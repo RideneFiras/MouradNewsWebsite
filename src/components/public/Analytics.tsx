@@ -1,0 +1,30 @@
+'use client';
+import Script from 'next/script';
+import { useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
+import type { SiteSettings } from '@/lib/data/settings';
+import { consentDefaultsScript } from '@/lib/analytics/consent';
+
+/** GA4 (only when a measurement ID is set in the admin), with Consent Mode v2 defaults.
+ * Loaded after the page is interactive so it never delays the first paint. */
+export function Analytics({ settings }: { settings: SiteSettings }) {
+  const id = settings.ga4?.measurement_id?.trim();
+  const pathname = usePathname();
+  const first = useRef(true);
+  useEffect(() => {
+    if (!id || !window.gtag) return;
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    window.gtag('event', 'page_view', { page_path: pathname, page_location: window.location.href });
+  }, [pathname, id]);
+  if (!id || !/^G-[A-Z0-9]+$/.test(id)) return null;
+  return (
+    <>
+      <Script id="consent-defaults" strategy="afterInteractive">{consentDefaultsScript()}</Script>
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${id}`} strategy="afterInteractive" />
+      <Script id="ga4-config" strategy="afterInteractive">{`gtag('js',new Date());gtag('config','${id}');`}</Script>
+    </>
+  );
+}

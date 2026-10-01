@@ -39,7 +39,8 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
 
   return (
     <div className="container-page mt-8" lang={lang !== locale ? lang : undefined}>
-      <span hidden data-active-section={a.category_slug} />
+      <span hidden data-active-section={a.category_slug} data-track-article={preview ? undefined : a.public_id} data-track-section={a.category_slug}
+        data-track-author={a.authors[0] ? a.authors[0].name_ar : ''} />
       <div className="grid lg:grid-cols-12 lg:gap-6">
         <article className="lg:col-span-8" aria-labelledby="article-title">
           <div className="mx-auto max-w-[var(--measure)]">
@@ -88,7 +89,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
             </figure>
           )}
 
-          <div className="mx-auto mt-8 max-w-[var(--measure)]">
+          <div className="mx-auto mt-8 max-w-[var(--measure)]" data-article-body>
             {chunks.map((c, i) => (
               <div key={i}>
                 <div className="prose-article" dangerouslySetInnerHTML={{ __html: c.html }} />
