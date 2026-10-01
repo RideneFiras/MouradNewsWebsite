@@ -81,3 +81,31 @@ waited on: what would have been asked is written here under each phase.
 4. Add a section, move it, rename its slug (old link redirects), delete it moving its articles.
 5. Reorder the homepage, preview it, save.
 6. Invite a correspondent as «كاتب»; as that user, submit an article for review; send it back with a note; publish it.
+
+## Phase 3 — Analytics (done)
+
+**Built**
+- First-party tracker (`src/components/public/Tracker.tsx`, ~2 KB, no cookies or storage): page-view beacon per page incl. client navigations, UTM read then stripped from the address bar, engagement beacon (active seconds with the tab visible, max scroll depth through the article body) on hide/leave, GA4 `article_read` at 75 %.
+- `/api/t`: size limit, bot filter (isbot), staff exclusion (auth cookie), zod validation, HMAC page token, per-IP rate limits, source classification, device and country (Cloudflare header), writes through `track_pageview` / `track_engagement` (visitor hash computed in Postgres with the monthly salt; IP and UA never stored).
+- GA4 loader with Consent Mode v2 defaults (denied in the EU/EEA/UK/CH, granted elsewhere), only when a `G-` measurement ID is set; page_view on client navigation.
+- Statistics (`/admin/stats`): overview (range presets + custom, comparison with the previous period, five tiles with definitions, two line charts, top articles, sources), articles (sortable, 200 rows) and article detail (daily views since publication, how readers arrived, sources, countries, devices, referrers), sections, authors (with their top articles), sources (+ referrer hosts, UTM campaigns), audience (Tunisia vs abroad, countries, devices, interface language), Facebook & social manual entries, CSV export for every table, printable one-page monthly report set like a newspaper page.
+- Dashboard home numbers: today views/visitors with 14-day sparklines, 7-day views with % change, 7-day engaged time, "right now" (30 min + top 5), top 10 (7 days), sources, Facebook card with «تحديث أرقام فيسبوك», link to GA4 when configured. Authors see their own numbers only (dashboard and stats screens).
+- Hand-rolled SVG charts (line, sparkline, bar list); no chart library in the bundle.
+- `pnpm dev:traffic`: local-only simulated traffic (45 days) for screenshots.
+
+**Checks**
+| Check | Result |
+|---|---|
+| lint / typecheck | pass |
+| Unit tests | 47 pass (new: engagement clock, scroll %, device, token, date ranges, CSV, number grouping) |
+| SQL tests | 135 assertions pass (now isolated from local analytics data) |
+| Playwright e2e | **22/22 pass** on `next start`: real browser page view + engagement recorded and UTM stripped; bot UA, forged token and logged-in staff not counted; rollup produces daily numbers; **anon, author, editor and admin can't insert/update/delete `analytics_daily`, `pageviews_raw`, `analytics_daily_article`, `ad_daily_stats` or call `track_pageview` through the API**; stats overview renders charts with hover tooltip; CSV export; author can't reach site-wide stats (403 on CSV); manual Facebook entry + label |
+| 375 px | no horizontal overflow on any stats screen (checked with Playwright) |
+| Screenshots | `docs/screenshots/phase3/` (15: dashboard AR 1280/375, author dashboard, every stats tab, FR overview, monthly report AR/FR) — reviewed: no cards with shadows, no gradients, no icons, one accent colour, hairline rules |
+| OpenNext build | pass |
+| Worker size | **2.10 MiB gzip** (8.87 MiB raw) — 70 % of 3 MiB |
+
+**For the owner**
+- Nothing to configure for the first-party statistics: they start counting as soon as the site is live. Add the GA4 measurement ID in الإعدادات only if you also want Google Analytics.
+- Enter Facebook numbers once a month from Meta Business Suite (الإحصائيات ← فيسبوك والشبكات).
+- The monthly report (الإحصائيات ← التقرير الشهري) prints to one PDF for sponsors.

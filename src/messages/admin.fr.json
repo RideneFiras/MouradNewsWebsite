@@ -595,7 +595,8 @@
       "referrers": "Sites référents",
       "shared": "Comment les lecteurs sont arrivés",
       "sources": "Sources",
-      "notFound": "Pas de statistiques pour cet article."
+      "notFound": "Pas de statistiques pour cet article.",
+      "openEditor": "Ouvrir dans l’éditeur"
     },
     "topReferrers": "Principaux sites référents",
     "campaigns": "Campagnes UTM",

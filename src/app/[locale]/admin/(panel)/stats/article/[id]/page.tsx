@@ -45,7 +45,7 @@ export default async function ArticleStats({ params, searchParams }: { params: P
         <p className="flex flex-wrap gap-x-4 text-[14px] text-ink-3">
           {a.first_published_at && <span>{formatDate(a.first_published_at, locale, 'short')}</span>}
           {a.status === 'published' && <a href={articleHref({ public_id: a.public_id, slug: a.slug, language: a.language })} target="_blank" rel="noopener" className="underline">{t('onSite')}</a>}
-          <Link prefetch={false} href={`/${locale}/admin/articles/${a.id}`} className="underline">{t('col.title')}</Link>
+          <Link prefetch={false} href={`/${locale}/admin/articles/${a.id}`} className="underline">{t('detail.openEditor')}</Link>
         </p>
       </header>
       <RangePicker locale={locale} range={range} path={`/${locale}/admin/stats/article/${id}`} />

@@ -5,18 +5,18 @@ session continuing the work._
 
 ## Where we are
 
-- **Current phase:** Phase 3 — Analytics (starting). Phases 0, 1 and 2 are done and pushed.
+- **Current phase:** Phase 4 — Monetization (starting). Phases 0–3 are done and pushed.
 - **Branch:** `claude/inspiring-curie-5nj5ew` (pushed to `origin`).
-- **Done:** see `docs/PROGRESS.md` (Phases 0–2).
-- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing (Phase 4). `src/components/admin/stats/DashboardStats.tsx` is an empty placeholder (Phase 3). Sidebar links «الإحصائيات», «الإشهار», «ملف المعلنين» point to pages not built yet (Phases 3–4).
+- **Done:** see `docs/PROGRESS.md` (Phases 0–3).
+- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing. Sidebar links «الإشهار» (`/admin/ads`) and «ملف المعلنين» (`/admin/media-kit`) point to pages not built yet. The token helper (`src/lib/analytics/token.ts`) is meant to be reused by `/api/ads/i`.
 
 ## Next 5 concrete steps
 
-1. Tracker client (`src/lib/analytics/tracker.ts` + a tiny client component in the public layout) and `/api/t` (HMAC page token, isbot, staff exclusion, rate limit, `track_pageview`/`track_engagement` via service role).
-2. Stats screens under `/admin/stats` (overview, articles + detail, sections, authors, sources, audience, Facebook manual entries, CSV export, printable monthly report) using the RPCs in migration 11; hand-rolled SVG charts.
-3. Dashboard tiles (`DashboardStats`) and author "my stats".
-4. GA4 loader with Consent Mode v2 defaults.
-5. Phase 3 tests: classifier/engagement unit tests, beacon → rollup integration test, "no role can write analytics" via the API; screenshots; bundle size.
+1. `/admin/ads`: slots list/edit (mode adsense/direct/house, AdSense slot id, sizes, active) and campaigns CRUD (sponsor, slot, dates, desktop/mobile creatives from the media library, https click URL, weight, target sections, language; status upcoming/running/ended). RPCs/tables are in migration 09.
+2. Public `AdSlot`: reserved height, «إشهار» label, client-side weighted pick from active campaigns (`/api/ads/active?slot=` with short cache or embedded JSON), AdSense manual unit loaded lazily after interaction/idle with collapse on `data-ad-status="unfilled"`, house ad fallback, `?show_slots=1` outline mode.
+3. `/api/ads/i` (IntersectionObserver ≥50 % for ≥1 s; same anti-abuse as `/api/t`) → `record_ad_impression`; `/api/ads/c/[id]` → `record_ad_click` + 302 to the campaign URL (`rel="sponsored noopener"`); `/ads.txt` from settings.
+4. Sponsor report per campaign (printable + CSV) from `ad_campaign_report`; `/admin/media-kit` settings (metrics checkboxes, period, rounding, formats, pitch/contact) feeding `/advertise`.
+5. Phase 4 tests: e2e campaign → impression + click counted → report; CLS check on pages with slots; screenshots `docs/screenshots/phase4`; bundle size; docs.
 
 ## Install and run (on Firas's machine)
 
@@ -43,10 +43,11 @@ SITE_URL=http://localhost:3000
 
 One command for a clean local database with demo content and test users
 (admin@elborj.test / editor@elborj.test / author@elborj.test, password `local-dev-password`):
-`pnpm db:local-reset`.
+`pnpm db:local-reset`. Then `pnpm dev:traffic` for 45 days of simulated (local-only) readers so the
+statistics screens have numbers (`pnpm dev:traffic --clear` removes them).
 
 Checks: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:db && pnpm build:cf && pnpm bundle:size`.
-E2E: `pnpm build && pnpm start` (other terminal), then `E2E_NO_SERVER=1 pnpm test:e2e` (needs local Supabase + demo seed).
+E2E: `pnpm build && pnpm start` (other terminal), then `E2E_NO_SERVER=1 pnpm test:e2e` (needs local Supabase + demo seed). Run e2e against `next start`, not `next dev` (Strict Mode double-sends page views in dev).
 Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/lighthouse.sh <label>`.
 
 ## Checks to run on Firas's machine

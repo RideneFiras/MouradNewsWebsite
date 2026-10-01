@@ -47,6 +47,7 @@ end $$;
 
 -- Start from an empty newsroom (everything here is rolled back after the file), so the
 -- tests give the same result on a fresh database and on one with demo content.
+truncate public.engagement_raw, public.pageviews_raw, public.analytics_daily, public.analytics_daily_article, public.analytics_monthly_uniques, public.rollup_runs;
 delete from public.articles;
 delete from public.contact_messages;
 delete from public.social_stats;
