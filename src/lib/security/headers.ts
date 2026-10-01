@@ -20,7 +20,8 @@ export function contentSecurityPolicy(supabaseUrl = process.env.NEXT_PUBLIC_SUPA
   const supabase = supabaseUrl ? new URL(supabaseUrl).origin : '';
   const directives: Record<string, string[]> = {
     'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'", ...GOOGLE],
+    // 'unsafe-eval' only in development (React dev tooling); never in production.
+    'script-src': ["'self'", "'unsafe-inline'", ...(process.env.NODE_ENV === 'development' ? ["'unsafe-eval'"] : []), ...GOOGLE],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'blob:', 'https:', supabase].filter(Boolean),
     'font-src': ["'self'", 'data:'],

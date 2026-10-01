@@ -120,7 +120,8 @@ img {
 .nameplate {
   font-family: var(--font-nameplate);
   font-weight: 700;
-  line-height: 1.1;
+  /* Ruqaa has deep descenders: generous line-height so nothing collides with it. */
+  line-height: 1.55;
 }
 .lead-headline {
   font-family: var(--font-headline);
@@ -411,5 +412,41 @@ img {
   }
 }
 .print-only {
+  display: none;
+}
+
+/* ---------- Masthead details ---------- */
+.nav-link[aria-current='page'] {
+  border-bottom-color: var(--accent);
+  color: var(--ink);
+}
+.masthead-mini {
+  display: none;
+}
+/* Desktop: the nav row is sticky; a small nameplate fades in once the big one has
+   scrolled away (scroll-driven animation, no JavaScript; hidden where unsupported). */
+@supports (animation-timeline: scroll()) {
+  @media (min-width: 1024px) {
+    .masthead-mini {
+      display: inline-block;
+      overflow: hidden;
+      animation: masthead-mini-in linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 240px;
+    }
+  }
+}
+@keyframes masthead-mini-in {
+  0%,
+  75% {
+    opacity: 0;
+    max-width: 0;
+  }
+  100% {
+    opacity: 1;
+    max-width: 220px;
+  }
+}
+details > summary::-webkit-details-marker {
   display: none;
 }

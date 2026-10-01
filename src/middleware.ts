@@ -23,6 +23,18 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 308);
   }
 
+  // ?page=N on listings → internal /page/N rewrite, so listing pages stay statically
+  // cached (reading searchParams would render them on every request).
+  const page = request.nextUrl.searchParams.get('page');
+  if (page && /^\/(ar|fr)\/(section\/[a-z0-9-]+|latest|author\/[a-z0-9-]+|topic\/[a-z0-9-]+|format\/[a-z0-9-]+)$/.test(pathname)) {
+    const n = Number(page);
+    const url = request.nextUrl.clone();
+    url.searchParams.delete('page');
+    if (!Number.isInteger(n) || n < 2 || n > 9999) return NextResponse.redirect(url, 308);
+    url.pathname = `${pathname}/page/${n}`;
+    return NextResponse.rewrite(url);
+  }
+
   const isAdmin = /^\/(ar|fr)\/admin(\/|$)/.test(pathname);
   if (!isAdmin) return intl(request);
 

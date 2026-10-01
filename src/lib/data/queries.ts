@@ -191,6 +191,8 @@ export interface CardFilter {
   /** Also match articles that list one of categoryIds as a secondary section. */
   includeExtra?: boolean;
   tagId?: string;
+  /** Any of these tags. */
+  tagIds?: string[];
   formatId?: string;
   authorId?: string;
   featured?: boolean;
@@ -214,6 +216,7 @@ async function queryCards(f: CardFilter): Promise<{ items: ArticleCard[]; total:
     q = f.includeExtra ? q.or(`category_id.in.(${list}),extra_category_ids.ov.{${list}}`) : q.in('category_id', f.categoryIds);
   }
   if (f.tagId) q = q.contains('tag_ids', [f.tagId]);
+  if (f.tagIds?.length) q = q.overlaps('tag_ids', f.tagIds);
   if (f.formatId) q = q.eq('format_id', f.formatId);
   if (f.authorId) q = q.contains('authors', JSON.stringify([{ id: f.authorId }]));
   if (f.featured) q = q.eq('is_featured', true);

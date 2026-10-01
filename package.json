@@ -19,7 +19,8 @@
     "test:e2e": "playwright test",
     "test:db": "bash scripts/db-test.sh",
     "db:bundle": "tsx scripts/build-all-migrations.ts",
-    "bundle:size": "tsx scripts/bundle-size.ts"
+    "bundle:size": "tsx scripts/bundle-size.ts",
+    "db:demo": "tsx scripts/generate-demo-seed.ts"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

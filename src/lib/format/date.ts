@@ -142,3 +142,14 @@ export function formatHijri(input: Date | string | number, locale: Locale, offse
     return '';
   }
 }
+
+/** ISO timestamp n days before now (kept out of components: render must stay pure). */
+export function daysAgoIso(n: number): string {
+  return new Date(Date.now() - n * 86400000).toISOString();
+}
+
+/** Tunisian day keys for today and yesterday. */
+export function todayAndYesterday(): { today: string; yesterday: string } {
+  const now = Date.now();
+  return { today: tunisDayKey(now), yesterday: tunisDayKey(now - 86400000) };
+}
