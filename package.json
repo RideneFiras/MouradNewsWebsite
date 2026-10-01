@@ -22,7 +22,8 @@
     "bundle:size": "tsx scripts/bundle-size.ts",
     "db:demo": "tsx scripts/generate-demo-seed.ts",
     "dev:users": "tsx scripts/dev-users.ts",
-    "db:local-reset": "bash scripts/local-reset.sh"
+    "db:local-reset": "bash scripts/local-reset.sh",
+    "dev:traffic": "bash scripts/simulate-traffic.sh"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

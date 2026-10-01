@@ -153,3 +153,19 @@ export function todayAndYesterday(): { today: string; yesterday: string } {
   const now = Date.now();
   return { today: tunisDayKey(now), yesterday: tunisDayKey(now - 86400000) };
 }
+
+/** Calendar day "YYYY-MM-DD" (already a Tunisian day) as «4 سبتمبر» / «4 sept.»; withYear adds the year. */
+export function formatCalendarDay(iso: string, locale: Locale, withYear = false): string {
+  const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+  const month = locale === 'ar' ? AR_MONTHS[m - 1] : FR_MONTHS_SHORT[m - 1];
+  return withYear ? `${d} ${month} ${y}` : `${d} ${month}`;
+}
+
+/** "YYYY-MM" (or a day in it) as «سبتمبر 2026» / «septembre 2026». */
+export function formatMonth(iso: string, locale: Locale): string {
+  const [y, m] = iso.split('-').map(Number) as [number, number];
+  return `${(locale === 'ar' ? AR_MONTHS : FR_MONTHS)[m - 1]} ${y}`;
+}
+
+/** Current time in ms (server components: keeps Date.now out of render bodies for the purity lint). */
+export const currentTimeMs = () => Date.now();

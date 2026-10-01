@@ -68,7 +68,7 @@ export function Sidebar({ locale, role, name, reviewCount, unreadMessages }: { l
   );
   return (
     <>
-      <div className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-rule bg-white px-2 lg:hidden">
+      <div className="no-print sticky top-0 z-40 flex h-12 items-center justify-between border-b border-rule bg-white px-2 lg:hidden">
         <button type="button" className="a-btn a-btn-ghost" onClick={() => setOpen(true)} aria-label={t('menu')} aria-expanded={open}><MenuIcon /></button>
         <span className="text-[15px] font-semibold">{visible.find(isActive) ? t(visible.find(isActive)!.key as 'dashboard') : ''}</span>
         <Link prefetch={false} href={`${b}/articles/new`} className="a-btn a-btn-sm a-btn-primary">{t('newArticle')}</Link>

@@ -120,3 +120,52 @@ test.describe.serial('first-party analytics', () => {
     expect(await rowsFor('forged-rpc')).toHaveLength(0);
   });
 });
+
+test.describe('statistics screens', () => {
+  async function loginAs(page: import('@playwright/test').Page, email: string) {
+    await page.context().clearCookies();
+    await page.goto('/ar/admin/login');
+    await page.fill('#email', email);
+    await page.fill('#password', PASSWORD);
+    await Promise.all([page.waitForURL(/\/ar\/admin(?!\/login)/), page.click('button[type=submit]')]);
+  }
+
+  test('editor sees the overview with charts, tooltip and CSV export', async ({ page }) => {
+    await loginAs(page, 'editor@elborj.test');
+    await page.goto('/ar/admin/stats?range=30d');
+    await expect(page.getByRole('heading', { name: 'الإحصائيات' })).toBeVisible();
+    const chart = page.locator('figure svg[role=img]').first();
+    await expect(chart).toBeVisible();
+    const box = (await chart.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await expect(page.locator('figure [role=status]').first()).toBeVisible();
+    const csv = await page.request.get('/ar/admin/stats/export?range=30d&table=articles');
+    expect(csv.status()).toBe(200);
+    expect(csv.headers()['content-type']).toContain('text/csv');
+    expect((await csv.text()).split('\r\n')[0]).toContain('pageviews');
+    // No edit control anywhere on statistics.
+    await expect(page.locator('main').getByRole('button', { name: /تعديل/ })).toHaveCount(0);
+  });
+
+  test('authors only get their own numbers', async ({ page }) => {
+    await loginAs(page, 'author@elborj.test');
+    await page.goto('/ar/admin/stats');
+    await expect(page.getByRole('heading', { name: 'أرقام مقالاتي' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'المصادر' })).toHaveCount(0);
+    const csv = await page.request.get('/ar/admin/stats/export?table=sources');
+    expect(csv.status()).toBe(403);
+  });
+
+  test('editor adds manual Facebook numbers, labelled as manual', async ({ page }) => {
+    await loginAs(page, 'editor@elborj.test');
+    await page.goto('/ar/admin/stats/social');
+    const followers = String(40000 + Math.floor(Math.random() * 9999));
+    await page.fill('#s-followers', followers);
+    await page.click('button:has-text("إضافة الأرقام")');
+    await expect(page.getByText('أضيفت الأرقام.')).toBeVisible();
+    await expect(page.getByText('أرقام مدخلة يدويا من إحصائيات فيسبوك')).toBeVisible();
+    const { data } = await db.from('social_stats').select('followers').eq('followers', Number(followers));
+    expect(data).toHaveLength(1);
+    await db.from('social_stats').delete().eq('followers', Number(followers));
+  });
+});
