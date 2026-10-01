@@ -12,3 +12,6 @@ node_modules/
 playwright-report/
 supabase/.temp/
 test-results/
+
+# Playwright MCP screenshots and logs
+.playwright-mcp/

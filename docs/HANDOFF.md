@@ -6,9 +6,25 @@ session continuing the work._
 ## Where we are
 
 - **Status: Phases 0–5 complete** (Phase 6 is optional and was not started, per CLOUD_RUN.md). Everything is committed and pushed.
-- **Branch:** `claude/inspiring-curie-5nj5ew`.
+- **Branch:** `main` (the cloud branch `claude/inspiring-curie-5nj5ew` was merged).
 - **Done:** see `docs/PROGRESS.md` (Phases 0–5, and "What Firas needs to do" at the end).
 - **Half-done:** nothing.
+
+## On Firas's machine (2026-10-01)
+
+- Repo cloned from GitHub `main` (c6ec606). Node 22 via nvm (`nvm use 22`; the machine default was 20), pnpm 10.28.
+- Checks run here: `pnpm lint` ✅, `pnpm typecheck` ✅, `pnpm test` ✅ (50/50), `pnpm build:cf` ✅, `pnpm bundle:size` ✅ 1.61 MiB gzip.
+  Not run: `pnpm test:db` and e2e (they need the local Docker Supabase, which Firas chose not to use; `psql` is also not installed — `sudo apt install postgresql-client-17` if needed).
+- **Local development uses the online Supabase project** `alborjnews` (ref `knxuskjqpsimptwxqfju`, eu-central-1, free plan). `.env.local` holds its URL, anon and service_role keys (legacy JWT keys) and two random secrets. APPLY.md steps 1–6 done: migrations, seed, admin `firasuv@gmail.com`, **demo content loaded** (32 articles, remove with `demo-clear.sql` before launch). Step 8 (`private.app_config`) waits for the public URL.
+  Don't run `pnpm test:db` / `pnpm dev:traffic` against it (they truncate or fake statistics; the scripts refuse non-local URLs anyway).
+- Access for Claude Code: the Supabase MCP server is configured in `.mcp.json` (approved in `.claude/settings.local.json`), and the Supabase CLI is logged in. `~/.bashrc` exports an old `SUPABASE_ACCESS_TOKEN` (another project) that overrides the CLI login and is rejected: run CLI commands as `env -u SUPABASE_ACCESS_TOKEN npx supabase … --linked --project-ref knxuskjqpsimptwxqfju`.
+- **Supabase Advisor review** (nothing changed in the database):
+  - "Security Definer View" ×4 (`article_cards`, `public_authors`, `public_ad_slots`, `active_ad_campaigns`): intended (DECISIONS → Database); each exposes only published/active public rows.
+  - "anon/authenticated can execute SECURITY DEFINER function" ×19/×31: role helpers needed by RLS, RPCs that check the role first, trigger functions (not callable directly), and Supabase's own `rls_auto_enable`. No hole. Optional hygiene migration (not written yet): revoke `anon` execute on trigger functions, `admin_list_users`, `ad_campaign_report`, `unique_profile_slug`; wrap `auth.uid()` in `(select …)` in the 8 policies flagged by `auth_rls_initplan`.
+  - "RLS enabled, no policy" ×4 (raw analytics, salts, app_config): intended lock.
+  - "Leaked password protection": paid-plan feature, not available on Free.
+  - Performance INFOs (unused indexes, unindexed FKs on small tables, multiple permissive policies): not relevant at this size.
+- Verified in the browser with `pnpm dev` against the online project: home AR at 1280 px, article AR at 390 px. Only console error: `/favicon.ico` 404 until a favicon is set in الإعدادات.
 
 ## Next 5 concrete steps (for whoever continues)
 

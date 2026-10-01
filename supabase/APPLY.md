@@ -119,7 +119,7 @@ select count(*) from public.tags where kind = 'place'; -- 8
 select count(*) from public.homepage_sections;     -- 13
 select count(*) from public.pages;                 -- 12 (all drafts)
 select count(*) from public.ad_slots;              -- 9 (all "off")
-select key from public.site_settings order by key; -- 20 keys incl. site_name, media_kit
+select key from public.site_settings order by key; -- 19 keys incl. site_name, media_kit
 select jobname, schedule from cron.job order by jobname;
 -- expire_breaking */5 * * * *, publish_scheduled * * * * *, purge_cron_history,
 -- rollup_hourly 5 * * * *, rollup_nightly 15 1 * * *, rotate_salt 5 0 1 * *
