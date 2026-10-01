@@ -327,7 +327,7 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
       <div className="border-t border-rule pt-4">
         <p className="a-label">{t('translation')}</p>
         {options.translations.length ? (
-          <ul className="text-[14px]">{options.translations.map((x) => <li key={x.id}><Link className="underline" href={`/${locale}/admin/articles/${x.id}`} lang={x.language}>{x.language.toUpperCase()} · {x.title}</Link> <span className="text-ink-3">({ts(x.status as 'draft')})</span></li>)}</ul>
+          <ul className="text-[14px]">{options.translations.map((x) => <li key={x.id}><Link prefetch={false} className="underline" href={`/${locale}/admin/articles/${x.id}`} lang={x.language}>{x.language.toUpperCase()} · {x.title}</Link> <span className="text-ink-3">({ts(x.status as 'draft')})</span></li>)}</ul>
         ) : <p className="a-help">{t('noTranslation')}</p>}
         {a.id && !options.translations.some((x) => x.language !== a.language) && (
           <button type="button" className="a-btn a-btn-sm mt-2" onClick={async () => {

@@ -35,3 +35,13 @@ select tests.ok((select excerpt = 'نص المقال عن المباراة' from
 select tests.fails($$insert into public.articles (title, category_id, is_sponsored) values ('x', (select id from public.categories limit 1), true)$$, 'sponsored needs a sponsor name');
 insert into public.articles (id, title, category_id, is_sponsored, sponsor_name) values ('50000000-0000-4000-8000-000000000009', 'x', (select id from public.categories limit 1), true, 'راع');
 select tests.ok((select not allow_ads from public.articles where id = '50000000-0000-4000-8000-000000000009'), 'sponsored articles default to no ads');
+
+-- Stored HTML guard
+select tests.fails($$update public.articles set body_html = '<p>x</p><script>alert(1)</script>' where id = '50000000-0000-4000-8000-000000000001'$$, 'script tags are refused');
+select tests.fails($$update public.articles set body_html = '<p onclick="x()">x</p>' where id = '50000000-0000-4000-8000-000000000001'$$, 'event handlers are refused');
+select tests.fails($$update public.articles set body_html = '<a href="javascript:alert(1)">x</a>' where id = '50000000-0000-4000-8000-000000000001'$$, 'javascript: links are refused');
+select tests.fails($$update public.articles set body_html = '<iframe src="https://evil.example/x"></iframe>' where id = '50000000-0000-4000-8000-000000000001'$$, 'foreign iframes are refused');
+select tests.ok(tests.affected($$update public.articles set body_html = '<p>نص <strong>عادي</strong></p>
+<figure class="embed embed-youtube"><iframe src="https://www.youtube-nocookie.com/embed/abcdef12" title="YouTube"></iframe></figure>
+<p class="read-also"><span>اقرأ أيضا</span><a href="/ar/article/1">x</a></p>' where id = '50000000-0000-4000-8000-000000000001'$$) = 1, 'normal article HTML (with a YouTube embed) is accepted');
+select tests.fails($$update public.pages set body_html = '<img src=x onerror=alert(1)>' where slug = 'about' and language = 'ar'$$, 'pages are guarded too');

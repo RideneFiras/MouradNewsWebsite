@@ -17,7 +17,7 @@ export function ForgotForm({ locale }: { locale: string }) {
         <input id="email" name="email" type="email" required dir="ltr" className="a-input" />
       </div>
       <button type="submit" className="a-btn a-btn-primary w-full" disabled={pending}>{t('sendLink')}</button>
-      <p className="text-center text-[14px]"><Link href={`/${locale}/admin/login`} className="text-ink-2 underline">{t('backToLogin')}</Link></p>
+      <p className="text-center text-[14px]"><Link prefetch={false} href={`/${locale}/admin/login`} className="text-ink-2 underline">{t('backToLogin')}</Link></p>
     </form>
   );
 }

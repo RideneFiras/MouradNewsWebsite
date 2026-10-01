@@ -99,3 +99,9 @@ reset role;
 select tests.as_anon();
 select tests.ok((select jsonb_array_length(authors) from public.article_cards where id = '10000000-0000-4000-8000-000000000001') = 1, 'anon sees bylines through article_cards');
 reset role;
+
+-- Authors can insert and read back in one statement (INSERT ... RETURNING, as the API does).
+update public.profiles set is_active = true where id = '00000000-0000-4000-8000-0000000000b1';
+select tests.as_user('00000000-0000-4000-8000-0000000000b1');
+select tests.ok(tests.affected($$insert into public.articles (title, category_id, created_by) values ('مسودة مع returning', (select id from public.categories where slug = 'culture'), '00000000-0000-4000-8000-0000000000b1') returning id$$) = 1, 'author insert ... returning works');
+reset role;

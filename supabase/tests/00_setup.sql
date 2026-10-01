@@ -45,12 +45,19 @@ begin
   perform set_config('role', 'anon', true);
 end $$;
 
+-- Start from an empty newsroom (everything here is rolled back after the file), so the
+-- tests give the same result on a fresh database and on one with demo content.
+delete from public.articles;
+delete from public.contact_messages;
+delete from public.social_stats;
+delete from auth.users;
+
 -- Staff users (ids are fixed so tests can refer to them).
-insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at)
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token, email_change, email_change_token_new)
 values
-  ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@test.local', '{"display_name":"مدير"}', now(), now()),
-  ('00000000-0000-4000-8000-0000000000e1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'editor@test.local', '{"display_name":"محرر"}', now(), now()),
-  ('00000000-0000-4000-8000-0000000000b1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'author1@test.local', '{"display_name":"كاتب أول"}', now(), now()),
-  ('00000000-0000-4000-8000-0000000000b2', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'author2@test.local', '{"display_name":"كاتب ثان"}', now(), now());
+  ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin@test.local', '{"display_name":"مدير"}', now(), now(), '', '', '', ''),
+  ('00000000-0000-4000-8000-0000000000e1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'editor@test.local', '{"display_name":"محرر"}', now(), now(), '', '', '', ''),
+  ('00000000-0000-4000-8000-0000000000b1', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'author1@test.local', '{"display_name":"كاتب أول"}', now(), now(), '', '', '', ''),
+  ('00000000-0000-4000-8000-0000000000b2', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'author2@test.local', '{"display_name":"كاتب ثان"}', now(), now(), '', '', '', '');
 update public.profiles set role = 'admin' where id = '00000000-0000-4000-8000-0000000000a1';
 update public.profiles set role = 'editor' where id = '00000000-0000-4000-8000-0000000000e1';

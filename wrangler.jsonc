@@ -9,6 +9,8 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Minify the Worker script at deploy (keeps it well under the free-plan size limit).
+  "minify": true,
   "services": [
     // Self-reference, must match "name" above (OpenNext caching).
     { "binding": "WORKER_SELF_REFERENCE", "service": "el-borj" }

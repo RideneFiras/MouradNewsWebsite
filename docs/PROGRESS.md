@@ -51,3 +51,33 @@ waited on: what would have been asked is written here under each phase.
 | Lighthouse mobile (sandbox, simulated slow 4G, slow CPU) | home: perf 71, a11y **100**, best-practices 96, SEO 92 · article: perf 72, a11y **100**, BP 96, SEO 92. SEO misses only `robots.txt` (Phase 5). Performance limited by 374 KB of web fonts delaying the text LCP — performance pass scheduled in Phase 5. |
 | OpenNext build | pass; Worker runs in local workerd (`opennextjs-cloudflare preview`): home, latest, section, search, article, 404, contact API all OK |
 | Worker size | **1.51 MiB gzip** (7.46 MiB raw) — 50% of 3 MiB (after switching production builds to webpack; Turbopack gave 2.22 MiB) |
+
+## Phase 2 — Admin and CMS (done)
+
+**Built** (all under `/[locale]/admin`, Arabic RTL by default, French available, usable at 375 px)
+- Auth: login, forgot password (e-mail link → `/api/auth/callback` → new password), invite completion, logout; middleware session refresh; role checks in every server action (`assertStaff`) and RLS behind them.
+- Dashboard work queue (in review, scheduled, drafts; authors: their drafts and sent-back notes).
+- Articles list: filters (status, section, author, language, title, dates), 7-day views (editors), bulk move/archive/tag, edit / view / duplicate / create translation.
+- Article editor: all fields and side panel from the spec, Tiptap with every block (paragraph, H2/H3, bold, italic, link, quote, pull quote, lists, image, gallery, embed, table, divider, read also, undo/redo), paste cleaning, autosave + local backup, history/restore, signed preview, publish / schedule / submit / send back with note / unpublish / archive / delete draft, validation messages next to the field, success panel with WhatsApp/Facebook/copy link, translation linking.
+- Media library: multi-upload and phone camera, client-side WebP variants, search, uploader filter, edit alt/caption/credit (AR/FR), focal point, delete blocked while used (shows where).
+- Sections (tree, drag/arrows, nesting max 2, toggles, colour palette, slug with automatic redirects, delete-with-move or deactivate), tags (kind filter, featured, merge with redirect), formats.
+- Homepage builder (both tabs, add/edit/reorder/activate, per-type config validated with zod, live preview of unsaved changes), menus (footer/utility/extra, link to URL/section/page/tag), static pages (same editor), settings (identity, logo/favicon/share image, masthead ears, legal masthead, socials, Hijri date, content mixing, breaking, in-article ad positions, GA4, AdSense, consent, analytics retention), team (invite, role, deactivate/reactivate, last-admin protection, edit anyone's public profile), profile (+ password), messages (contact form inbox), system (DB/storage vs limits, raw rows, rollup log, cron jobs, regenerate cache).
+- Cache revalidation on every relevant mutation (`expireTags`).
+
+**Checks**
+| Check | Result |
+|---|---|
+| lint / typecheck / unit tests | pass (35) |
+| SQL tests | 135 assertions pass (new: author INSERT…RETURNING, HTML guard) |
+| `scripts/test-all-migrations.sh` (ALL_MIGRATIONS.sql + seed + tests + demo seed/clear) | pass |
+| Playwright e2e | **15/15 pass** (stable over 4+ runs): author draft → submit → editor sends back with note → author edits & resubmits → **author can't publish through the API** → editor schedules → `publish_scheduled()` (the pg_cron job) publishes → article public with dateline; **category delete with move**; **homepage reorder reflected publicly**; + the 8 public tests |
+| Screenshots | `docs/screenshots/phase2/` (editor at 375 px and 1280 px AR/FR, articles, sections, homepage builder, media at 375, settings, team, dashboard at 375) |
+| Worker | **1.92 MiB gzip** (7.87 MiB raw) with Wrangler minify — 64% of 3 MiB. Runs in local workerd incl. admin. |
+
+**Stop point B (not waited on) — things for the owner to try on staging**
+1. Log in, change the paper's name and tagline in الإعدادات, check the masthead.
+2. Write an article from the phone with a photo taken from the camera; set the focal point; publish; share on WhatsApp from the success panel.
+3. Schedule an article 5 minutes ahead and watch it appear.
+4. Add a section, move it, rename its slug (old link redirects), delete it moving its articles.
+5. Reorder the homepage, preview it, save.
+6. Invite a correspondent as «كاتب»; as that user, submit an article for review; send it back with a note; publish it.

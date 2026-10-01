@@ -47,7 +47,7 @@ export function Sidebar({ locale, role, name, reviewCount, unreadMessages }: { l
   const nav = (
     <nav className="a-nav flex flex-col py-2" aria-label={t('menu')}>
       {visible.map((i) => (
-        <Link key={i.key} href={i.href} onClick={() => setOpen(false)} aria-current={isActive(i) ? 'page' : undefined}
+        <Link prefetch={false} key={i.key} href={i.href} onClick={() => setOpen(false)} aria-current={isActive(i) ? 'page' : undefined}
           className="flex min-h-10 items-center justify-between border-s-[3px] border-transparent px-4 text-[15px] hover:text-accent">
           <span>{t(i.key as 'dashboard')}</span>
           {i.badge ? <span className="a-chip text-accent">{i.badge}</span> : null}
@@ -71,7 +71,7 @@ export function Sidebar({ locale, role, name, reviewCount, unreadMessages }: { l
       <div className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-rule bg-white px-2 lg:hidden">
         <button type="button" className="a-btn a-btn-ghost" onClick={() => setOpen(true)} aria-label={t('menu')} aria-expanded={open}><MenuIcon /></button>
         <span className="text-[15px] font-semibold">{visible.find(isActive) ? t(visible.find(isActive)!.key as 'dashboard') : ''}</span>
-        <Link href={`${b}/articles/new`} className="a-btn a-btn-sm a-btn-primary">{t('newArticle')}</Link>
+        <Link prefetch={false} href={`${b}/articles/new`} className="a-btn a-btn-sm a-btn-primary">{t('newArticle')}</Link>
       </div>
       {open && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-white lg:hidden" role="dialog" aria-modal="true" aria-label={t('menu')}>

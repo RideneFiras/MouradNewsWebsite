@@ -5,18 +5,18 @@ session continuing the work._
 
 ## Where we are
 
-- **Current phase:** Phase 2 — Admin and CMS (starting). Phases 0 and 1 are done and pushed.
+- **Current phase:** Phase 3 — Analytics (starting). Phases 0, 1 and 2 are done and pushed.
 - **Branch:** `claude/inspiring-curie-5nj5ew` (pushed to `origin`).
-- **Done:** see `docs/PROGRESS.md` (Phase 0).
-- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing (Phase 4). No tracker yet (Phase 3).
+- **Done:** see `docs/PROGRESS.md` (Phases 0–2).
+- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing (Phase 4). `src/components/admin/stats/DashboardStats.tsx` is an empty placeholder (Phase 3). Sidebar links «الإحصائيات», «الإشهار», «ملف المعلنين» point to pages not built yet (Phases 3–4).
 
 ## Next 5 concrete steps
 
-1. Admin shell: `src/app/[locale]/admin/` layout (sidebar/drawer), login / forgot / reset pages, role helpers (`src/lib/auth/`).
-2. Article editor (Tiptap, client-only via `next/dynamic`) with server actions: save/autosave/revisions/submit/publish/schedule/send back, `renderDoc` + `sanitizeArticleHtml` on save, revalidation.
-3. Media library with client-side WebP variants (480/960/1600) and focal point.
-4. Categories (tree + delete-with-move), tags (merge), formats, homepage builder, menus, pages, settings, team (invites via service role), profile, messages, system.
-5. Phase 2 e2e (review workflow, category delete with move, homepage reorder) + mobile editor screenshots + bundle size.
+1. Tracker client (`src/lib/analytics/tracker.ts` + a tiny client component in the public layout) and `/api/t` (HMAC page token, isbot, staff exclusion, rate limit, `track_pageview`/`track_engagement` via service role).
+2. Stats screens under `/admin/stats` (overview, articles + detail, sections, authors, sources, audience, Facebook manual entries, CSV export, printable monthly report) using the RPCs in migration 11; hand-rolled SVG charts.
+3. Dashboard tiles (`DashboardStats`) and author "my stats".
+4. GA4 loader with Consent Mode v2 defaults.
+5. Phase 3 tests: classifier/engagement unit tests, beacon → rollup integration test, "no role can write analytics" via the API; screenshots; bundle size.
 
 ## Install and run (on Firas's machine)
 
@@ -41,6 +41,10 @@ TRACKER_HMAC_SECRET=local-dev-tracker-secret
 SITE_URL=http://localhost:3000
 ```
 
+One command for a clean local database with demo content and test users
+(admin@elborj.test / editor@elborj.test / author@elborj.test, password `local-dev-password`):
+`pnpm db:local-reset`.
+
 Checks: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:db && pnpm build:cf && pnpm bundle:size`.
 E2E: `pnpm build && pnpm start` (other terminal), then `E2E_NO_SERVER=1 pnpm test:e2e` (needs local Supabase + demo seed).
 Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/lighthouse.sh <label>`.
@@ -51,6 +55,7 @@ Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/
 
 ## Known problems
 
+- In the cloud sandbox the Docker daemon is a background job with a 2-hour limit; when it stops, restart it (`dockerd &`) and run `npx supabase stop && npx supabase start` (data is kept in Docker volumes). Not an issue on a normal machine.
 - `next build` warns that `middleware.ts` is deprecated in favour of `proxy.ts`; intentionally kept (see DECISIONS.md).
 
 ## Prompt to resume in a new session

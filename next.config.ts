@@ -7,6 +7,7 @@ const withNextIntl = createNextIntlPlugin('./src/lib/i18n/request.ts');
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  env: { NEXT_PUBLIC_BUILD_TIME: new Date().toISOString() },
   // Images are pre-processed in the admin (WebP variants) and served from
   // Supabase Storage with plain <img srcset>. No paid image optimisation.
   images: { unoptimized: true },

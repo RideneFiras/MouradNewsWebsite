@@ -76,7 +76,7 @@ export default async function ArticlesPage({ params, searchParams }: { params: P
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h1 className="a-h1">{f.status === 'in_review' ? ts('in_review') : t('title')}</h1>
-        <Link href={`/${locale}/admin/articles/new`} className="a-btn a-btn-primary">{t('new')}</Link>
+        <Link prefetch={false} href={`/${locale}/admin/articles/new`} className="a-btn a-btn-primary">{t('new')}</Link>
       </div>
       <form className="a-panel mb-4 grid gap-2 p-3 sm:grid-cols-2 lg:grid-cols-4" method="get">
         <input name="q" defaultValue={f.q} className="a-input" placeholder={t('searchTitle')} aria-label={t('searchTitle')} />
@@ -105,9 +105,9 @@ export default async function ArticlesPage({ params, searchParams }: { params: P
         categories={(cats.data ?? []).map((c) => ({ id: c.id, name: nm(c) }))} tags={(tags.data ?? []).map((x) => ({ id: x.id, name: nm(x) }))} />
       {totalPages > 1 && (
         <nav className="mt-4 flex items-center gap-3 text-[14px]" aria-label="pagination">
-          {page > 1 && <Link className="a-btn a-btn-sm" href={qs(page - 1)}>{tc('previous')}</Link>}
+          {page > 1 && <Link prefetch={false} className="a-btn a-btn-sm" href={qs(page - 1)}>{tc('previous')}</Link>}
           <span>{tc('page', { n: page })} {tc('of')} {totalPages}</span>
-          {page < totalPages && <Link className="a-btn a-btn-sm" href={qs(page + 1)}>{tc('next')}</Link>}
+          {page < totalPages && <Link prefetch={false} className="a-btn a-btn-sm" href={qs(page + 1)}>{tc('next')}</Link>}
         </nav>
       )}
     </div>

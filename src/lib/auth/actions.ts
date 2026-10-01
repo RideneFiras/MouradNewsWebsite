@@ -40,3 +40,18 @@ export async function logoutAction(form: FormData) {
   await db.auth.signOut();
   redirect(`/${locale}/admin/login`);
 }
+
+/** Sets a new password after an e-mail link. Invites put the session tokens in the URL
+ * hash (implicit flow): they are passed here and turned into a cookie session first. */
+export async function setNewPasswordAction(input: { password: string; access_token?: string; refresh_token?: string; locale: 'ar' | 'fr' }): Promise<{ error?: string }> {
+  const d = z.object({ password: z.string().min(10).max(200), access_token: z.string().max(4000).optional(), refresh_token: z.string().max(400).optional(), locale: z.enum(['ar', 'fr']) }).safeParse(input);
+  if (!d.success) return { error: 'newPasswordHelp' };
+  const db = await sessionClient();
+  if (d.data.access_token && d.data.refresh_token) {
+    const { error } = await db.auth.setSession({ access_token: d.data.access_token, refresh_token: d.data.refresh_token });
+    if (error) return { error: 'badLogin' };
+  }
+  const { error } = await db.auth.updateUser({ password: d.data.password });
+  if (error) return { error: 'badLogin' };
+  redirect(`/${d.data.locale}/admin`);
+}

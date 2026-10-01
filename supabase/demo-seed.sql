@@ -5,20 +5,26 @@
 -- Remove everything with demo-clear.sql. Run after seed.sql. Dates are relative to now().
 begin;
 
-insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at)
-values ('de000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-leila@example.invalid', '{"display_name":"ليلى بن يوسف","slug":"demo-leila-ben-youssef"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now())
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+values ('de000000-0000-4000-8000-000000000001', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-leila@example.invalid', '{"display_name":"ليلى بن يوسف","slug":"demo-leila-ben-youssef"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 update public.profiles set display_name_ar = 'ليلى بن يوسف', display_name_fr = 'Leïla Ben Youssef', slug = 'demo-leila-ben-youssef',
   title_ar = 'مراسلة نابل (حساب تجريبي)', title_fr = 'Correspondante à Nabeul (compte de démo)', bio_ar = 'حساب تجريبي لعرض صفحة الكاتب. يُحذف مع المحتوى التجريبي.', bio_fr = 'Compte de démonstration, supprimé avec le contenu de démo.', is_demo = true
 where id = 'de000000-0000-4000-8000-000000000001';
-insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at)
-values ('de000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-sofiene@example.invalid', '{"display_name":"سفيان العياري","slug":"demo-sofiene-ayari"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now())
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+values ('de000000-0000-4000-8000-000000000002', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-sofiene@example.invalid', '{"display_name":"سفيان العياري","slug":"demo-sofiene-ayari"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 update public.profiles set display_name_ar = 'سفيان العياري', display_name_fr = 'Sofiene Ayari', slug = 'demo-sofiene-ayari',
   title_ar = 'محرر رياضي (حساب تجريبي)', title_fr = 'Journaliste sportif (compte de démo)', bio_ar = 'حساب تجريبي يغطي الكرة الطائرة والرياضات الجماعية.', bio_fr = 'Compte de démonstration : volley-ball et sports collectifs.', is_demo = true
 where id = 'de000000-0000-4000-8000-000000000002';
-insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at)
-values ('de000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-nadia@example.invalid', '{"display_name":"نادية الكراي","slug":"demo-nadia-karray"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now())
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+values ('de000000-0000-4000-8000-000000000003', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'demo-nadia@example.invalid', '{"display_name":"نادية الكراي","slug":"demo-nadia-karray"}'::jsonb, '{"provider":"email","providers":["email"]}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 update public.profiles set display_name_ar = 'نادية الكراي', display_name_fr = 'Nadia Karray', slug = 'demo-nadia-karray',
   title_ar = 'صحفية ثقافية (حساب تجريبي)', title_fr = 'Journaliste culture (compte de démo)', bio_ar = 'حساب تجريبي يكتب بالعربية والفرنسية عن الثقافة.', bio_fr = 'Compte de démonstration, culture, en arabe et en français.', is_demo = true

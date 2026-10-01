@@ -17,12 +17,14 @@ const users = [
 ];
 
 for (const u of users) {
-  const { data: list } = await db.auth.admin.listUsers();
-  let id = list.users.find((x) => x.email === u.email)?.id;
+  const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  let id = list?.users.find((x) => x.email === u.email)?.id;
   if (!id) {
     const { data, error } = await db.auth.admin.createUser({ email: u.email, password: DEV_PASSWORD, email_confirm: true, user_metadata: { display_name: u.name_ar, slug: u.slug } });
     if (error) throw error;
     id = data.user.id;
+  } else {
+    await db.auth.admin.updateUserById(id, { password: DEV_PASSWORD, ban_duration: 'none' });
   }
   const { error } = await db.from('profiles').update({ role: u.role, display_name_ar: u.name_ar, display_name_fr: u.name_fr, title_ar: u.title_ar, title_fr: u.title_fr, slug: u.slug, is_active: true }).eq('id', id);
   if (error) throw error;

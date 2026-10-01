@@ -21,7 +21,7 @@ export function LoginForm({ locale, next }: { locale: string; next?: string }) {
       </div>
       {state.error && <p role="alert" className="a-error">{t(state.error as 'badLogin')}</p>}
       <button type="submit" className="a-btn a-btn-primary w-full" disabled={pending}>{t('login')}</button>
-      <p className="text-center text-[14px]"><Link href={`/${locale}/admin/forgot`} className="text-ink-2 underline">{t('forgot')}</Link></p>
+      <p className="text-center text-[14px]"><Link prefetch={false} href={`/${locale}/admin/forgot`} className="text-ink-2 underline">{t('forgot')}</Link></p>
     </form>
   );
 }

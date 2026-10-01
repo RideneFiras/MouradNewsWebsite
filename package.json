@@ -21,7 +21,8 @@
     "db:bundle": "tsx scripts/build-all-migrations.ts",
     "bundle:size": "tsx scripts/bundle-size.ts",
     "db:demo": "tsx scripts/generate-demo-seed.ts",
-    "dev:users": "tsx scripts/dev-users.ts"
+    "dev:users": "tsx scripts/dev-users.ts",
+    "db:local-reset": "bash scripts/local-reset.sh"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",

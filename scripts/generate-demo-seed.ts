@@ -48,8 +48,11 @@ begin;
 
 // Authors: auth users without password (they can't log in); the trigger creates the profile.
 for (const a of Object.values(AUTHORS)) {
-  out.push(`insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at)
-values ('${a.id}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', ${q(a.email)}, ${j({ display_name: a.name_ar, slug: a.slug })}, '{"provider":"email","providers":["email"]}'::jsonb, now(), now())
+  // Token columns must be '' (not NULL) or Supabase Auth can't list users.
+  out.push(`insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new, email_change_token_current, phone_change, phone_change_token, reauthentication_token)
+values ('${a.id}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', ${q(a.email)}, ${j({ display_name: a.name_ar, slug: a.slug })}, '{"provider":"email","providers":["email"]}'::jsonb, now(), now(),
+  '', '', '', '', '', '', '', '')
 on conflict (id) do nothing;
 update public.profiles set display_name_ar = ${q(a.name_ar)}, display_name_fr = ${q(a.name_fr)}, slug = ${q(a.slug)},
   title_ar = ${q(a.title_ar)}, title_fr = ${q(a.title_fr)}, bio_ar = ${q(a.bio_ar)}, bio_fr = ${q(a.bio_fr)}, is_demo = true

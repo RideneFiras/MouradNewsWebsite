@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildBody } from '@/lib/public/article-body';
 import { renderDoc } from '@/lib/content/render';
+import { sanitizeArticleHtml } from '@/lib/content/sanitize';
 
 const doc = (n: number) => ({
   type: 'doc',
@@ -33,10 +34,9 @@ describe('buildBody', () => {
     const chunks = buildBody(renderDoc(d), { ads: true, afterParagraphs: [3], minParagraphs: 3 });
     expect(chunks[0]!.html).toMatch(/<p[^>]*>c<\/p>$/);
   });
-  it('strips scripts and unknown iframes', () => {
-    const chunks = buildBody('<p>ok</p>\n<script>alert(1)</script>\n<iframe src="https://evil.example/x"></iframe>\n<p onclick="x()">y</p>', { ads: false, afterParagraphs: [], minParagraphs: 5 });
-    const html = chunks.map((c) => c.html).join('');
-    expect(html).not.toMatch(/script|evil|onclick/);
+  it('save-time sanitizer strips scripts, handlers and unknown iframes', () => {
+    const html = sanitizeArticleHtml('<p>ok</p>\n<script>alert(1)</script>\n<iframe src="https://evil.example/x"></iframe>\n<p onclick="x()">y</p>\n<a href="javascript:alert(1)">z</a>');
+    expect(html).not.toMatch(/script|evil|onclick|javascript/);
     expect(html).toContain('<p>y</p>');
   });
 });

@@ -60,7 +60,7 @@ export function ArticlesTable({ rows, locale, canBulk, categories, tags }: {
               <tr key={r.id}>
                 {canBulk && <td><input type="checkbox" aria-label={r.title} checked={sel.includes(r.id)} onChange={(e) => setSel((s) => (e.target.checked ? [...s, r.id] : s.filter((x) => x !== r.id)))} /></td>}
                 <td className="min-w-[260px]" lang={r.language}>
-                  <Link href={`/${locale}/admin/articles/${r.id}`} className="font-semibold hover:text-accent">{r.title}</Link>
+                  <Link prefetch={false} href={`/${locale}/admin/articles/${r.id}`} className="font-semibold hover:text-accent">{r.title}</Link>
                   {!r.editable && <span className="ms-2 text-[12px] text-ink-3">({t('readOnly')})</span>}
                 </td>
                 <td><span className="a-chip" data-status={r.status}>{ts(r.status as 'draft')}</span></td>
@@ -71,7 +71,7 @@ export function ArticlesTable({ rows, locale, canBulk, categories, tags }: {
                 <td className="text-end tabular-nums">{r.views ?? '—'}</td>
                 <td className="whitespace-nowrap">
                   <div className="flex gap-1">
-                    <Link className="a-btn a-btn-sm" href={`/${locale}/admin/articles/${r.id}`}>{tc('edit')}</Link>
+                    <Link prefetch={false} className="a-btn a-btn-sm" href={`/${locale}/admin/articles/${r.id}`}>{tc('edit')}</Link>
                     {r.href && <a className="a-btn a-btn-sm" href={r.href} target="_blank" rel="noopener">{t('viewOnSite')}</a>}
                     <button type="button" className="a-btn a-btn-sm" onClick={async () => { const x = await copyArticle(r.id, 'duplicate'); if (x.ok) router.push(`/${locale}/admin/articles/${x.data!.id}`); }}>{t('duplicate')}</button>
                     <button type="button" className="a-btn a-btn-sm" onClick={async () => { const x = await copyArticle(r.id, 'translate'); if (x.ok) router.push(`/${locale}/admin/articles/${x.data!.id}`); }}>{t('translate')}</button>

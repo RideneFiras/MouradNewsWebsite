@@ -25,6 +25,25 @@ export interface AdminMedia {
 
 const PATH = z.string().regex(/^[0-9]{4}\/[0-9]{2}\/[0-9a-f-]{36}\/[a-z0-9_.-]+$/);
 
+/** Signed upload URLs (valid 2 h) so the browser can upload without the Supabase JS client. */
+export async function createUploadTargets(names: string[]) {
+  return run(async () => {
+    await assertStaff();
+    const list = z.array(z.string().regex(/^[a-z0-9_.-]{1,40}$/)).min(1).max(6).parse(names);
+    const now = new Date();
+    const dir = `${now.getUTCFullYear()}/${String(now.getUTCMonth() + 1).padStart(2, '0')}/${crypto.randomUUID()}`;
+    const db = await sessionClient();
+    const out: { name: string; path: string; url: string }[] = [];
+    for (const name of list) {
+      const path = `${dir}/${name}`;
+      const { data, error } = await db.storage.from('media').createSignedUploadUrl(path);
+      if (error || !data) throw new Error(error?.message ?? 'signed url failed');
+      out.push({ name, path, url: data.signedUrl });
+    }
+    return out;
+  });
+}
+
 export async function createMedia(input: { storage_path: string; variants: Record<string, string>; width: number; height: number; size_bytes: number; mime_type: string }) {
   return run(async () => {
     const staff = await assertStaff();

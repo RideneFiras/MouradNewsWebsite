@@ -16,7 +16,7 @@ function List({ title, items, locale, empty, showSchedule = false }: { title: st
         <ul className="divide-y divide-rule text-[14px]">
           {items.map((a) => (
             <li key={a.id} className="py-2">
-              <Link href={`/${locale}/admin/articles/${a.id}`} className="font-semibold hover:text-accent" lang={a.language}>{a.title}</Link>
+              <Link prefetch={false} href={`/${locale}/admin/articles/${a.id}`} className="font-semibold hover:text-accent" lang={a.language}>{a.title}</Link>
               <span className="ms-2 text-ink-3" dir="ltr">{fmt(showSchedule ? a.scheduled_for : a.updated_at)}</span>
               {a.review_note && <p className="mt-1 text-warn">{a.review_note}</p>}
             </li>

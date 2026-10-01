@@ -1,14 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { browserClient } from '@/lib/supabase/browser';
+import { setNewPasswordAction } from '@/lib/auth/actions';
 
-/** New password. Works after a reset link (session cookie set by /api/auth/callback) and after
- * an invite link (session tokens in the URL hash, picked up by the browser client). */
-export function ResetForm({ locale }: { locale: string }) {
+/** New password. After a reset link the session cookie is already set (/api/auth/callback);
+ * after an invite link the session tokens are in the URL hash and are sent to the server. */
+export function ResetForm({ locale }: { locale: 'ar' | 'fr' }) {
   const t = useTranslations('admin.auth');
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   return (
@@ -18,14 +16,15 @@ export function ResetForm({ locale }: { locale: string }) {
         e.preventDefault();
         const password = String(new FormData(e.currentTarget).get('password') ?? '');
         if (password.length < 10) return setError(t('newPasswordHelp'));
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
         setPending(true);
-        const db = browserClient();
-        await db.auth.getSession(); // consumes tokens from the URL hash (invites)
-        const { error: err } = await db.auth.updateUser({ password });
+        const res = await setNewPasswordAction({
+          password, locale,
+          access_token: hash.get('access_token') ?? undefined,
+          refresh_token: hash.get('refresh_token') ?? undefined,
+        });
         setPending(false);
-        if (err) return setError(err.message);
-        router.replace(`/${locale}/admin`);
-        router.refresh();
+        if (res?.error) setError(t(res.error as 'badLogin'));
       }}
     >
       <div>
