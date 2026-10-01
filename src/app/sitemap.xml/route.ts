@@ -2,7 +2,8 @@ import { siteUrl } from '@/lib/env';
 import { allArticleStubs } from '@/lib/seo/feeds';
 import { sitemapIndex, xmlResponse } from '@/lib/seo/xml';
 
-export const revalidate = 600;
+// Rendered on request (data cached by tag): the build must not need the database.
+export const dynamic = 'force-dynamic';
 
 /** Sitemap index: one sitemap per month of articles, plus sections, tags, authors, pages. */
 export async function GET() {

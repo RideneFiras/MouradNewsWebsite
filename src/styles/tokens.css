@@ -22,12 +22,13 @@
   --gutter: 16px;
   --measure: 680px;
 
-  /* Font stacks: each face covers one script (unicode-range), so order only matters where two
-     faces cover the same script: our Arabic subset of Markazi must win over Google's own. */
+  /* Font stacks: the Arabic faces come first. They only cover Arabic (unicode-range) and
+     carry no fallback, so Latin letters and digits fall through to the Latin face, whose
+     metric-matched fallback then applies (src/app/fonts.ts). */
   --font-nameplate: var(--f-aref), var(--f-markazi-ar), var(--f-markazi), serif;
   --font-headline: var(--f-markazi-ar), var(--f-markazi), serif;
-  --font-body: var(--f-source-serif), var(--f-naskh), serif;
-  --font-ui: var(--f-plex), var(--f-plex-ar), system-ui, sans-serif;
+  --font-body: var(--f-naskh), var(--f-source-serif), serif;
+  --font-ui: var(--f-plex-ar), var(--f-plex), system-ui, sans-serif;
 }
 
 @media (min-width: 1024px) {

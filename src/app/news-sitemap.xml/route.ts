@@ -4,7 +4,8 @@ import { pick } from '@/lib/data/settings';
 import { sinceCards } from '@/lib/seo/feeds';
 import { absUrl, xmlEscape, xmlResponse } from '@/lib/seo/xml';
 
-export const revalidate = 300;
+// Rendered on request (data cached by tag): the build must not need the database.
+export const dynamic = 'force-dynamic';
 
 /** Google News sitemap: articles first published in the last 48 hours. */
 export async function GET() {

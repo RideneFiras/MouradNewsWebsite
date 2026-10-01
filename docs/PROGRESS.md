@@ -134,3 +134,48 @@ waited on: what would have been asked is written here under each phase.
 - To sell a sponsorship: الإشهار → put the slot in «معلن مباشر» → «حملة جديدة» → send the sponsor the printable report at the end.
 - AdSense: apply only once the About, Contact and Privacy pages are published (launch checklist, Phase 5). Paste the `ca-pub-…` ID and Google's ads.txt line in الإشهار, set a slot to AdSense with its unit ID, and keep Auto ads off in AdSense.
 - Review and publish the «أعلن معنا» page (Pages); choose what the media kit shows in «ملف المعلنين».
+
+## Phase 5 — SEO, polish, launch prep (done)
+
+**Built**
+- `/robots.txt`; `/sitemap.xml` index → one sitemap per month of articles (with hreflang alternates for translations), sections, tags (≥ 3 articles), authors, published static pages; `/news-sitemap.xml` (last 48 h); RSS 2.0 per locale and per section (`media:content`, `dc:creator`), linked in `<head>` and the footer. Metadata, canonical, hreflang, Open Graph and JSON-LD (NewsArticle, NewsMediaOrganization + WebSite/SearchAction, ProfilePage, BreadcrumbList) were already in place since Phase 1 and are now covered by tests.
+- Performance: Arabic fonts subset and self-hosted (`scripts/fonts/subset-arabic-fonts.sh`), `display: optional` for Arabic text faces, LCP-only preloads, correct font stacks (see DECISIONS), no inline-CSS duplication, no link prefetching. 359 → 272 KB of fonts per page; Worker 2.23 → **1.61 MiB gzip**.
+- Accessibility: axe tests on public and admin pages, keyboard/skip-link/focus test; editor accessible name.
+- Security: tests for headers, absence of secrets in browser bundles, admin/API guards, contact honeypot and rate limit.
+- Ops: `scripts/backup.sh`, `.github/workflows/ci.yml` (lint, types, unit tests, migrations drift, build without secrets), `scripts/restart-prod.sh`, `scripts/lighthouse-median.sh`; `/sitemap.xml`, `/news-sitemap.xml`, `/ads.txt` no longer need the database at build time (verified with a clean clone and placeholder env).
+- Docs: `docs/DEPLOY.md`, `docs/LAUNCH.md`, README (quick start, commands, upgrade path), DECISIONS (Phase 5 + "Owner to verify").
+
+**Checks**
+| Check | Result |
+|---|---|
+| lint / typecheck | pass |
+| Unit tests | 50 pass |
+| SQL tests | 135 assertions pass (no migration changed in this phase) |
+| Playwright e2e | **41/41 pass** (public, admin workflow, analytics, ads, media kit, SEO, accessibility, security) |
+| Sitemaps / RSS | every sitemap and feed parses as XML; all `<loc>` absolute |
+| axe (WCAG 2.1 AA) | no serious/critical violations: public AR/FR at 375 and 1280 px (home, article, section, latest, author, search, contact, 404) and 7 admin screens |
+| Lighthouse mobile (sandbox, median of 5) | home **94** / 100 / 96 / 100; article **80** / 100 / 96 / 100 (perf / a11y / best practices / SEO). Same build ranged 78–95 between batches on this shared machine; best practices only loses on the sandbox's TLS errors for the Wikimedia demo photos. Target ≥ 90 perf must be confirmed on the real domain (below). |
+| CLS | 0.000–0.024 (ad-heavy article at 375 px: 0.0004) |
+| Clean build without secrets/DB (CI) | pass |
+| OpenNext build / Worker size | pass / **1.61 MiB gzip** (6.43 MiB raw) — 54 % of 3 MiB |
+| Screenshots | `docs/screenshots/phase5/` (28: home, section, article, author, search, media kit, 404 × AR/FR × 375/1280), reviewed against the banned-patterns list after the font changes |
+
+**Stop point C (not waited on).** There is no staging URL: nothing was deployed (no credentials, by design). Everything needed to go live is below.
+
+## What Firas needs to do
+
+In this order. Details in the linked files.
+
+1. **Accounts (free)**: Supabase, Cloudflare, GitHub (repository already there). Optional later: Google Search Console, GA4, AdSense, a free SMTP provider.
+2. **Database** — `supabase/APPLY.md`: create the project, run `ALL_MIGRATIONS.sql` then `seed.sql` in the SQL editor (enable pg_cron + pg_net if asked), optionally `demo-seed.sql`, create your father's user in Authentication and run `bootstrap_admin.sql` with his e-mail, copy the keys.
+3. **Environment variables / secrets** — `docs/DEPLOY.md` §2:
+   - `wrangler.jsonc` vars and `.env.production.local`: `SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable key).
+   - `npx wrangler secret put`: `SUPABASE_SERVICE_ROLE_KEY` (secret key), `REVALIDATE_SECRET`, `TRACKER_HMAC_SECRET` (`openssl rand -hex 32` each).
+   - Same `REVALIDATE_SECRET` + site URL in `private.app_config` (APPLY.md step 8).
+4. **Cloudflare** — DEPLOY.md §1, §3: `wrangler login`, create the R2 bucket (or the KV fallback) and the D1 database (paste its id into `wrangler.jsonc`), then `pnpm build:cf && pnpm bundle:size && pnpm deploy`.
+5. **Supabase Auth URLs** — DEPLOY.md §4 (Site URL + `/api/auth/callback` redirect URLs).
+6. **Domain** — DEPLOY.md §5 (buy `.tn`/`.com`, move DNS to Cloudflare, attach to the Worker, update `SITE_URL`, redeploy).
+7. **Checks to run on your machine / the real site** (could not run here): see `docs/HANDOFF.md` → "Checks to run on Firas's machine".
+8. **Launch** — `docs/LAUNCH.md`: remove demo content, settings, legal pages, 15–20 articles, Search Console, Publisher Center, AdSense, Facebook, training.
+9. **Legal questions** — DECISIONS.md "Owner to verify" (declaration, masthead, INPDP, privacy text) with SNJT or a lawyer.
+10. **Weekly**: `scripts/backup.sh` (and a photo download monthly).

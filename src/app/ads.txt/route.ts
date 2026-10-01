@@ -1,6 +1,7 @@
 import { getSettings } from '@/lib/data/queries';
 
-export const revalidate = 300;
+// Rendered on request (data cached by tag): the build must not need the database.
+export const dynamic = 'force-dynamic';
 
 /** /ads.txt from the admin (الإشهار → AdSense). Empty file until the owner pastes Google's line. */
 export async function GET() {

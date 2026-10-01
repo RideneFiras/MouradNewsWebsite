@@ -1,19 +1,62 @@
-# El Borj (working name) — build spec
+# El Borj (working name) — online newspaper
 
-Spec package for an Arabic-first online newspaper for Mourad Ridene, built with Claude Code.
+Arabic-first (RTL) and French online newspaper for Mourad Ridene: public site, admin/CMS,
+first-party statistics that nobody can edit, sponsor ads and a live media kit. Next.js on
+Cloudflare Workers (free plan) + Supabase (free plan).
 
-## How to use it
+## Start here
 
-1. Create an empty folder (or Git repo) and copy everything from this package into it: `CLAUDE.md`, `README.md`, `docs/`.
-2. Open Claude Code in that folder and say:
-   > Read CLAUDE.md and the docs in order, then start Phase 0 of docs/09-build-plan.md.
-3. Claude Code will stop at three points (A, B, C in the build plan) to ask you for things only you can do: create the Supabase project and apply the migrations, try the admin, and go live.
+| You want to… | Read |
+|---|---|
+| Put it online | `supabase/APPLY.md` (database), then `docs/DEPLOY.md` (Cloudflare) |
+| Launch it | `docs/LAUNCH.md` |
+| Know what was built and what's left for you | `docs/PROGRESS.md` (ends with "What Firas needs to do") |
+| Know why things are the way they are | `docs/DECISIONS.md` |
+| Continue development with Claude Code | `docs/HANDOFF.md` |
 
-## What you'll get from Claude Code
+## Run it locally
 
-- The full Next.js app (public site + admin/CMS + analytics + ads), deployable on Cloudflare Workers free plan
-- `supabase/migrations/*.sql` + `supabase/ALL_MIGRATIONS.sql` (paste into the Supabase SQL editor) + `seed.sql` + `APPLY.md` with step-by-step instructions
-- `docs/DECISIONS.md` (choices it made), `docs/PROGRESS.md` (what's done), `docs/DEPLOY.md`, `docs/LAUNCH.md`
+Needs Node 22, pnpm 10 and Docker (for the local Supabase).
+
+```bash
+pnpm install
+npx supabase start                 # local database; prints the local keys
+cp .env.example .env.local         # put the local URL/keys in it (see docs/HANDOFF.md)
+pnpm db:local-reset                # migrations + seed + demo content + 3 test users
+pnpm dev:traffic                   # optional: 45 days of simulated readers (local only)
+pnpm dev                           # http://localhost:3000  — admin: /ar/admin/login
+```
+
+Test users (local only): `admin@elborj.test`, `editor@elborj.test`, `author@elborj.test`,
+password `local-dev-password`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `pnpm lint` / `pnpm typecheck` / `pnpm test` | ESLint (incl. RTL rule), TypeScript, unit tests |
+| `pnpm test:db` | SQL tests against the local database (RLS, statistics lock, rollups…) |
+| `pnpm build && pnpm start` then `E2E_NO_SERVER=1 pnpm test:e2e` | Playwright end-to-end tests |
+| `pnpm db:bundle` | Rebuilds `supabase/ALL_MIGRATIONS.sql` from the numbered migrations |
+| `pnpm db:demo` | Regenerates `supabase/demo-seed.sql` |
+| `pnpm build:cf` / `pnpm bundle:size` / `pnpm deploy` | Cloudflare build, Worker size check, deploy |
+| `bash scripts/backup.sh` | Database backup (see DEPLOY.md §8) |
+| `bash scripts/lighthouse-median.sh <url>` | Lighthouse mobile, median of 3 runs |
+
+## Costs
+
+- Cloudflare Workers free plan + Supabase free plan: 0 TND/month. Domain: yearly fee.
+
+## Upgrade path (only when needed)
+
+| Sign | Upgrade | Cost (list prices when written; check before buying) |
+|---|---|---|
+| More than ~100k page requests a day, or Workers CPU-limit errors in the logs | Cloudflare **Workers Paid** (10 million requests/month, 30 s CPU, bigger script) | $5/month |
+| Database near 500 MB, storage near 1 GB, need real backups or no pausing | **Supabase Pro** (8 GB DB, 100 GB storage, daily backups, no pausing) | $25/month |
+| Login e-mails limited | A free SMTP provider in Supabase Auth (no upgrade needed) | free |
+| Error alerts wanted | Sentry free tier | free |
+
+Nothing in the code has to change for these upgrades.
 
 ## Things to confirm with your dad (can be changed later in the admin, no code)
 

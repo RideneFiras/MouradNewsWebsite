@@ -5,18 +5,18 @@ session continuing the work._
 
 ## Where we are
 
-- **Current phase:** Phase 5 — SEO, polish, launch prep (starting). Phases 0–4 are done and pushed.
-- **Branch:** `claude/inspiring-curie-5nj5ew` (pushed to `origin`).
-- **Done:** see `docs/PROGRESS.md` (Phases 0–4).
-- **Half-done:** nothing. Known issue to fix in Phase 5: web-font swap causes ~0.12 CLS on article pages at 375 px (see DECISIONS, Phase 4).
+- **Status: Phases 0–5 complete** (Phase 6 is optional and was not started, per CLOUD_RUN.md). Everything is committed and pushed.
+- **Branch:** `claude/inspiring-curie-5nj5ew`.
+- **Done:** see `docs/PROGRESS.md` (Phases 0–5, and "What Firas needs to do" at the end).
+- **Half-done:** nothing.
 
-## Next 5 concrete steps
+## Next 5 concrete steps (for whoever continues)
 
-1. SEO: review metadata/hreflang/canonical, JSON-LD (NewsArticle, Organization, BreadcrumbList), `sitemap.xml` index + per-type sitemaps, `news-sitemap.xml` (last 48 h), `robots.txt`, RSS (`/[locale]/rss.xml`, per-section).
-2. Performance: font strategy (subset / fewer weights / preload only the headline face / `size-adjust` fallbacks) to remove the swap CLS and the 374 KB font cost; check `srcset`/`sizes`; Lighthouse mobile ≥ 90/95/100 on home and article.
-3. Accessibility: axe in Playwright on main public and admin pages (no serious/critical), keyboard and focus review.
-4. Security review: CSP, headers, contact rate limits; `scripts/backup.sh` (pg_dump of the Supabase DB, free).
-5. `docs/DEPLOY.md`, `docs/LAUNCH.md`, README update; final screenshot review; PROGRESS "What Firas needs to do"; HANDOFF "Checks to run on Firas's machine".
+1. Firas: deploy following `supabase/APPLY.md` then `docs/DEPLOY.md`.
+2. Run the "Checks to run on Firas's machine" below against the real domain; fix anything they reveal (most likely: Lighthouse performance on the article page, see DECISIONS Phase 5).
+3. Owner: `docs/LAUNCH.md` (content, legal pages, Google, Facebook, training).
+4. If wanted, Phase 6 options from `docs/09-build-plan.md` (newsletter, reader tips, volleyball module, PWA).
+5. Keep `pnpm bundle:size` under 3 MiB gzip on every change (now 1.61 MiB).
 
 ## Install and run (on Firas's machine)
 
@@ -53,13 +53,25 @@ Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/
 
 ## Checks to run on Firas's machine
 
-(None blocked so far — Docker, Supabase CLI and Chromium all work in the cloud sandbox.)
+Things that could not run in the cloud sandbox (no credentials, no real domain, proxy in the way):
+
+1. **Real deployment**: `pnpm build:cf && pnpm deploy` with the real Supabase project and Cloudflare account (DEPLOY.md). The OpenNext build and `wrangler deploy --dry-run` pass here; the upload itself needs Cloudflare credentials.
+2. **Lighthouse on the real domain** (Chrome DevTools → Lighthouse → Mobile, or `bash scripts/lighthouse-median.sh https://your-domain.tn 5`): home and an article, targets perf ≥ 90, a11y ≥ 95, SEO 100. In the sandbox: home 94, article 80 (noisy machine; demo photos blocked by the sandbox proxy).
+3. **JSON-LD validation**: paste an article URL into Google's Rich Results Test and the Schema.org validator (network access to Google was not available for this).
+4. **Backups**: `SUPABASE_DB_URL=… bash scripts/backup.sh` against the real project, then restore the dump into a scratch project (`pg_dump` 17 needed).
+5. **E-mail flows** with the real Supabase project: invitation, forgot password → `/api/auth/callback` → new password (tested locally with the CLI's mail catcher only).
+6. **AdSense** live units (needs an approved account): a slot in AdSense mode fills, and an unfilled unit collapses. The collapse logic is in `AdSlotClient.tsx`; only the sponsor and house modes were tested end to end here.
+7. **Cloudflare cache behaviour**: publish an article and check it appears on the homepage within a minute (on-demand revalidation through R2/D1).
+8. **R2 activation**: if Cloudflare asks for a card and you don't want to add one, use the KV fallback (DEPLOY.md §1).
 
 ## Known problems
 
 - In the cloud sandbox the Docker daemon is a background job with a 2-hour limit; when it stops, restart it (`dockerd &`) and run `npx supabase stop && npx supabase start` (data is kept in Docker volumes). Not an issue on a normal machine.
 - `next build` warns that `middleware.ts` is deprecated in favour of `proxy.ts`; intentionally kept (see DECISIONS.md).
+- Lighthouse numbers in the cloud sandbox vary ±15 points between identical runs; trust the real-domain run.
+- E2E tests must run against `next start` (port 3001 via `scripts/restart-prod.sh`), not `next dev` (Strict Mode double-sends page views).
+- `pnpm test:db` empties the local analytics tables (so its numbers are deterministic); run `pnpm dev:traffic` again afterwards if you want local statistics.
 
 ## Prompt to resume in a new session
 
-> Read `docs/CLOUD_RUN.md`, `CLAUDE.md`, then `docs/HANDOFF.md`, `docs/PROGRESS.md` and `docs/DECISIONS.md`. Continue the build from the "Next 5 concrete steps" in HANDOFF.md, following `docs/09-build-plan.md` (phases 0–5, skip 6) and the rules in CLOUD_RUN.md. Keep HANDOFF.md current and push after every phase.
+> Read `CLAUDE.md`, then `docs/HANDOFF.md`, `docs/PROGRESS.md` and `docs/DECISIONS.md`. Phases 0–5 are done. Start from "Next 5 concrete steps" in HANDOFF.md (or the Phase 6 item I name), keep the design system and the free-tier rules, run the checks listed in HANDOFF.md before each push, and keep HANDOFF.md current.
