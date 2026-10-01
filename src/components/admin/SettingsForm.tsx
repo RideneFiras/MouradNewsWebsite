@@ -113,8 +113,6 @@ export function SettingsForm({ initial, media }: { initial: V; media: Record<str
 
       <Section title={t('integrations')}>
         {text('ga4', 'measurement_id', t('ga4'), { dir: 'ltr' })}
-        {text('adsense', 'client_id', t('adsenseClient'), { dir: 'ltr' })}
-        {check('adsense', 'enabled', t('adsenseEnabled'))}
         <div><label className="a-label" htmlFor="consent-mode">{t('consentMode')}</label>
           <select id="consent-mode" className="a-select" value={String(obj('consent').mode ?? 'google_cmp')} onChange={(e) => setIn('consent', 'mode', e.target.value)}>
             <option value="google_cmp">{t('consent_google_cmp')}</option><option value="none">{t('consent_none')}</option>

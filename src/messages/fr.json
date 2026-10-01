@@ -24,7 +24,9 @@
     "latestEar": "Dernière heure",
     "home": "Accueil",
     "previewBanner": "Aperçu — cette page n’est pas publiée",
-    "page": "Page {n}"
+    "page": "Page {n}",
+    "houseAd": "Votre publicité ici",
+    "houseAdCta": "Annoncez chez nous"
   },
   "time": {
     "today": "Aujourd’hui",

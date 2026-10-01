@@ -5,7 +5,7 @@ import { DEFAULT_SETTINGS } from '@/lib/data/settings';
 import { SettingsForm } from '@/components/admin/SettingsForm';
 
 const KEYS = ['site_name', 'tagline', 'logo', 'favicon_media_id', 'default_og_media_id', 'masthead_ears', 'legal_masthead', 'social_links', 'show_hijri_date',
-  'breaking', 'content_mixing', 'ga4', 'adsense', 'consent', 'in_article_ads', 'analytics', 'home_text_block'];
+  'breaking', 'content_mixing', 'ga4', 'consent', 'in_article_ads', 'analytics', 'home_text_block'];
 
 export default async function SettingsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

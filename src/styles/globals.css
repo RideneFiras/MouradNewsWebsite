@@ -378,9 +378,67 @@
     border-color: var(--focus);
   }
 
-  /* ---------- Ads ---------- */
+  /* ---------- Ads (docs/02 "Ad slot"): labelled, hairlines, reserved height ---------- */
+  .ad-slot {
+    border-block: 1px solid var(--rule);
+    padding-block: 6px 12px;
+    text-align: center;
+  }
+  .ad-slot .ad-label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .ad-slot .ad-body {
+    min-height: var(--ad-h-m, 250px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (min-width: 768px) {
+    .ad-slot .ad-body {
+      min-height: var(--ad-h-d, 90px);
+    }
+  }
+  .ad-slot .ad-creative,
+  .ad-slot .ad-creative img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+  .ad-slot .ad-house {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: min(100%, 728px);
+    min-height: inherit;
+    border: 1px solid var(--rule);
+    background: var(--paper-2);
+    font-family: var(--font-ui);
+    color: var(--ink-2);
+    padding: 12px;
+  }
+  .ad-slot .ad-house-cta {
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ad-slot .ad-house:hover .ad-house-cta {
+    color: var(--accent);
+  }
   .ad-slot[data-state='unfilled'] {
     display: none;
+  }
+  .ad-outline {
+    outline: 2px dashed var(--focus);
+    outline-offset: 2px;
+    min-height: 40px;
+  }
+  .ad-outline-info {
+    color: var(--focus);
   }
 
   /* ---------- Print: a newspaper article should print like one ---------- */

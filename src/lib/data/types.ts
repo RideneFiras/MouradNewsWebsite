@@ -208,6 +208,8 @@ export interface ActiveCampaign {
   alt_text: string;
   weight: number;
   category_ids: string[] | null;
+  starts_at: string;
+  ends_at: string | null;
   desktop_path: string | null;
   desktop_variants: Record<string, string> | null;
   desktop_width: number | null;
