@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   // Images are pre-processed in the admin (WebP variants) and served from
   // Supabase Storage with plain <img srcset>. No paid image optimisation.
   images: { unoptimized: true },
+  // Inline the (small) stylesheet into the HTML: removes the render-blocking CSS request.
+  experimental: { inlineCss: true },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders() }];
   },

@@ -10,6 +10,12 @@ import { homeJsonLd, JsonLd } from '@/lib/seo/jsonld';
 
 export const revalidate = 60;
 
+// Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
+// so building doesn't need database access.
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: AppLocale }> }): Promise<Metadata> {
   const { locale } = await params;
   return homeMetadata(locale, await getSettings());

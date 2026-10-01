@@ -8,6 +8,12 @@ import { pick } from '@/lib/data/settings';
 import { mediaUrl, siteUrl } from '@/lib/env';
 import { fontVariables } from '../fonts';
 
+// Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
+// so building doesn't need database access.
+export function generateStaticParams() {
+  return [];
+}
+
 export const viewport: Viewport = { themeColor: '#f5f1e8', width: 'device-width', initialScale: 1 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

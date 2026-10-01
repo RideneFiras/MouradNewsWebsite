@@ -11,6 +11,12 @@ import { MediaKit } from '@/components/public/MediaKit';
 // Numbers are cached for one hour (docs/07); the page itself refreshes every minute.
 export const revalidate = 60;
 
+// Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
+// so building doesn't need database access.
+export function generateStaticParams() {
+  return [];
+}
+
 type Params = { params: Promise<{ locale: AppLocale }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

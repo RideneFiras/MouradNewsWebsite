@@ -15,6 +15,12 @@ import { OpinionItem, SectionHeader } from '@/components/public/story';
 
 export const revalidate = 60;
 
+// Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
+// so building doesn't need database access.
+export function generateStaticParams() {
+  return [];
+}
+
 type Params = { params: Promise<{ locale: AppLocale; slug: string; rest?: string[] }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

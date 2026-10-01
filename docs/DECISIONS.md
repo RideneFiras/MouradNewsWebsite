@@ -47,3 +47,22 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 ## Security
 
 - **CSP** allows `'unsafe-inline'` scripts: pages are statically cached, so a per-request nonce isn't possible, and AdSense/GA4 inject inline scripts. Script/frame/connect sources are limited to self, Supabase and Google ad/analytics hosts (+ YouTube/Facebook frames for embeds). Full policy in `src/lib/security/headers.ts`.
+
+## Phase 1 — public site
+
+- **Webpack instead of Turbopack for production builds** (`next build --webpack`). Same app, measured with `pnpm bundle:size`: Turbopack server output gave a **2.22 MiB gzip** Worker, webpack **1.51 MiB**. `next dev` still uses Turbopack.
+- **ISR for dynamic routes needs `generateStaticParams`** in Next 16: every public route exports `generateStaticParams() { return [] }` so pages render on first request and are then cached (`x-nextjs-cache: HIT`). Nothing is prerendered at build time, so building needs no database.
+- **`?page=N` is rewritten to `/page/N` by the middleware.** Public URLs keep the spec's `?page=2`; internally the page renders from a path segment, which keeps listing pages statically cacheable (reading `searchParams` would force a render on every request — CPU matters on the Workers free plan).
+- **Inline CSS** (`experimental.inlineCss`): removes the render-blocking stylesheet request (CLS went from 0.05 to 0 in Lighthouse).
+- **Font weights 500 dropped** (Noto Naskh Arabic, IBM Plex Sans/Arabic): the CSS never uses them.
+- **Breaking bar lives in the masthead on every page.** The homepage `breaking_ticker` section type is kept (so the builder can list it) but renders nothing, to avoid two identical red bars on the homepage.
+- **`latest_list` is not deduplicated** against the lead: it is the chronological "latest" column next to the lead. "Most read" is a ranking and isn't deduplicated either. All other blocks are.
+- **Language switch** goes to the same path in the other interface; article and static pages declare their switch target (`data-lang-switch`: linked translation or the other homepage), read when the link is clicked, so the pages stay cacheable.
+- **Wrong-locale article URLs** 301 to the linked translation if one exists in the requested interface, else to the article's own locale (spec, `03-architecture.md`).
+- **Desktop sticky bar without JavaScript:** the nav row is `position: sticky`; a small nameplate fades into it with a CSS scroll-driven animation (Chromium today; other browsers simply show the sticky nav without the mini nameplate).
+- **Desktop search** opens with a `<details>` element (no JavaScript); mobile search links to `/search`.
+- **Footer menu links to unpublished static pages are hidden** (the seeded footer menu points to pages that start as drafts).
+- **HTML is sanitized twice**: when saved (Phase 2) and again when rendered, so an editor writing through the API can't inject markup.
+- **Demo photos**: six CC-licensed photos of Kélibia and Hammamet from Wikimedia Commons, credited in the caption and loaded directly from `upload.wikimedia.org` (removed with the demo). Wikimedia only serves standard thumbnail widths, so demo variants are 500/960/1280 px; our own uploads use 480/960/1600. Clubs, festivals, people and scores in the demo are invented.
+- **Cloudflare Turnstile on the contact form: not added.** Honeypot field + minimum time-to-submit + per-IP rate limit instead (no extra account/keys needed). Turnstile is free and can be added later.
+- **Screenshots in the sandbox**: Playwright's Chromium doesn't trust the sandbox's HTTPS proxy, so tests fetch remote demo images through Node (which does) instead of disabling certificate checks (`tests/support/route-images.mjs`).

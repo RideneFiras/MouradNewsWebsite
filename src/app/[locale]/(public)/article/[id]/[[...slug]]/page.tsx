@@ -12,6 +12,12 @@ import { articleJsonLd, JsonLd } from '@/lib/seo/jsonld';
 
 export const revalidate = 60;
 
+// Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
+// so building doesn't need database access.
+export function generateStaticParams() {
+  return [];
+}
+
 type Params = { params: Promise<{ locale: AppLocale; id: string; slug?: string[] }> };
 
 const parseId = (id: string) => (/^\d{1,15}$/.test(id) ? Number(id) : null);

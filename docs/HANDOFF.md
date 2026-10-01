@@ -5,18 +5,18 @@ session continuing the work._
 
 ## Where we are
 
-- **Current phase:** Phase 1 — Public site (starting). Phase 0 is done and pushed.
+- **Current phase:** Phase 2 — Admin and CMS (starting). Phases 0 and 1 are done and pushed.
 - **Branch:** `claude/inspiring-curie-5nj5ew` (pushed to `origin`).
 - **Done:** see `docs/PROGRESS.md` (Phase 0).
-- **Half-done:** `src/app/[locale]/(public)/page.tsx` is a placeholder (prints the site name); it will be replaced by the homepage renderer.
+- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing (Phase 4). No tracker yet (Phase 3).
 
 ## Next 5 concrete steps
 
-1. Write `supabase/demo-seed.sql` (~30 demo articles, 3 demo authors, `is_demo = true`, «[تجريبي]» / «[Démo]» titles).
-2. Public components in `src/components/public/` (masthead, nav, footer, breaking bar, story units, ad slot) and `src/app/[locale]/(public)/layout.tsx`.
-3. Homepage renderer for every `homepage_sections` type with deduplication.
-4. Category, article, author, tag, format, latest, search, static pages, 404/500.
-5. Playwright e2e + screenshots (375 / 1280, AR / FR) + Lighthouse; record bundle size.
+1. Admin shell: `src/app/[locale]/admin/` layout (sidebar/drawer), login / forgot / reset pages, role helpers (`src/lib/auth/`).
+2. Article editor (Tiptap, client-only via `next/dynamic`) with server actions: save/autosave/revisions/submit/publish/schedule/send back, `renderDoc` + `sanitizeArticleHtml` on save, revalidation.
+3. Media library with client-side WebP variants (480/960/1600) and focal point.
+4. Categories (tree + delete-with-move), tags (merge), formats, homepage builder, menus, pages, settings, team (invites via service role), profile, messages, system.
+5. Phase 2 e2e (review workflow, category delete with move, homepage reorder) + mobile editor screenshots + bundle size.
 
 ## Install and run (on Firas's machine)
 
@@ -42,6 +42,8 @@ SITE_URL=http://localhost:3000
 ```
 
 Checks: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:db && pnpm build:cf && pnpm bundle:size`.
+E2E: `pnpm build && pnpm start` (other terminal), then `E2E_NO_SERVER=1 pnpm test:e2e` (needs local Supabase + demo seed).
+Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/lighthouse.sh <label>`.
 
 ## Checks to run on Firas's machine
 
