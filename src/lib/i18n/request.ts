@@ -4,6 +4,9 @@ import { routing, isLocale } from './routing';
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = isLocale(requested) ? requested : routing.defaultLocale;
-  const messages = locale === 'fr' ? (await import('@/messages/fr.json')).default : (await import('@/messages/ar.json')).default;
-  return { locale, messages, timeZone: 'Africa/Tunis' };
+  const [pub, admin] =
+    locale === 'fr'
+      ? await Promise.all([import('@/messages/fr.json'), import('@/messages/admin.fr.json')])
+      : await Promise.all([import('@/messages/ar.json'), import('@/messages/admin.ar.json')]);
+  return { locale, messages: { ...pub.default, admin: admin.default }, timeZone: 'Africa/Tunis' };
 });

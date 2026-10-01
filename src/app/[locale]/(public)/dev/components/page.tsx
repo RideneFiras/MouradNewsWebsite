@@ -7,6 +7,10 @@ import { HeadlineItem, LeadStory, ListItem, NumberedItem, OpinionItem, Secondary
 // Dev-only component gallery (docs/02 "Components"). 404 in production builds.
 export const dynamic = 'force-dynamic';
 
+function Box({ title, children }: { title: string; children: React.ReactNode }) {
+  return <section className="mt-12"><SectionHeader title={title} /><div className="grid gap-8 lg:grid-cols-2">{children}</div></section>;
+}
+
 export default async function DevComponents({ params }: { params: Promise<{ locale: AppLocale }> }) {
   if (process.env.NODE_ENV === 'production' && process.env.ENABLE_DEV_COMPONENTS !== '1') notFound();
   const { locale } = await params;
@@ -19,9 +23,6 @@ export default async function DevComponents({ params }: { params: Promise<{ loca
   const fr = items.find((a) => a.language === 'fr') ?? noImg;
   const opinion = items.find((a) => a.format_is_opinion) ?? noImg;
   const sponsored = items.find((a) => a.is_sponsored) ?? noImg;
-  const Box = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <section className="mt-12"><SectionHeader title={title} /><div className="grid gap-8 lg:grid-cols-2">{children}</div></section>
-  );
   return (
     <div className="container-page mt-8">
       <h1 className="headline-1">Components / المكوّنات</h1>

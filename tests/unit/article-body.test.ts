@@ -31,12 +31,23 @@ describe('buildBody', () => {
       { type: 'paragraph', content: [{ type: 'text', text: 'd' }] },
     ] };
     const chunks = buildBody(renderDoc(d), { ads: true, afterParagraphs: [3], minParagraphs: 3 });
-    expect(chunks[0]!.html.endsWith('<p>c</p>')).toBe(true);
+    expect(chunks[0]!.html).toMatch(/<p[^>]*>c<\/p>$/);
   });
   it('strips scripts and unknown iframes', () => {
     const chunks = buildBody('<p>ok</p>\n<script>alert(1)</script>\n<iframe src="https://evil.example/x"></iframe>\n<p onclick="x()">y</p>', { ads: false, afterParagraphs: [], minParagraphs: 5 });
     const html = chunks.map((c) => c.html).join('');
     expect(html).not.toMatch(/script|evil|onclick/);
     expect(html).toContain('<p>y</p>');
+  });
+});
+
+describe('paragraph direction', () => {
+  it('marks a French quote inside an Arabic article as ltr, leaves Arabic paragraphs alone', () => {
+    const html = renderDoc({ type: 'doc', content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'PSG فاز في المباراة' }] },
+      { type: 'paragraph', content: [{ type: 'text', text: 'Nous avons bien joué ce soir' }] },
+    ] }, { locale: 'ar' });
+    expect(html).toContain('<p>PSG فاز في المباراة</p>');
+    expect(html).toContain('<p dir="ltr">Nous avons bien joué ce soir</p>');
   });
 });

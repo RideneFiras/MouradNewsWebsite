@@ -28,9 +28,27 @@ function safeHref(href: unknown): string | null {
   return null;
 }
 
+function plain(n: PMNode): string {
+  if (n.type === 'text') return n.text ?? '';
+  return (n.content ?? []).map(plain).join(' ');
+}
+
+/** Direction of a block from the majority of its letters (Arabic vs Latin). */
+export function majorityDir(text: string): 'rtl' | 'ltr' | null {
+  const ar = (text.match(/[\u0600-\u06FF\u0750-\u077F]/g) ?? []).length;
+  const la = (text.match(/[A-Za-z\u00C0-\u024F]/g) ?? []).length;
+  if (!ar && !la) return null;
+  return ar >= la ? 'rtl' : 'ltr';
+}
+
+let docDir: 'rtl' | 'ltr' = 'rtl';
+
+/** Explicit dir if set in the editor; otherwise only when the block's script differs from the article's. */
 function dirAttr(n: PMNode): string {
   const d = n.attrs?.dir;
-  return d === 'rtl' || d === 'ltr' || d === 'auto' ? ` dir="${d}"` : '';
+  if (d === 'rtl' || d === 'ltr') return ` dir="${d}"`;
+  const m = majorityDir(plain(n));
+  return m && m !== docDir ? ` dir="${m}"` : '';
 }
 
 function renderText(n: PMNode): string {
@@ -165,6 +183,7 @@ function block(n: PMNode, opts: Required<RenderOptions>): string {
 export function renderDoc(doc: PMNode | null | undefined, options: RenderOptions = {}): string {
   const opts: Required<RenderOptions> = { mediaUrl: options.mediaUrl ?? ((p) => p), locale: options.locale ?? 'ar' };
   if (!doc || doc.type !== 'doc') return '';
+  docDir = opts.locale === 'fr' ? 'ltr' : 'rtl';
   return (doc.content ?? []).map((n) => block(n, opts)).filter(Boolean).join('\n');
 }
 
