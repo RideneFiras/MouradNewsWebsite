@@ -66,7 +66,7 @@ export async function Footer({ locale, settings, categories, menu, pages }: {
           <div>
             <h2 className="kicker mb-3 text-ink">{t('sections')}</h2>
             <ul className="space-y-1.5 font-ui text-[15px]">
-              {top.map((c) => <li key={c.id}><Link href={sectionHref(locale, c.slug)}>{categoryName(c, locale)}</Link></li>)}
+              {top.map((c) => <li key={c.id}><Link prefetch={false} href={sectionHref(locale, c.slug)}>{categoryName(c, locale)}</Link></li>)}
             </ul>
           </div>
           <div className="col-rule">
@@ -74,7 +74,7 @@ export async function Footer({ locale, settings, categories, menu, pages }: {
             <ul className="space-y-1.5 font-ui text-[15px]">
               {links.map((l) => (
                 <li key={l.href}>
-                  {l.external ? <a href={l.href} target="_blank" rel="noopener">{l.label}</a> : <Link href={l.href}>{l.label}</Link>}
+                  {l.external ? <a href={l.href} target="_blank" rel="noopener">{l.label}</a> : <Link prefetch={false} href={l.href}>{l.label}</Link>}
                 </li>
               ))}
             </ul>

@@ -14,7 +14,7 @@ export default async function NotFound() {
         <input id="nf-q" name="q" type="search" className="input" placeholder={tc('searchPlaceholder')} />
         <button type="submit" className="btn btn-primary">{tc('search')}</button>
       </form>
-      <p className="mt-6 font-ui"><Link href={`/${locale}/latest`} className="text-accent">{t('latest')}</Link> · <Link href={`/${locale}`}>{tc('home')}</Link></p>
+      <p className="mt-6 font-ui"><Link prefetch={false} href={`/${locale}/latest`} className="text-accent">{t('latest')}</Link> · <Link prefetch={false} href={`/${locale}`}>{tc('home')}</Link></p>
     </div>
   );
 }

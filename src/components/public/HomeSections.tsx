@@ -202,7 +202,7 @@ export function HomeEmpty({ locale }: { locale: Lang }) {
   return (
     <div className="container-page mt-10">
       <p className="dek">{locale === 'fr' ? 'Aucun article publié pour le moment.' : 'لا توجد مقالات منشورة بعد.'}</p>
-      <p className="meta mt-2"><Link href={`/${locale}/admin`}>{locale === 'fr' ? 'Administration' : 'لوحة التحكم'}</Link></p>
+      <p className="meta mt-2"><Link prefetch={false} href={`/${locale}/admin`}>{locale === 'fr' ? 'Administration' : 'لوحة التحكم'}</Link></p>
     </div>
   );
 }

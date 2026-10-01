@@ -80,7 +80,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
             pages={pages.filter((p) => p.show_in_footer).map((p) => ({ href: pageHref(locale, p.slug, p.page_kind), label: p.title }))}
           />
           <Nameplate settings={settings} locale={locale} size="compact" />
-          <Link href={`/${locale}/search`} className="inline-flex h-11 w-11 items-center justify-center" aria-label={t('search')}>
+          <Link prefetch={false} href={`/${locale}/search`} className="inline-flex h-11 w-11 items-center justify-center" aria-label={t('search')}>
             <SearchIcon />
           </Link>
         </div>
@@ -89,7 +89,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
             {settings.masthead_ears.start === 'latest' && latest && (
               <>
                 <span className="kicker block">{t('latestEar')}</span>
-                <Link href={articleHref(latest)} className="font-headline text-[16px] leading-snug font-semibold text-ink hover:text-accent"
+                <Link prefetch={false} href={articleHref(latest)} className="font-headline text-[16px] leading-snug font-semibold text-ink hover:text-accent"
                   lang={latest.language !== locale ? latest.language : undefined}>
                   {latest.title}
                 </Link>
@@ -116,7 +116,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
               const kids = childrenOf(c.id);
               return (
                 <li key={c.id} className="group relative">
-                  <Link href={sectionHref(locale, c.slug)} data-section={c.slug}
+                  <Link prefetch={false} href={sectionHref(locale, c.slug)} data-section={c.slug}
                     className="nav-link inline-flex min-h-11 items-center border-b-2 border-transparent font-ui text-[15px] font-semibold lg:text-[16px]">
                     {categoryName(c, locale)}
                   </Link>
@@ -124,7 +124,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
                     <ul className="invisible absolute start-0 top-full z-40 hidden min-w-48 border border-rule bg-paper py-1 group-focus-within:visible group-hover:visible lg:block">
                       {kids.map((k) => (
                         <li key={k.id}>
-                          <Link href={sectionHref(locale, k.slug)} className="block px-4 py-2 font-ui text-[15px] hover:text-accent">{categoryName(k, locale)}</Link>
+                          <Link prefetch={false} href={sectionHref(locale, k.slug)} className="block px-4 py-2 font-ui text-[15px] hover:text-accent">{categoryName(k, locale)}</Link>
                         </li>
                       ))}
                     </ul>
@@ -133,7 +133,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
               );
             })}
             <li>
-              <Link href={`/${locale}/latest`} className="nav-link inline-flex min-h-11 items-center border-b-2 border-transparent font-ui text-[15px] font-semibold text-ink-2 lg:text-[16px]">
+              <Link prefetch={false} href={`/${locale}/latest`} className="nav-link inline-flex min-h-11 items-center border-b-2 border-transparent font-ui text-[15px] font-semibold text-ink-2 lg:text-[16px]">
                 {t('allNews')}
               </Link>
             </li>

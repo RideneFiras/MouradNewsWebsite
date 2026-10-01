@@ -53,11 +53,11 @@ export function MobileMenu({ locale, sections, pages, labels }: {
             <ul className="hairline-list">
               {sections.map((s) => (
                 <li key={s.href} className="py-3">
-                  <Link href={s.href} className="font-headline text-[22px] font-bold">{s.label}</Link>
+                  <Link prefetch={false} href={s.href} className="font-headline text-[22px] font-bold">{s.label}</Link>
                   {s.children.length > 0 && (
                     <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
                       {s.children.map((c) => (
-                        <li key={c.href}><Link href={c.href} className="font-ui text-[15px] text-ink-2">{c.label}</Link></li>
+                        <li key={c.href}><Link prefetch={false} href={c.href} className="font-ui text-[15px] text-ink-2">{c.label}</Link></li>
                       ))}
                     </ul>
                   )}
@@ -69,7 +69,7 @@ export function MobileMenu({ locale, sections, pages, labels }: {
                 <p className="meta mt-8 mb-2">{labels.pages}</p>
                 <ul className="flex flex-wrap gap-x-4 gap-y-2">
                   {pages.map((p) => (
-                    <li key={p.href}><Link href={p.href} className="font-ui text-[15px]">{p.label}</Link></li>
+                    <li key={p.href}><Link prefetch={false} href={p.href} className="font-ui text-[15px]">{p.label}</Link></li>
                   ))}
                 </ul>
               </>

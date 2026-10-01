@@ -84,7 +84,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
           <div>
             <p className="dek">{t('empty')}</p>
             <p className="meta mt-3 flex flex-wrap gap-x-4">
-              {categories.filter((c) => c.show_in_nav).map((c) => <Link key={c.id} href={sectionHref(locale, c.slug)} className="font-semibold text-ink-2">{categoryName(c, locale)}</Link>)}
+              {categories.filter((c) => c.show_in_nav).map((c) => <Link prefetch={false} key={c.id} href={sectionHref(locale, c.slug)} className="font-semibold text-ink-2">{categoryName(c, locale)}</Link>)}
             </p>
           </div>
         )}
@@ -97,7 +97,7 @@ export default async function SearchPage({ params, searchParams }: Props) {
                   <time dateTime={a.published_at} className="meta w-[4.5rem] shrink-0 pt-1">{formatListTime(a.published_at, a.language)}</time>
                   <div className="min-w-0">
                     <Kicker a={a} locale={locale} />
-                    <h2 className="headline-3"><Link href={articleHref(a)} className="hover:text-accent">{highlight(a.title, q)}</Link></h2>
+                    <h2 className="headline-3"><Link prefetch={false} href={articleHref(a)} className="hover:text-accent">{highlight(a.title, q)}</Link></h2>
                     {a.excerpt && <p className="excerpt clamp-3 mt-1">{a.excerpt}</p>}
                   </div>
                 </li>

@@ -18,7 +18,7 @@ export function Pagination({ basePath, page, totalPages, labels, query = {} }: {
   }
   return (
     <nav className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-rule pt-4 font-ui text-[15px]" aria-label="pagination">
-      {page > 1 ? <Link href={href(page - 1)} rel="prev" className="btn">{labels.newer}</Link> : <span />}
+      {page > 1 ? <Link prefetch={false} href={href(page - 1)} rel="prev" className="btn">{labels.newer}</Link> : <span />}
       <ul className="flex flex-wrap gap-1">
         {pages.map((n, i) =>
           n === '…' ? (
@@ -28,13 +28,13 @@ export function Pagination({ basePath, page, totalPages, labels, query = {} }: {
               {n === page ? (
                 <span aria-current="page" className="inline-flex h-11 min-w-11 items-center justify-center bg-ink px-2 text-paper">{n}</span>
               ) : (
-                <Link href={href(n)} aria-label={labels.page(n)} className="inline-flex h-11 min-w-11 items-center justify-center px-2 hover:text-accent">{n}</Link>
+                <Link prefetch={false} href={href(n)} aria-label={labels.page(n)} className="inline-flex h-11 min-w-11 items-center justify-center px-2 hover:text-accent">{n}</Link>
               )}
             </li>
           ),
         )}
       </ul>
-      {page < totalPages ? <Link href={href(page + 1)} rel="next" className="btn">{labels.older}</Link> : <span />}
+      {page < totalPages ? <Link prefetch={false} href={href(page + 1)} rel="next" className="btn">{labels.older}</Link> : <span />}
     </nav>
   );
 }

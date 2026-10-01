@@ -50,7 +50,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
               </p>
             )}
             <p className="kicker mb-2" style={{ '--kicker': a.category_color } as CSSProperties}>
-              <Link href={sectionHref(lang, a.category_slug)}><bdi>{kickerOf(a)}</bdi></Link>
+              <Link prefetch={false} href={sectionHref(lang, a.category_slug)}><bdi>{kickerOf(a)}</bdi></Link>
             </p>
             <h1 id="article-title" className="headline-1">{a.title}</h1>
             {a.subtitle && <p className="dek mt-4">{a.subtitle}</p>}
@@ -63,7 +63,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                     {names.map((n, i) => (
                       <span key={i}>
                         {i > 0 && ` ${tc('and')} `}
-                        {n.slug ? <Link href={authorHref(lang, n.slug)} className="hover:text-accent"><bdi>{n.name}</bdi></Link> : <bdi>{n.name}</bdi>}
+                        {n.slug ? <Link prefetch={false} href={authorHref(lang, n.slug)} className="hover:text-accent"><bdi>{n.name}</bdi></Link> : <bdi>{n.name}</bdi>}
                       </span>
                     ))}
                   </span>
@@ -103,7 +103,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                 {a.tags.map((tag, i) => (
                   <span key={tag.id}>
                     {i > 0 && <span aria-hidden="true"> · </span>}
-                    <Link href={topicHref(lang, tag.slug)} className="hover:text-accent"><bdi>{tagName(tag, lang)}</bdi></Link>
+                    <Link prefetch={false} href={topicHref(lang, tag.slug)} className="hover:text-accent"><bdi>{tagName(tag, lang)}</bdi></Link>
                   </span>
                 ))}
               </p>
@@ -125,7 +125,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                   {(lang === 'fr' ? primary.title_fr : null) || primary.title_ar ? <p className="meta">{(lang === 'fr' ? primary.title_fr : null) || primary.title_ar}</p> : null}
                   {authorBio && <p className="excerpt mt-2">{authorBio}</p>}
                   {primary.linkable && (
-                    <Link href={authorHref(lang, primary.slug)} className="meta mt-1 inline-block text-accent">
+                    <Link prefetch={false} href={authorHref(lang, primary.slug)} className="meta mt-1 inline-block text-accent">
                       {t('allArticlesBy', { name: (lang === 'fr' ? primary.name_fr : null) || primary.name_ar })}
                     </Link>
                   )}

@@ -13,7 +13,7 @@ export function Nameplate({ settings, locale, size = 'large' }: { settings: Site
   const heights = { large: 'h-20 lg:h-24', small: 'h-10', compact: 'h-9' };
   const text = { large: 'text-[56px] lg:text-[84px]', small: 'text-[34px]', compact: 'text-[30px]' };
   return (
-    <Link href={`/${locale}`} className="masthead-nameplate inline-flex flex-col items-center text-ink hover:text-ink" aria-label={name}>
+    <Link prefetch={false} href={`/${locale}`} className="masthead-nameplate inline-flex flex-col items-center text-ink hover:text-ink" aria-label={name}>
       {logo ? (
         // eslint-disable-next-line @next/next/no-img-element -- uploaded SVG/PNG logo
         <img src={logo} alt={name} className={`${heights[size]} w-auto`} />

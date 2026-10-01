@@ -69,10 +69,10 @@ export default async function LatestPage({ params }: Params) {
                   <time dateTime={a.published_at} className="meta w-12 shrink-0 pt-1 tabular-nums">{formatDate(a.published_at, a.language, 'time')}</time>
                   <div className="min-w-0 flex-1">
                     <Kicker a={a} locale={locale} />
-                    <h3 className="headline-3"><Link href={articleHref(a)} className="hover:text-accent">{a.title}</Link></h3>
+                    <h3 className="headline-3"><Link prefetch={false} href={articleHref(a)} className="hover:text-accent">{a.title}</Link></h3>
                   </div>
                   {a.cover && (
-                    <Link href={articleHref(a)} tabIndex={-1} aria-hidden="true" className="hidden w-32 shrink-0 lg:block">
+                    <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true" className="hidden w-32 shrink-0 lg:block">
                       <Img media={a.cover} lang={a.language} alt={a.cover_alt} ratio="4/3" sizes="128px" />
                     </Link>
                   )}

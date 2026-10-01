@@ -49,7 +49,7 @@ export function MetaLine({ a, withTime = true, withLocation = true, linkAuthors 
             <span key={i}>
               {i > 0 && w.and}
               {n.slug && linkAuthors ? (
-                <Link href={authorHref(a.language, n.slug)} className="hover:text-accent"><bdi>{n.name}</bdi></Link>
+                <Link prefetch={false} href={authorHref(a.language, n.slug)} className="hover:text-accent"><bdi>{n.name}</bdi></Link>
               ) : (
                 <bdi>{n.name}</bdi>
               )}
@@ -76,7 +76,7 @@ export function MetaLine({ a, withTime = true, withLocation = true, linkAuthors 
 function Title({ a, className, as: H = 'h3' }: { a: ArticleCard; className: string; as?: 'h2' | 'h3' }) {
   return (
     <H className={className}>
-      <Link href={articleHref(a)} className="hover:text-accent">{a.title}</Link>
+      <Link prefetch={false} href={articleHref(a)} className="hover:text-accent">{a.title}</Link>
     </H>
   );
 }
@@ -101,7 +101,7 @@ export function LeadStory({ a, locale, layout = 'stacked', priority = true }: { 
     <ItemFrame a={a} locale={locale} className={`${a.is_sponsored ? 'bg-paper-2 p-4' : ''} ${side ? 'grid gap-4 lg:grid-cols-12 lg:gap-6' : ''}`}>
       {a.cover && (
         <figure className={side ? 'lg:col-span-7' : 'mb-4'}>
-          <Link href={articleHref(a)} tabIndex={-1} aria-hidden="true">
+          <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true">
             <Img media={a.cover} lang={a.language} alt={a.cover_alt} priority={priority} sizes="(min-width: 1024px) 760px, 100vw" />
           </Link>
           <Caption a={a} />
@@ -125,7 +125,7 @@ export function SecondaryStory({ a, locale, image = true, horizontal = false, ex
   return (
     <ItemFrame a={a} locale={locale} className={`${a.is_sponsored ? 'bg-paper-2 p-3' : ''} ${horizontal && showImg ? 'grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]' : ''}`}>
       {showImg && a.cover && (
-        <Link href={articleHref(a)} tabIndex={-1} aria-hidden="true" className={horizontal ? '' : 'mb-3 block'}>
+        <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true" className={horizontal ? '' : 'mb-3 block'}>
           <Img media={a.cover} lang={a.language} alt={a.cover_alt} ratio={horizontal ? '4/3' : '3/2'} sizes="(min-width: 1024px) 400px, 100vw" />
         </Link>
       )}
@@ -151,7 +151,7 @@ export function ListItem({ a, locale, kicker = true, thumb = false }: { a: Artic
         <Title a={a} className="headline-3" />
       </div>
       {thumb && a.cover && (
-        <Link href={articleHref(a)} tabIndex={-1} aria-hidden="true" className="hidden w-28 shrink-0 lg:block">
+        <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true" className="hidden w-28 shrink-0 lg:block">
           <Img media={a.cover} lang={a.language} alt={a.cover_alt} ratio="4/3" sizes="112px" />
         </Link>
       )}
@@ -193,7 +193,7 @@ export function OpinionItem({ a, locale }: { a: ArticleCard; locale: Lang }) {
       <div className="min-w-0">
         {name && (
           <p className="kicker mb-1">
-            {author?.linkable && !a.byline_override ? <Link href={authorHref(a.language, author.slug)}><bdi>{name}</bdi></Link> : <bdi>{name}</bdi>}
+            {author?.linkable && !a.byline_override ? <Link prefetch={false} href={authorHref(a.language, author.slug)}><bdi>{name}</bdi></Link> : <bdi>{name}</bdi>}
           </p>
         )}
         <Title a={a} className="headline-3" />
@@ -209,9 +209,9 @@ export function SectionHeader({ title, href, moreLabel, color, as: H = 'h2', id 
   return (
     <div className="mb-4">
       <div className="flex items-end justify-between gap-4 pb-2">
-        <H id={id} className="section-title">{href ? <Link href={href} className="hover:text-accent">{title}</Link> : title}</H>
+        <H id={id} className="section-title">{href ? <Link prefetch={false} href={href} className="hover:text-accent">{title}</Link> : title}</H>
         {href && moreLabel && (
-          <Link href={href} className="meta shrink-0 hover:text-accent">
+          <Link prefetch={false} href={href} className="meta shrink-0 hover:text-accent">
             {moreLabel} <span aria-hidden="true" className="inline-block rtl:rotate-0 ltr:-scale-x-100">←</span>
           </Link>
         )}

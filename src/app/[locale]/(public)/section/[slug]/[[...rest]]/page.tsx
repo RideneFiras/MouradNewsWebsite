@@ -76,7 +76,7 @@ export default async function SectionPage({ params }: Params) {
   return (
     <div className="container-page mt-8">
       <header className="mb-8">
-        {parent && <p className="kicker mb-1"><Link href={sectionHref(locale, parent.slug)}>{categoryName(parent, locale)}</Link></p>}
+        {parent && <p className="kicker mb-1"><Link prefetch={false} href={sectionHref(locale, parent.slug)}>{categoryName(parent, locale)}</Link></p>}
         <h1 className="headline-1 pb-2">{categoryName(cat, locale)}</h1>
         <div className="section-rule" style={{ '--notch': cat.color } as CSSProperties} />
         {description && <p className="dek mt-3 max-w-[var(--measure)]">{description}</p>}
@@ -85,7 +85,7 @@ export default async function SectionPage({ params }: Params) {
             {children.map((c, i) => (
               <span key={c.id}>
                 {i > 0 && <span aria-hidden="true"> · </span>}
-                <Link href={sectionHref(locale, c.slug)} className="font-semibold text-ink-2 hover:text-accent">{categoryName(c, locale)}</Link>
+                <Link prefetch={false} href={sectionHref(locale, c.slug)} className="font-semibold text-ink-2 hover:text-accent">{categoryName(c, locale)}</Link>
               </span>
             ))}
           </p>

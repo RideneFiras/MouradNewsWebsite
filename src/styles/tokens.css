@@ -22,9 +22,10 @@
   --gutter: 16px;
   --measure: 680px;
 
-  /* Font stacks: Latin face first so Latin runs use it, Arabic falls through. */
-  --font-nameplate: var(--f-aref), var(--f-markazi), serif;
-  --font-headline: var(--f-markazi), serif;
+  /* Font stacks: each face covers one script (unicode-range), so order only matters where two
+     faces cover the same script: our Arabic subset of Markazi must win over Google's own. */
+  --font-nameplate: var(--f-aref), var(--f-markazi-ar), var(--f-markazi), serif;
+  --font-headline: var(--f-markazi-ar), var(--f-markazi), serif;
   --font-body: var(--f-source-serif), var(--f-naskh), serif;
   --font-ui: var(--f-plex), var(--f-plex-ar), system-ui, sans-serif;
 }
