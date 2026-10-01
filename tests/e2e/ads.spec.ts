@@ -43,7 +43,7 @@ test.describe.serial('sponsor ads', () => {
       await db.from('ad_daily_stats').delete().eq('campaign_id', campaignId);
       await db.from('ad_campaigns').delete().eq('id', campaignId);
     }
-    await db.from('ad_slots').update({ mode: 'off' }).eq('key', 'sidebar_top');
+    await db.from('ad_slots').update({ mode: 'off' }).in('key', ['sidebar_top', 'in_article_1', 'in_article_2', 'article_end', 'header_leaderboard']);
   });
 
   test('admin turns a slot on and creates a campaign', async ({ page }) => {
@@ -125,6 +125,33 @@ test.describe.serial('sponsor ads', () => {
     page.once('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'حذف الحملة' }).click();
     await expect(page.getByText('لا يمكن حذف حملة ظهرت للقراء')).toBeVisible();
+  });
+
+  test('slots reserve their space: CLS stays low on an article with ads (375 px)', async ({ browser, baseURL }) => {
+    await db.from('ad_slots').update({ mode: 'house' }).in('key', ['in_article_1', 'in_article_2', 'article_end', 'header_leaderboard']);
+    await revalidate(baseURL!, ['ads']);
+    const ctx = await browser.newContext({ viewport: { width: 375, height: 740 }, deviceScaleFactor: 2 });
+    const page = await ctx.newPage();
+    await routeRemoteImages(page);
+    await page.addInitScript(() => {
+      (window as unknown as { __cls: number }).__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const e of list.getEntries() as (PerformanceEntry & { value: number; hadRecentInput: boolean })[]) {
+          if (!e.hadRecentInput) (window as unknown as { __cls: number }).__cls += e.value;
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+    await page.goto(articlePath, { waitUntil: 'load' });
+    await expect(page.locator('aside.ad-slot[data-slot="header_leaderboard"] .ad-house')).toBeVisible();
+    for (let y = 0; y < 6; y++) {
+      await page.mouse.wheel(0, 700);
+      await page.waitForTimeout(250);
+    }
+    await page.waitForTimeout(1000);
+    const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+    console.log('CLS with ads', cls.toFixed(4));
+    expect(cls).toBeLessThan(0.1);
+    await ctx.close();
   });
 
   test('ads.txt is served from the admin setting', async ({ request }) => {

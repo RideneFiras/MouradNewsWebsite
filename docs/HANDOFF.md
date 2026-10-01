@@ -5,18 +5,18 @@ session continuing the work._
 
 ## Where we are
 
-- **Current phase:** Phase 4 — Monetization (starting). Phases 0–3 are done and pushed.
+- **Current phase:** Phase 5 — SEO, polish, launch prep (starting). Phases 0–4 are done and pushed.
 - **Branch:** `claude/inspiring-curie-5nj5ew` (pushed to `origin`).
-- **Done:** see `docs/PROGRESS.md` (Phases 0–3).
-- **Half-done:** `src/components/public/AdSlot.tsx` is a stub that renders nothing. Sidebar links «الإشهار» (`/admin/ads`) and «ملف المعلنين» (`/admin/media-kit`) point to pages not built yet. The token helper (`src/lib/analytics/token.ts`) is meant to be reused by `/api/ads/i`.
+- **Done:** see `docs/PROGRESS.md` (Phases 0–4).
+- **Half-done:** nothing. Known issue to fix in Phase 5: web-font swap causes ~0.12 CLS on article pages at 375 px (see DECISIONS, Phase 4).
 
 ## Next 5 concrete steps
 
-1. `/admin/ads`: slots list/edit (mode adsense/direct/house, AdSense slot id, sizes, active) and campaigns CRUD (sponsor, slot, dates, desktop/mobile creatives from the media library, https click URL, weight, target sections, language; status upcoming/running/ended). RPCs/tables are in migration 09.
-2. Public `AdSlot`: reserved height, «إشهار» label, client-side weighted pick from active campaigns (`/api/ads/active?slot=` with short cache or embedded JSON), AdSense manual unit loaded lazily after interaction/idle with collapse on `data-ad-status="unfilled"`, house ad fallback, `?show_slots=1` outline mode.
-3. `/api/ads/i` (IntersectionObserver ≥50 % for ≥1 s; same anti-abuse as `/api/t`) → `record_ad_impression`; `/api/ads/c/[id]` → `record_ad_click` + 302 to the campaign URL (`rel="sponsored noopener"`); `/ads.txt` from settings.
-4. Sponsor report per campaign (printable + CSV) from `ad_campaign_report`; `/admin/media-kit` settings (metrics checkboxes, period, rounding, formats, pitch/contact) feeding `/advertise`.
-5. Phase 4 tests: e2e campaign → impression + click counted → report; CLS check on pages with slots; screenshots `docs/screenshots/phase4`; bundle size; docs.
+1. SEO: review metadata/hreflang/canonical, JSON-LD (NewsArticle, Organization, BreadcrumbList), `sitemap.xml` index + per-type sitemaps, `news-sitemap.xml` (last 48 h), `robots.txt`, RSS (`/[locale]/rss.xml`, per-section).
+2. Performance: font strategy (subset / fewer weights / preload only the headline face / `size-adjust` fallbacks) to remove the swap CLS and the 374 KB font cost; check `srcset`/`sizes`; Lighthouse mobile ≥ 90/95/100 on home and article.
+3. Accessibility: axe in Playwright on main public and admin pages (no serious/critical), keyboard and focus review.
+4. Security review: CSP, headers, contact rate limits; `scripts/backup.sh` (pg_dump of the Supabase DB, free).
+5. `docs/DEPLOY.md`, `docs/LAUNCH.md`, README update; final screenshot review; PROGRESS "What Firas needs to do"; HANDOFF "Checks to run on Firas's machine".
 
 ## Install and run (on Firas's machine)
 
@@ -46,6 +46,7 @@ One command for a clean local database with demo content and test users
 `pnpm db:local-reset`. Then `pnpm dev:traffic` for 45 days of simulated (local-only) readers so the
 statistics screens have numbers (`pnpm dev:traffic --clear` removes them).
 
+Restart the local production server for e2e: `bash scripts/restart-prod.sh` (port 3001; run e2e with `E2E_BASE_URL=http://localhost:3001 E2E_NO_SERVER=1`).
 Checks: `pnpm lint && pnpm typecheck && pnpm test && pnpm test:db && pnpm build:cf && pnpm bundle:size`.
 E2E: `pnpm build && pnpm start` (other terminal), then `E2E_NO_SERVER=1 pnpm test:e2e` (needs local Supabase + demo seed). Run e2e against `next start`, not `next dev` (Strict Mode double-sends page views in dev).
 Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/lighthouse.sh <label>`.

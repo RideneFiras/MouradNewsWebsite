@@ -109,3 +109,28 @@ waited on: what would have been asked is written here under each phase.
 - Nothing to configure for the first-party statistics: they start counting as soon as the site is live. Add the GA4 measurement ID in الإعدادات only if you also want Google Analytics.
 - Enter Facebook numbers once a month from Meta Business Suite (الإحصائيات ← فيسبوك والشبكات).
 - The monthly report (الإحصائيات ← التقرير الشهري) prints to one PDF for sponsors.
+
+## Phase 4 — Monetization (done)
+
+**Built**
+- Public `AdSlot` (server + client): «إشهار» label, hairlines, reserved height per slot size, weighted client-side rotation of running campaigns (language and section targeting incl. parent sections), `<picture>` desktop/mobile creatives, AdSense manual unit (lazy script, collapse when unfilled), house ad «أعلن معنا», `?show_slots=1` outline mode (slot key, mode, sizes) for every active slot. Header and footer slots added to the layout.
+- `/api/ads/i` (impressions: ≥ 50 % visible ≥ 1 s, once per view, token + bot + staff + rate limits), `/api/ads/c/{id}` (counted click + 302), `/ads.txt` from the admin.
+- Admin «الإشهار»: campaigns list with status (upcoming/running/ended/paused), impressions, clicks, CTR; campaign editor (sponsor, slot, language, desktop/mobile creatives from the media library, https link, alt, Tunis-time dates, weight, target sections, active, notes); delete only if never shown; slots editor (mode, AdSense unit id, sizes, active) with links to the outline mode; AdSense account + ads.txt editor with validity hint.
+- Sponsor report per campaign: totals, daily chart and table, printable page set like the paper, CSV.
+- Admin «ملف المعلنين»: metrics shown, period, rounding (down only), methodology sentence AR/FR, contact, repeatable ad formats (AR/FR name, description, size, price or «حسب الطلب», visible, order), link to the pitch page and to the public preview.
+
+**Checks**
+| Check | Result |
+|---|---|
+| lint / typecheck | pass |
+| Unit tests | 50 pass (new: weighted pick, running filter, section targeting) |
+| SQL tests | 135 assertions pass |
+| Playwright e2e | **29/29 pass**: admin turns a slot on and creates a campaign (https validation) → reader sees it in the slot with «إشهار» and `rel="sponsored noopener"` → **one view = exactly one impression** even when scrolled out and back → click = one click + 302 to the sponsor → **bot, staff and forged-token hits not counted** → sponsor report shows 1 / 1 / 100.00 % and CSV → campaign with numbers can't be deleted; ads.txt served; **media kit**: hidden metric disappears from the public page and the number shown is rounded down (≤ exact); **CLS 0.062 at 375 px** on an article with four slots on |
+| Screenshots | `docs/screenshots/phase4/` (article with sponsor + house ads 1280/375, homepage outline mode, ads admin, campaign editor 1280/375, sponsor report AR/FR, media-kit settings) — reviewed: ads labelled, separated by hairlines, not styled like editorial |
+| OpenNext build | pass |
+| Worker size | **2.23 MiB gzip** (9.56 MiB raw) — 74 % of 3 MiB |
+
+**For the owner**
+- To sell a sponsorship: الإشهار → put the slot in «معلن مباشر» → «حملة جديدة» → send the sponsor the printable report at the end.
+- AdSense: apply only once the About, Contact and Privacy pages are published (launch checklist, Phase 5). Paste the `ca-pub-…` ID and Google's ads.txt line in الإشهار, set a slot to AdSense with its unit ID, and keep Auto ads off in AdSense.
+- Review and publish the «أعلن معنا» page (Pages); choose what the media kit shows in «ملف المعلنين».
