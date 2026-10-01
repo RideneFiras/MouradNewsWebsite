@@ -1,0 +1,19 @@
+import { getTranslations } from 'next-intl/server';
+import { requireStaff } from '@/lib/auth/staff';
+import { loadEditor } from '@/lib/admin/editor-data';
+import { ArticleEditor } from '@/components/admin/editor/ArticleEditor';
+
+export default async function Page({ params }: { params: Promise<{ locale: 'ar' | 'fr' }> }) {
+  const p = await params;
+  const locale = p.locale;
+
+  const staff = await requireStaff(locale);
+  const t = await getTranslations({ locale, namespace: 'admin.nav' });
+  const { article, options } = await loadEditor(staff, locale, null);
+  return (
+    <div>
+      <h1 className="a-h1 mb-4">{article.id ? article.title || t('articles') : t('newArticle')}</h1>
+      <ArticleEditor key={article.id ?? 'new'} initial={article} options={options} role={staff.role} userId={staff.id} locale={locale} />
+    </div>
+  );
+}

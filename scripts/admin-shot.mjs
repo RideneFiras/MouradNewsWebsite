@@ -1,0 +1,21 @@
+// Logs into the admin and screenshots a page: node scripts/admin-shot.mjs <path> <out.png> [width] [email]
+import { chromium } from '@playwright/test';
+import { routeRemoteImages } from '../tests/support/route-images.mjs';
+const [path, out, width = '1280', email = 'admin@elborj.test'] = process.argv.slice(2);
+const base = process.env.BASE ?? 'http://localhost:3000';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: Number(width), height: 900 } });
+await routeRemoteImages(p);
+const errors = [];
+p.on('pageerror', (e) => errors.push(String(e)));
+p.on('console', (m) => m.type() === 'error' && !/eval|CERT/.test(m.text()) && errors.push(m.text().slice(0, 300)));
+await p.goto(`${base}/ar/admin/login`);
+await p.fill('#email', email);
+await p.fill('#password', 'local-dev-password');
+await Promise.all([p.waitForURL(/\/admin(?!\/login)/, { timeout: 60000 }), p.click('button[type=submit]')]);
+await p.goto(base + path, { waitUntil: 'load', timeout: 120000 });
+await p.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+await p.waitForTimeout(800);
+await p.screenshot({ path: out, fullPage: true });
+console.log('ok', out, errors.length ? 'ERRORS: ' + errors.join(' | ') : '');
+await b.close();

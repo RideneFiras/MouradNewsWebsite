@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "el-borj",
+  "compatibility_date": "2026-09-25",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "observability": { "enabled": true },
+  // Minify the Worker script at deploy (keeps it well under the free-plan size limit).
+  "minify": true,
+  "services": [
+    // Self-reference, must match "name" above (OpenNext caching).
+    { "binding": "WORKER_SELF_REFERENCE", "service": "el-borj" }
+  ],
+  "r2_buckets": [
+    // Create once: npx wrangler r2 bucket create el-borj-opennext-cache
+    { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "el-borj-opennext-cache" }
+  ],
+  "d1_databases": [
+    // Create once: npx wrangler d1 create el-borj-tag-cache  -> paste the id below.
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "el-borj-tag-cache",
+      "database_id": "00000000-0000-0000-0000-000000000000"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "vars": {
+    // Public, non-secret values. Secrets: see docs/DEPLOY.md (wrangler secret put).
+    "SITE_URL": "https://example.tn",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://YOUR-PROJECT-REF.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_REPLACE_ME"
+  }
+}
