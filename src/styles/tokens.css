@@ -1,0 +1,36 @@
+/*
+ * Design tokens (docs/02-design-system.md). Components use these only, never raw hex.
+ * Light theme only in v1; a dark theme can later redefine these variables.
+ */
+:root {
+  --paper: #f5f1e8;
+  --paper-2: #ece6d8;
+  --ink: #17140f;
+  --ink-2: #4b453b;
+  --ink-3: #6e6658; /* spec #7A7264 is 4.22:1 on paper (< 4.5); darkened to 5.03:1 (DECISIONS.md) */
+  --rule: #cdc5b4;
+  --rule-strong: #17140f;
+  --accent: #a3161c;
+  --accent-ink: #ffffff;
+  --focus: #0b5cad;
+  --ok: #2f6b3a;
+  --warn: #9a6b00;
+  --danger: #a3161c;
+  --white: #ffffff;
+
+  --container: 1240px;
+  --gutter: 16px;
+  --measure: 680px;
+
+  /* Font stacks: Latin face first so Latin runs use it, Arabic falls through. */
+  --font-nameplate: var(--f-aref), var(--f-markazi), serif;
+  --font-headline: var(--f-markazi), serif;
+  --font-body: var(--f-source-serif), var(--f-naskh), serif;
+  --font-ui: var(--f-plex), var(--f-plex-ar), system-ui, sans-serif;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 24px;
+  }
+}

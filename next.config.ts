@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
   // Images are pre-processed in the admin (WebP variants) and served from
   // Supabase Storage with plain <img srcset>. No paid image optimisation.
   images: { unoptimized: true },
-  // The admin editor is the only heavy client code; keep it out of the Worker.
-  experimental: {
-    optimizePackageImports: [],
-  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders() }];
   },

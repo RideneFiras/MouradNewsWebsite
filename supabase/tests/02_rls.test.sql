@@ -89,3 +89,13 @@ update public.profiles set is_active = false where id = '00000000-0000-4000-8000
 select tests.as_user('00000000-0000-4000-8000-0000000000b1');
 select tests.fails($$insert into public.articles (title, category_id, created_by) values ('x', (select id from public.categories where slug = 'culture'), '00000000-0000-4000-8000-0000000000b1')$$, 'deactivated author cannot write');
 reset role;
+
+-- Public read model
+select tests.as_anon();
+select tests.ok((select count(*) from public.article_cards) = (select count(*) from public.articles), 'article_cards = what anon may see');
+select tests.fails($$select count(*) from public.article_cards_all$$, 'anon cannot use article_cards_all');
+select tests.fails($$update public.article_cards set title = 'x'$$, 'article_cards is read-only');
+reset role;
+select tests.as_anon();
+select tests.ok((select jsonb_array_length(authors) from public.article_cards where id = '10000000-0000-4000-8000-000000000001') = 1, 'anon sees bylines through article_cards');
+reset role;
