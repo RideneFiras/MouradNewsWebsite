@@ -53,7 +53,7 @@ export default function RichText({ value, onChange, onBlur, language, placeholde
     ],
     content: value ?? { type: 'doc', content: [] },
     editorProps: {
-      attributes: { class: 'prose-article admin-prose min-h-[320px] max-w-none outline-none', dir: language === 'fr' ? 'ltr' : 'rtl', lang: language },
+      attributes: { class: 'prose-article admin-prose min-h-[320px] max-w-none outline-none', dir: language === 'fr' ? 'ltr' : 'rtl', lang: language, 'aria-label': t('body'), 'aria-multiline': 'true' },
       transformPastedHTML: cleanPastedHTML,
     },
     onUpdate: ({ editor: e }) => onChange(e.getJSON() as PMNode),
