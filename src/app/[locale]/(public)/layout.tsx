@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { Masthead } from '@/components/public/Masthead';
 import { Footer } from '@/components/public/Footer';
@@ -9,11 +10,13 @@ import { Analytics } from '@/components/public/Analytics';
 import { AdSlot } from '@/components/public/AdSlot';
 import { makeToken } from '@/lib/analytics/token';
 import { serverEnv } from '@/lib/env.server';
-import type { AppLocale } from '@/lib/i18n/routing';
+import { isLocale } from '@/lib/i18n/routing';
 
 export default async function PublicLayout({ children, params }: { children: ReactNode; params: Promise<{ locale: string }> }) {
-  const { locale: raw } = await params;
-  const locale = raw as AppLocale;
+  const { locale } = await params;
+  // Layouts render in parallel: the parent's locale check doesn't stop this one from
+  // querying the database with e.g. "favicon.ico" as the language (500 instead of 404).
+  if (!isLocale(locale)) notFound();
   setRequestLocale(locale);
   const chrome = await getChrome(locale);
   const token = await makeToken(serverEnv.trackerSecret());
