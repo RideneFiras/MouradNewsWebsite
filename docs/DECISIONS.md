@@ -158,6 +158,8 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 
 - Share buttons (article page and the admin's share box) use **`/{lang}/article/{public_id}`** without the slug: an Arabic slug percent-encodes into a ~250-character link. The article page now **serves the bare number directly** instead of 308-redirecting to the slug URL, because the redirect dropped the `utm_source`/`utm_medium` params that count shares. The `<link rel="canonical">` and `og:url` still give the full slug URL, so Google and Facebook keep one address per article. A wrong/old slug still redirects to the current one. Stats still attribute the view to the article (the tracker reads `data-track-article`); only the recorded path is the short one.
 
+- **Share row moved below the body** (before the tags), departing from docs/02 §article ("meta row → share row → cover"). Firas: a reader who got a shared link took the dek for the whole post, because the share buttons right under it, followed by a tall poster cover, looked like the end of the article. The top now goes kicker → H1 → dek → meta → cover → body; sharing after reading is also the natural moment.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:

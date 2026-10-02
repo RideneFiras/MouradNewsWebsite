@@ -76,9 +76,6 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                 )}
                 {' · '}{tt('readingTime', { count: a.reading_minutes })}
               </p>
-              <div className="no-print mt-3">
-                <ShareRow url={url} title={a.title} labels={{ share: t('share'), facebook: t('shareFacebook'), whatsapp: t('shareWhatsapp'), x: t('shareX'), copy: t('copyLink'), copied: t('copied') }} />
-              </div>
             </div>
           </div>
 
@@ -102,8 +99,14 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
               </div>
             ))}
 
+            {/* Share row after the body, not under the title: above a tall cover it read as the
+                end of the post, so readers took the dek for the whole article. */}
+            <div className="no-print mt-10">
+              <ShareRow url={url} title={a.title} labels={{ share: t('share'), facebook: t('shareFacebook'), whatsapp: t('shareWhatsapp'), x: t('shareX'), copy: t('copyLink'), copied: t('copied') }} />
+            </div>
+
             {a.tags.length > 0 && (
-              <p className="meta mt-10 border-t border-rule pt-4">
+              <p className="meta mt-6 border-t border-rule pt-4">
                 <span className="font-semibold text-ink-2">{t('tags')}: </span>
                 {a.tags.map((tag, i) => (
                   <span key={tag.id}>
