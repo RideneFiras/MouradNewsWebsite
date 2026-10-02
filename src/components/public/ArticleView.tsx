@@ -84,7 +84,12 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
 
           {m && (
             <figure className="mt-6">
-              <Img media={m} lang={lang} alt={a.cover_alt} priority sizes="(min-width: 1024px) 800px, 100vw" />
+              {/* Tall images (posters, flyers) are shown whole: cropping them to 3:2 cuts their text. */}
+              {m.height && m.width && m.height > m.width ? (
+                <Img media={m} lang={lang} alt={a.cover_alt} priority ratio="auto" className="max-h-[85svh] w-auto" sizes="(min-width: 1024px) 600px, 100vw" />
+              ) : (
+                <Img media={m} lang={lang} alt={a.cover_alt} priority sizes="(min-width: 1024px) 800px, 100vw" />
+              )}
               {(caption || credit) && <figcaption className="caption mx-auto mt-2 max-w-[var(--measure)]">{caption && <bdi>{caption}</bdi>}{caption && credit && ' · '}{credit && <bdi>{credit}</bdi>}</figcaption>}
             </figure>
           )}

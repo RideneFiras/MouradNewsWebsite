@@ -27,8 +27,9 @@ export function Img({ media, lang, alt, ratio = '3/2', sizes = '100vw', priority
       loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : undefined}
       decoding={priority ? 'sync' : 'async'}
-      className={`block w-full bg-paper-2 ${className}`}
-      style={{ aspectRatio: ratio === 'auto' ? undefined : ratio, objectFit: 'cover', objectPosition: p.objectPosition, height: ratio === 'auto' ? 'auto' : undefined }}
+      // ratio "auto": the whole image, never cropped (posters); width follows its height cap.
+      className={`block ${ratio === 'auto' ? 'mx-auto h-auto max-w-full' : 'w-full'} bg-paper-2 ${className}`}
+      style={{ aspectRatio: ratio === 'auto' ? undefined : ratio, objectFit: 'cover', objectPosition: p.objectPosition }}
     />
   );
 }

@@ -150,6 +150,10 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 - **Unsigned articles** («بدون توقيع» / «Sans signature» in the editor, `unsigned: true` in the publish-article spec): no author rows and no byline override, so no «بقلم» line, no author box, no author page link; JSON-LD names the newspaper (`#organization`) as author. Chosen over a nameless author profile, which would have produced an empty byline, an author page and a nameless Person for Google. Saving no longer adds the writer as author when the box is ticked; `created_by` still lets them edit their draft.
 - **No personal names on the site for now** (Firas, pending legal research, see "Owner to verify"): the legal masthead names (director, editor-in-chief) were emptied in `site_settings` (the footer hides empty lines); the admin profile was renamed «هيئة التحرير» / «La rédaction», its title removed and its public author page turned off (`show_public_page = false`), so even a signed article shows no person's name. The publish-article skill defaults to unsigned. To restore: الإعدادات → البيانات القانونية, and ملفي (profile) in the admin. Note `supabase/seed.sql` and `bootstrap_admin.sql` still contain the name for a fresh project.
 
+## Tall cover images (2026-10-02)
+
+- On the **article page**, a cover taller than it is wide (posters, flyers: common for cultural news) is shown whole, centred, capped at 85 % of the screen height, instead of the 3:2 crop from docs/02. Cropping a poster to 3:2 cut its title and dates. Wide photos keep the 3:2 crop. Homepage and list units keep 3:2 (consistent front page); the focal point (click the cover in the editor) chooses the visible part. `Img` `ratio="auto"` = never cropped.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:
