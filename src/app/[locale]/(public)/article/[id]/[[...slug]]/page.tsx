@@ -48,7 +48,9 @@ export default async function ArticlePage({ params }: Params) {
   }
   const wanted = a.slug ?? '';
   const got = slug?.length ? decodeURIComponent(slug.join('/')) : '';
-  if (got !== wanted || (slug?.length ?? 0) > 1) permanentRedirect(articleHref(a));
+  // The bare short link (/ar/article/35) is served as is: share buttons use it, and a
+  // redirect would drop their utm params. A wrong or outdated slug still redirects.
+  if ((got !== '' && got !== wanted) || (slug?.length ?? 0) > 1) permanentRedirect(articleHref(a));
 
   const settings = await getSettings();
   const langs = languagesFor(locale, settings);

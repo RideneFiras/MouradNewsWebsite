@@ -154,6 +154,10 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 
 - On the **article page**, a cover taller than it is wide (posters, flyers: common for cultural news) is shown whole, centred, capped at 85 % of the screen height, instead of the 3:2 crop from docs/02. Cropping a poster to 3:2 cut its title and dates. Wide photos keep the 3:2 crop. Homepage and list units keep 3:2 (consistent front page); the focal point (click the cover in the editor) chooses the visible part. `Img` `ratio="auto"` = never cropped.
 
+## Short share links (2026-10-02)
+
+- Share buttons (article page and the admin's share box) use **`/{lang}/article/{public_id}`** without the slug: an Arabic slug percent-encodes into a ~250-character link. The article page now **serves the bare number directly** instead of 308-redirecting to the slug URL, because the redirect dropped the `utm_source`/`utm_medium` params that count shares. The `<link rel="canonical">` and `og:url` still give the full slug URL, so Google and Facebook keep one address per article. A wrong/old slug still redirects to the current one. Stats still attribute the view to the article (the tracker reads `data-track-article`); only the recorded path is the short one.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:

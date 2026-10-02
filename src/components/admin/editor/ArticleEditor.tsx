@@ -169,7 +169,7 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
   }, [tagQuery, tags, a.tag_ids]);
   const excerptAuto = a.excerpt || firstParagraph(a.body_json, 220);
   const coverAlt = a.cover_alt || (a.cover ? (a.language === 'fr' ? a.cover.alt_fr : a.cover.alt_ar) ?? '' : '');
-  const publicUrl = a.public_id ? `${options.siteUrl}/${a.language}/article/${a.public_id}${a.slug ? `/${encodeURIComponent(a.slug)}` : ''}` : '';
+  const publicUrl = a.public_id ? `${options.siteUrl}/${a.language}/article/${a.public_id}` : '';
 
   const settingsPanel = (
     <div className="space-y-5">

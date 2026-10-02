@@ -5,7 +5,7 @@ import type { ArticleCard, ArticleFull, Lang } from '@/lib/data/types';
 import type { SiteSettings } from '@/lib/data/settings';
 import { formatDate } from '@/lib/format/date';
 import { buildBody } from '@/lib/public/article-body';
-import { authorHref, sectionHref, topicHref } from '@/lib/public/links';
+import { articleShortHref, authorHref, sectionHref, topicHref } from '@/lib/public/links';
 import { bylineNames, kickerOf, tagName } from '@/lib/public/labels';
 import { siteUrl } from '@/lib/env';
 import { AdSlot } from './AdSlot';
@@ -21,7 +21,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
   const t = await getTranslations({ locale: lang, namespace: 'article' });
   const tt = await getTranslations({ locale: lang, namespace: 'time' });
   const tc = await getTranslations({ locale: lang, namespace: 'common' });
-  const url = `${siteUrl()}/${lang}/article/${a.public_id}${a.slug ? `/${encodeURIComponent(a.slug)}` : ''}`;
+  const url = `${siteUrl()}${articleShortHref(a)}`;
   const names = bylineNames(a);
   const adsAllowed = a.allow_ads && !a.is_sponsored && !preview;
   const chunks = buildBody(a.body_html, {

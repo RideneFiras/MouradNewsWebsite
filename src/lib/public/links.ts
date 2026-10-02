@@ -4,6 +4,11 @@ import type { ArticleCard, Lang } from '@/lib/data/types';
 export function articleHref(a: Pick<ArticleCard, 'public_id' | 'slug' | 'language'>): string {
   return `/${a.language}/article/${a.public_id}${a.slug ? `/${encodeURIComponent(a.slug)}` : ''}`;
 }
+/** Short link for sharing: just the number. The page answers it directly (no redirect, so
+ *  share UTM params survive) and its canonical tag still names the full slug URL. */
+export function articleShortHref(a: Pick<ArticleCard, 'public_id' | 'language'>): string {
+  return `/${a.language}/article/${a.public_id}`;
+}
 export const sectionHref = (locale: Lang, slug: string) => `/${locale}/section/${slug}`;
 export const topicHref = (locale: Lang, slug: string) => `/${locale}/topic/${slug}`;
 export const authorHref = (locale: Lang, slug: string) => `/${locale}/author/${slug}`;
