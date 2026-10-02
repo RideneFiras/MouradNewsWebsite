@@ -12,7 +12,7 @@ for a new project: `APPLY.md`.
 | URL | `https://knxuskjqpsimptwxqfju.supabase.co` |
 | Used by | the live site (https://www.elborj.workers.dev) **and** `pnpm dev` (`.env.local`). There is no separate staging database. |
 | Admin user | `firasuv@gmail.com` (role `admin`) |
-| Content | seed + demo content (32 articles `is_demo = true`, 3 demo authors) |
+| Content | seed data + real articles (demo content removed 2026-10-02 with `demo-clear.sql`) |
 | `private.app_config` | `revalidate_url` + `revalidate_secret` (instant refresh when a scheduled article publishes) |
 
 ## How Claude Code talks to it

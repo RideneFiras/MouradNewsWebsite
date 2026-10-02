@@ -3,7 +3,7 @@
 **El Borj (البرج)**: an Arabic-first (RTL) and French online newspaper for Mourad Ridene, a
 Tunisian journalist. Public site, admin/CMS, first-party statistics nobody can edit, sponsor
 ads and a live media kit. Built (phases 0–5) and **live** at https://www.elborj.workers.dev
-(demo content still in). Owner/developer: Firas (the journalist's son). The editor-in-chief is
+(demo content removed 2026-10-02). Owner/developer: Firas (the journalist's son). The editor-in-chief is
 not technical: everything editorial must stay doable from the admin.
 
 Stack: Next.js 16 (App Router, webpack build) + next-intl 4 + Tailwind 4, deployed on

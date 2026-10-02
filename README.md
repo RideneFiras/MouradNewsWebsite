@@ -4,9 +4,9 @@ Arabic-first (RTL) and French online newspaper for Mourad Ridene: public site, a
 first-party statistics that nobody can edit, sponsor ads and a live media kit. Next.js on
 Cloudflare Workers (free plan) + Supabase (free plan).
 
-**Live (test address, demo content):** https://www.elborj.workers.dev — admin at
-`/ar/admin/login`. Every demo article is marked «[تجريبي]» / «[Démo]» and is removed before
-launch (`supabase/demo-clear.sql`).
+**Live (test address):** https://www.elborj.workers.dev — admin at
+`/ar/admin/login`. The screenshots below show the demo content used during development (removed
+from the live site with `supabase/demo-clear.sql`).
 
 ## Screenshots
 

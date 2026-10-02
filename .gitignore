@@ -15,3 +15,4 @@ test-results/
 
 # Playwright MCP screenshots and logs
 .playwright-mcp/
+posts/

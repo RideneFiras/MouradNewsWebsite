@@ -28,7 +28,7 @@ session continuing the work._
 
 ## Deployed (2026-10-02)
 
-- **Live: https://www.elborj.workers.dev** (Cloudflare account firasuv@gmail.com, account subdomain `elborj`, Worker `www`). Demo content is still in the database.
+- **Live: https://www.elborj.workers.dev** (Cloudflare account firasuv@gmail.com, account subdomain `elborj`, Worker `www`). Demo content was removed on 2026-10-02 (`demo-clear.sql`); re-apply `demo-seed.sql` only on a test project.
 - Resources: R2 bucket `el-borj-opennext-cache` (R2 enabled in the dashboard), D1 `el-borj-tag-cache` (id in `wrangler.jsonc`), SQLite DO queue. Public vars in `wrangler.jsonc`; `.env.production.local` (git-ignored) holds the same public values for the build.
 - Secrets set with `wrangler secret bulk` (new random values, not the local ones): `SUPABASE_SERVICE_ROLE_KEY`, `REVALIDATE_SECRET`, `TRACKER_HMAC_SECRET`. The same `REVALIDATE_SECRET` and `revalidate_url` are in Supabase `private.app_config`.
 - Deploy with **`pnpm run deploy`** (`scripts/deploy.sh`: builds with `.env.local` moved aside and refuses to ship if a secret got bundled). `pnpm deploy` is pnpm's built-in and fails.
