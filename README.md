@@ -38,7 +38,7 @@ Public pages: taken on the live site (2026-10-02). Admin screens: from the build
 | Launch it | `docs/LAUNCH.md` |
 | Know what was built and what's left for you | `docs/PROGRESS.md` (ends with "What Firas needs to do") |
 | Know why things are the way they are | `docs/DECISIONS.md` |
-| Continue development with Claude Code | `docs/HANDOFF.md` |
+| Continue development with Claude Code | `CLAUDE.md`, `docs/HANDOFF.md`, and the `MODULE.md` in each folder (`supabase/MODULE.md` = the database) |
 
 ## Run it locally
 

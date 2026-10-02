@@ -37,6 +37,12 @@ session continuing the work._
 - **Still to do by Firas**: Supabase → Authentication → URL Configuration: Site URL `https://www.elborj.workers.dev`, add redirect URL `https://www.elborj.workers.dev/**` (password reset / invitations). Then test login on the live site.
 - Logs: `npx wrangler tail www` (add `--format json` for scripts). Debug cache logging for one deploy: `npx wrangler deploy --var NEXT_PRIVATE_DEBUG_CACHE:1`, then deploy again normally.
 
+## Working with Claude Code (2026-10-02)
+
+- `CLAUDE.md` was rewritten for maintenance (the build-session version said "the repository starts empty"). It holds the ground rules, commands, the live database and Cloudflare details, and the rules for touching the online database.
+- Every main folder has a `MODULE.md` (map in CLAUDE.md). **`supabase/MODULE.md` is the database definition**: tables, roles, views, RPCs, triggers, cron, and how to change it.
+- The live Supabase project has **no migration history table**: apply new migrations with the Supabase MCP `apply_migration`, never `supabase db push`.
+
 ## Next 5 concrete steps (for whoever continues)
 
 1. Firas: Supabase Auth URLs for the live address (above), then log in on https://www.elborj.workers.dev/ar/admin/login.
