@@ -40,7 +40,7 @@ In the left menu: **Authentication**.
      Cloudflare address, e.g. `https://el-borj.<your-account>.workers.dev`).
    - Redirect URLs: add
      - `https://elborj.tn/**`
-     - `https://el-borj.<your-account>.workers.dev/**`
+     - `https://www.elborj.workers.dev/**`
      - `http://localhost:3000/**`
 3. (Optional) **Emails → Templates**: you can translate the "Invite user" and
    "Reset password" e-mails into Arabic.

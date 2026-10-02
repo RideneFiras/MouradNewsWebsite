@@ -24,15 +24,26 @@ session continuing the work._
   - "RLS enabled, no policy" ×4 (raw analytics, salts, app_config): intended lock.
   - "Leaked password protection": paid-plan feature, not available on Free.
   - Performance INFOs (unused indexes, unindexed FKs on small tables, multiple permissive policies): not relevant at this size.
-- Verified in the browser with `pnpm dev` against the online project: home AR at 1280 px, article AR at 390 px. Only console error: `/favicon.ico` 404 until a favicon is set in الإعدادات.
+- Verified in the browser with `pnpm dev` against the online project: home AR at 1280 px, article AR at 390 px.
+
+## Deployed (2026-10-02)
+
+- **Live: https://www.elborj.workers.dev** (Cloudflare account firasuv@gmail.com, account subdomain `elborj`, Worker `www`). Demo content is still in the database.
+- Resources: R2 bucket `el-borj-opennext-cache` (R2 enabled in the dashboard), D1 `el-borj-tag-cache` (id in `wrangler.jsonc`), SQLite DO queue. Public vars in `wrangler.jsonc`; `.env.production.local` (git-ignored) holds the same public values for the build.
+- Secrets set with `wrangler secret bulk` (new random values, not the local ones): `SUPABASE_SERVICE_ROLE_KEY`, `REVALIDATE_SECRET`, `TRACKER_HMAC_SECRET`. The same `REVALIDATE_SECRET` and `revalidate_url` are in Supabase `private.app_config`.
+- Deploy with **`pnpm run deploy`** (`scripts/deploy.sh`: builds with `.env.local` moved aside and refuses to ship if a secret got bundled). `pnpm deploy` is pnpm's built-in and fails.
+- Fixed during the first deploy (details in DECISIONS.md → Deployment): homepage 500 from the Free plan's 50-subrequest limit (data cache now in isolate memory), pages re-rendered on almost every visit (`enableCacheInterception`), `/favicon.ico` 500 (public layout locale guard), local secrets bundled into the Worker (deploy script).
+- Measured live: cached page visits 15–60 ms CPU, page builds 400–700 ms CPU (above the Free plan's 10 ms; accepted by Cloudflare so far). Pages rebuild in the background at most about once a minute while visited. If error 1102 or "Too many subrequests" appear: `docs/WORKERS-PAID.md`.
+- **Still to do by Firas**: Supabase → Authentication → URL Configuration: Site URL `https://www.elborj.workers.dev`, add redirect URL `https://www.elborj.workers.dev/**` (password reset / invitations). Then test login on the live site.
+- Logs: `npx wrangler tail www` (add `--format json` for scripts). Debug cache logging for one deploy: `npx wrangler deploy --var NEXT_PRIVATE_DEBUG_CACHE:1`, then deploy again normally.
 
 ## Next 5 concrete steps (for whoever continues)
 
-1. Firas: deploy following `supabase/APPLY.md` then `docs/DEPLOY.md`.
-2. Run the "Checks to run on Firas's machine" below against the real domain; fix anything they reveal (most likely: Lighthouse performance on the article page, see DECISIONS Phase 5).
+1. Firas: Supabase Auth URLs for the live address (above), then log in on https://www.elborj.workers.dev/ar/admin/login.
+2. Run the remaining "Checks to run on Firas's machine" below against the live site (Lighthouse, JSON-LD, backups, e-mail flows, AdSense, cache after publishing); fix anything they reveal.
 3. Owner: `docs/LAUNCH.md` (content, legal pages, Google, Facebook, training).
 4. If wanted, Phase 6 options from `docs/09-build-plan.md` (newsletter, reader tips, volleyball module, PWA).
-5. Keep `pnpm bundle:size` under 3 MiB gzip on every change (now 1.61 MiB).
+5. Keep `pnpm bundle:size` under 3 MiB gzip on every change (now 1.62 MiB). Buy the domain and attach it (DEPLOY.md §5), then update `SITE_URL` and the Supabase Auth URLs.
 
 ## Install and run (on Firas's machine)
 
@@ -71,7 +82,7 @@ Screenshots: `node scripts/screenshots.mjs <folder>`; Lighthouse: `bash scripts/
 
 Things that could not run in the cloud sandbox (no credentials, no real domain, proxy in the way):
 
-1. **Real deployment**: `pnpm build:cf && pnpm deploy` with the real Supabase project and Cloudflare account (DEPLOY.md). The OpenNext build and `wrangler deploy --dry-run` pass here; the upload itself needs Cloudflare credentials.
+1. ~~**Real deployment**~~ Done 2026-10-02 (see "Deployed" above).
 2. **Lighthouse on the real domain** (Chrome DevTools → Lighthouse → Mobile, or `bash scripts/lighthouse-median.sh https://your-domain.tn 5`): home and an article, targets perf ≥ 90, a11y ≥ 95, SEO 100. In the sandbox: home 94, article 80 (noisy machine; demo photos blocked by the sandbox proxy).
 3. **JSON-LD validation**: paste an article URL into Google's Rich Results Test and the Schema.org validator (network access to Google was not available for this).
 4. **Backups**: `SUPABASE_DB_URL=… bash scripts/backup.sh` against the real project, then restore the dump into a scratch project (`pg_dump` 17 needed).

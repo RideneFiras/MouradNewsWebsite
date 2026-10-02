@@ -23,8 +23,9 @@ Paste the printed `database_id` into `wrangler.jsonc` (`d1_databases[0].database
 > **R2 and payment methods.** Cloudflare may ask you to add a payment method before R2
 > can be enabled, even on the free tier. Nothing is charged within the free allowance
 > (10 GB, 1M writes and 10M reads per month — far above what this site uses). If you
-> prefer not to add a card, use Workers KV instead (free: 100k reads and 1k writes per
-> day, enough for a small paper):
+> prefer not to add a card, Workers KV is the alternative (free: 100k reads but only
+> **1k writes per day**). With pages refreshing every 60 seconds that limit is reached
+> within hours on a live paper, so **R2 is strongly recommended** (DECISIONS.md, Deployment):
 >
 > ```bash
 > npx wrangler kv namespace create NEXT_INC_CACHE_KV   # prints an id
@@ -70,12 +71,21 @@ scheduled articles).
 
 ```bash
 pnpm build:cf        # Next.js production build + OpenNext Worker bundle
-pnpm bundle:size     # must stay under 3 MiB gzip (free plan); last measured: 2.23 MiB
-pnpm deploy          # uploads the Worker and static files
+pnpm bundle:size     # must stay under 3 MiB gzip (free plan); last measured: 1.62 MiB
+pnpm run deploy      # builds without .env.local, then uploads (scripts/deploy.sh)
 ```
 
-The first deploy prints a URL like `https://el-borj.<your-subdomain>.workers.dev`. Open
-it: `/ar` must show the paper, `/ar/admin/login` the login page.
+Use `pnpm run deploy`, not `pnpm deploy` (that is a built-in pnpm command and fails).
+The script moves `.env.local` aside during the build so local secrets are never bundled.
+
+The address is `https://<worker name>.<account subdomain>.workers.dev`. The first time,
+open Workers & Pages in the dashboard once so Cloudflare creates the account subdomain
+(rename it there: Account details → Subdomain → Change). This project: Worker `www`,
+subdomain `elborj` → **https://www.elborj.workers.dev**. Open it: `/ar` must show the
+paper, `/ar/admin/login` the login page.
+
+If you change the Worker `name` in `wrangler.jsonc`, change the `WORKER_SELF_REFERENCE`
+service to the same name.
 
 To preview the production Worker locally before deploying: `pnpm preview:cf`.
 
@@ -85,7 +95,7 @@ Supabase → Authentication → URL Configuration:
 
 - **Site URL**: `https://your-domain.tn` (or the workers.dev URL for now)
 - **Redirect URLs**: `https://your-domain.tn/api/auth/callback`,
-  `https://el-borj.<subdomain>.workers.dev/api/auth/callback`,
+  `https://www.elborj.workers.dev/api/auth/callback`,
   `http://localhost:3000/api/auth/callback`
 
 Without these, password-reset and invitation e-mails won't log people in.
@@ -96,7 +106,7 @@ Without these, password-reset and invitation e-mails won't log people in.
   d'Internet); `.com` anywhere. Buying the domain is not automated here.
 - Add the domain to Cloudflare (free plan): Cloudflare dashboard → Add a domain, then at
   your registrar replace the name servers with the two Cloudflare gives you.
-- Attach it to the Worker: Workers & Pages → el-borj → Settings → Domains & Routes →
+- Attach it to the Worker: Workers & Pages → www → Settings → Domains & Routes →
   Add → Custom domain → `your-domain.tn` (and `www.your-domain.tn` if you want it).
 - Update `SITE_URL` (wrangler.jsonc and `.env.production.local`) and the Supabase Auth
   URLs, then build and deploy again.
@@ -149,10 +159,11 @@ When the paper outgrows these, see "Upgrade path" in `README.md`.
 
 ## 10. Troubleshooting
 
-- **Logs**: `npx wrangler tail` (live), or Workers & Pages → el-borj → Logs.
+- **Logs**: `npx wrangler tail` (live), or Workers & Pages → www → Logs.
 - **Error 1102 / "exceeded CPU"**: a page rendered without cache on a slow path; it is
   retried from cache next time. If frequent, check «النظام» and the logs; see upgrade path.
 - **Old content after an edit**: «النظام» → «إعادة توليد الذاكرة المؤقتة».
 - **Login e-mails don't arrive**: Supabase's built-in e-mail is limited to a few
   messages per hour; for regular use add a free SMTP provider in Supabase → Auth → SMTP.
+- **"Too many subrequests" or error 1102 in the logs**: Free-plan limits (50 subrequests, 10 ms CPU per request); see `docs/WORKERS-PAID.md`.
 - **Worker too big**: `pnpm bundle:size`; DECISIONS.md (Verified facts, Phase 1 and Phase 2) lists what was done to keep it small.

@@ -4,11 +4,37 @@ Arabic-first (RTL) and French online newspaper for Mourad Ridene: public site, a
 first-party statistics that nobody can edit, sponsor ads and a live media kit. Next.js on
 Cloudflare Workers (free plan) + Supabase (free plan).
 
+**Live (test address, demo content):** https://www.elborj.workers.dev — admin at
+`/ar/admin/login`. Every demo article is marked «[تجريبي]» / «[Démo]» and is removed before
+launch (`supabase/demo-clear.sql`).
+
+## Screenshots
+
+| Homepage (Arabic, desktop) | Accueil (français) |
+|---|---|
+| ![Arabic homepage](docs/screenshots/live/home-ar-1280.png) | ![French homepage](docs/screenshots/live/home-fr-1280.png) |
+
+| Homepage (phone) | Article (phone) | Media kit for advertisers |
+|---|---|---|
+| ![Homepage on a phone](docs/screenshots/live/home-ar-390.png) | ![Article on a phone](docs/screenshots/live/article-ar-390.png) | ![Media kit](docs/screenshots/phase5/mediakit-ar-375.png) |
+
+| Article editor (admin) | Statistics (admin, simulated local traffic) |
+|---|---|
+| ![Article editor](docs/screenshots/phase2/editor-ar-1280.png) | ![Statistics](docs/screenshots/phase3/stats-overview-ar-1280.png) |
+
+| Homepage builder | Sponsor report |
+|---|---|
+| ![Homepage builder](docs/screenshots/phase2/homepage-ar-1280.png) | ![Sponsor report](docs/screenshots/phase4/sponsor-report-ar-1280.png) |
+
+Public pages: taken on the live site (2026-10-02). Admin screens: from the build
+(`docs/screenshots/phase*/`, more there), with simulated local readers for the statistics.
+
 ## Start here
 
 | You want to… | Read |
 |---|---|
 | Put it online | `supabase/APPLY.md` (database), then `docs/DEPLOY.md` (Cloudflare) |
+| Move to the $5 Cloudflare plan | `docs/WORKERS-PAID.md` (what to switch back in the code) |
 | Launch it | `docs/LAUNCH.md` |
 | Know what was built and what's left for you | `docs/PROGRESS.md` (ends with "What Firas needs to do") |
 | Know why things are the way they are | `docs/DECISIONS.md` |
@@ -16,7 +42,14 @@ Cloudflare Workers (free plan) + Supabase (free plan).
 
 ## Run it locally
 
-Needs Node 22, pnpm 10 and Docker (for the local Supabase).
+Needs Node 22 and pnpm 10.
+
+**Against the online Supabase project** (simplest; what Firas uses): copy `.env.example`
+to `.env.local`, fill in the project URL, anon/publishable key, secret key and two random
+strings (`openssl rand -hex 32`), then `pnpm install && pnpm dev`. Don't run
+`pnpm test:db` or `pnpm dev:traffic` against it (they reset or fake statistics).
+
+**With a local database** (needs Docker; required for `pnpm test:db` and the e2e tests):
 
 ```bash
 pnpm install
@@ -39,7 +72,8 @@ password `local-dev-password`.
 | `pnpm build && pnpm start` then `E2E_NO_SERVER=1 pnpm test:e2e` | Playwright end-to-end tests |
 | `pnpm db:bundle` | Rebuilds `supabase/ALL_MIGRATIONS.sql` from the numbered migrations |
 | `pnpm db:demo` | Regenerates `supabase/demo-seed.sql` |
-| `pnpm build:cf` / `pnpm bundle:size` / `pnpm deploy` | Cloudflare build, Worker size check, deploy |
+| `pnpm build:cf` / `pnpm bundle:size` | Cloudflare build, Worker size check (free plan: 3 MiB gzip) |
+| `pnpm run deploy` | Build without local secrets and deploy (`scripts/deploy.sh`; not `pnpm deploy`, which is a pnpm built-in) |
 | `bash scripts/backup.sh` | Database backup (see DEPLOY.md §8) |
 | `bash scripts/lighthouse-median.sh <url>` | Lighthouse mobile, median of 3 runs |
 
@@ -51,12 +85,12 @@ password `local-dev-password`.
 
 | Sign | Upgrade | Cost (list prices when written; check before buying) |
 |---|---|---|
-| More than ~100k page requests a day, or Workers CPU-limit errors in the logs | Cloudflare **Workers Paid** (10 million requests/month, 30 s CPU, bigger script) | $5/month |
+| More than ~100k page requests a day, error 1102 or "Too many subrequests" in the Workers logs | Cloudflare **Workers Paid** (10 million requests/month, 30 s CPU, 10,000 subrequests) — see `docs/WORKERS-PAID.md` | $5/month |
 | Database near 500 MB, storage near 1 GB, need real backups or no pausing | **Supabase Pro** (8 GB DB, 100 GB storage, daily backups, no pausing) | $25/month |
 | Login e-mails limited | A free SMTP provider in Supabase Auth (no upgrade needed) | free |
 | Error alerts wanted | Sentry free tier | free |
 
-Nothing in the code has to change for these upgrades.
+Nothing in the code has to change for these upgrades; `docs/WORKERS-PAID.md` lists optional improvements once on Workers Paid.
 
 ## Things to confirm with your dad (can be changed later in the admin, no code)
 
@@ -67,11 +101,6 @@ Nothing in the code has to change for these upgrades.
 - [ ] Legal masthead: who is المدير المسؤول and رئيس التحرير, address, contact
 - [ ] Whether the publication needs to be declared anywhere in Tunisia (ask SNJT or a lawyer)
 - [ ] Domain name (check availability of the chosen name in `.tn` and `.com`)
-
-## Costs
-
-- Cloudflare Workers free plan + Supabase free plan: 0 TND/month. Domain: yearly fee.
-- Possible upgrades later: Cloudflare Workers Paid ($5/month) if the app bundle grows past 3 MiB or traffic is high; Supabase Pro when the database outgrows 500 MB or for proper backups.
 
 ## What's in `docs/`
 
@@ -86,4 +115,6 @@ Nothing in the code has to change for these upgrades.
 | 07-analytics-and-monetization.md | Tracker, dashboards, per-author stats, GA4, AdSense, sponsors, media kit |
 | 08-seo-legal-ops.md | SEO, feeds, legal pages, deployment, backups, launch checklist |
 | 09-build-plan.md | Phases, checks, stop points |
+| DEPLOY.md, WORKERS-PAID.md, LAUNCH.md | Deploying, the $5 plan, launch checklist |
+| HANDOFF.md, PROGRESS.md, DECISIONS.md | Current state, what was built, why |
 | research/tunisian-press-notes.md | What Tunisian news sites look like, and what we keep or avoid |
