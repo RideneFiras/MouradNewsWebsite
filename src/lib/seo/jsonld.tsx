@@ -77,8 +77,11 @@ export function articleJsonLd(a: ArticleFull, settings: S, crumbs: { name: strin
         image: images.length ? images : undefined,
         datePublished: a.first_published_at ?? a.published_at,
         dateModified: a.content_updated_at ?? a.updated_at ?? a.published_at,
+        // Unsigned articles (no authors, no byline): the newspaper itself is the author.
         author: a.byline_override
           ? [{ '@type': 'Organization', name: a.byline_override }]
+          : !a.authors.length
+          ? [{ '@id': `${base}/#organization` }]
           : a.authors.map((p) => ({
               '@type': 'Person',
               name: (a.language === 'fr' ? p.name_fr : null) || p.name_ar,

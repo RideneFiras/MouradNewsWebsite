@@ -29,7 +29,7 @@ export interface SaveResult {
 function validateForPublish(d: z.output<typeof ArticleInput>) {
   if (!d.title) throw new ActionError('err_title', 'title');
   if (!d.category_id) throw new ActionError('err_category', 'category_id');
-  if (!d.author_ids.length && !d.byline_override) throw new ActionError('err_authors', 'author_ids');
+  if (!d.unsigned && !d.author_ids.length && !d.byline_override) throw new ActionError('err_authors', 'author_ids');
   if (d.cover_media_id && !d.cover_alt) throw new ActionError('err_alt', 'cover_alt');
   if (d.is_sponsored && !d.sponsor_name) throw new ActionError('err_sponsor', 'sponsor_name');
 }
@@ -59,7 +59,7 @@ export async function saveArticle(raw: ArticleInputT, intent: Intent, opts: { sc
     const patch: Record<string, unknown> = {
       language: d.language, kicker_override: d.kicker_override, title: d.title || (existing?.title ?? '…'), subtitle: d.subtitle,
       body_json: doc, body_html, body_text, location: d.location, format_id: d.format_id ?? null,
-      byline_override: d.byline_override, cover_media_id: d.cover_media_id ?? null, cover_caption: d.cover_caption,
+      byline_override: d.unsigned ? null : d.byline_override, cover_media_id: d.cover_media_id ?? null, cover_caption: d.cover_caption,
       cover_credit: d.cover_credit, cover_alt: d.cover_alt, excerpt: d.excerpt, seo_title: d.seo_title,
       seo_description: d.seo_description, correction_note_ar: d.correction_note_ar, correction_note_fr: d.correction_note_fr,
       allow_ads: d.is_sponsored ? false : d.allow_ads,
@@ -120,7 +120,8 @@ export async function saveArticle(raw: ArticleInputT, intent: Intent, opts: { sc
     }
 
     // Join tables (replace).
-    const authors = d.author_ids.length ? d.author_ids : d.byline_override ? [] : [staff.id];
+    // Unsigned articles keep no author rows; created_by still lets the writer edit their draft.
+    const authors = d.unsigned ? [] : d.author_ids.length ? d.author_ids : d.byline_override ? [] : [staff.id];
     check(await db.from('article_authors').delete().eq('article_id', row.id));
     if (authors.length) check(await db.from('article_authors').insert(authors.map((profile_id, position) => ({ article_id: row.id, profile_id, position }))));
     check(await db.from('article_tags').delete().eq('article_id', row.id));

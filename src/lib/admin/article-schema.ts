@@ -17,6 +17,8 @@ export const ArticleInput = z.object({
   tag_ids: z.array(uuid).max(30).default([]),
   author_ids: z.array(uuid).max(6).default([]),
   byline_override: optText,
+  /** No author name at all (editor checkbox «بدون توقيع»). */
+  unsigned: z.boolean().default(false),
   cover_media_id: uuid.nullish(),
   cover_caption: optText,
   cover_credit: optText,

@@ -16,6 +16,8 @@ export interface EditorArticle {
   tag_ids: string[];
   author_ids: string[];
   byline_override: string;
+  /** Published without any author name (no «بقلم» line, no author box). */
+  unsigned: boolean;
   cover_media_id: string | null;
   cover: { storage_path: string; variants: Record<string, string>; focal_x: number; focal_y: number; alt_ar: string | null; alt_fr: string | null; caption_ar: string | null; caption_fr: string | null; credit: string | null } | null;
   cover_caption: string;

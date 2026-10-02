@@ -98,7 +98,8 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
   const toInput = (x: EditorArticle) => ({
     id: x.id, language: x.language, kicker_override: x.kicker_override, title: x.title, subtitle: x.subtitle, body_json: x.body_json,
     location: x.location, category_id: x.category_id || null, extra_category_ids: x.extra_category_ids, format_id: x.format_id || null,
-    tag_ids: x.tag_ids, author_ids: x.author_ids, byline_override: x.byline_override, cover_media_id: x.cover_media_id,
+    tag_ids: x.tag_ids, author_ids: x.unsigned ? [] : x.author_ids, byline_override: x.unsigned ? null : x.byline_override, unsigned: x.unsigned,
+    cover_media_id: x.cover_media_id,
     cover_caption: x.cover_caption, cover_credit: x.cover_credit, cover_alt: x.cover_alt, excerpt: x.excerpt,
     is_featured: x.is_featured, is_breaking: x.is_breaking, breaking_hours: x.breaking_hours, is_sponsored: x.is_sponsored,
     sponsor_name: x.sponsor_name, allow_ads: x.allow_ads, seo_title: x.seo_title, seo_description: x.seo_description,
@@ -226,7 +227,12 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
         )}
       </Field>
       <Field id="authors" label={t('authors')} error={errors.author_ids}>
-        <div className="flex max-h-40 flex-col gap-1 overflow-y-auto text-[14px]">
+        <label className="mb-2 flex items-center gap-2 text-[14px] font-semibold">
+          <input type="checkbox" disabled={readOnly} checked={a.unsigned} onChange={(e) => set('unsigned', e.target.checked)} />
+          {t('unsigned')}
+        </label>
+        {a.unsigned && <p className="mb-2 text-[13px] text-ink-3">{t('unsignedHelp')}</p>}
+        <div className="flex max-h-40 flex-col gap-1 overflow-y-auto text-[14px]" hidden={a.unsigned}>
           {options.people.map((p) => (
             <label key={p.id} className="flex items-center gap-2">
               <input type="checkbox" disabled={readOnly} checked={a.author_ids.includes(p.id)}
@@ -236,9 +242,11 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
           ))}
         </div>
       </Field>
-      <Field id="byline" label={t('bylineOverride')} help={t('bylineHelp')}>
-        <input id="byline" className="a-input" value={a.byline_override} disabled={readOnly} onChange={(e) => set('byline_override', e.target.value)} />
-      </Field>
+      {!a.unsigned && (
+        <Field id="byline" label={t('bylineOverride')} help={t('bylineHelp')}>
+          <input id="byline" className="a-input" value={a.byline_override} disabled={readOnly} onChange={(e) => set('byline_override', e.target.value)} />
+        </Field>
+      )}
 
       <fieldset className="space-y-3 border-t border-rule pt-4">
         <legend className="a-label">{t('cover')}</legend>

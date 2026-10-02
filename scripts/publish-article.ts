@@ -80,6 +80,8 @@ const Spec = z.object({
   new_tags: z.array(z.object({ name_ar: z.string().min(1), name_fr: z.string().nullish(), kind: z.enum(['topic', 'place', 'person', 'club', 'competition', 'event']) })).default([]),
   authors: z.array(z.string()).max(6).default([]), // profile slugs; default: the admin
   byline_override: z.string().trim().max(200).nullish(),
+  /** No author name at all (same as «بدون توقيع» in the editor). */
+  unsigned: z.boolean().default(false),
   cover: Image.nullish(),
   excerpt: z.string().trim().max(400).nullish(),
   is_breaking: z.boolean().default(false),
@@ -248,7 +250,9 @@ async function resolveSpec(client: SupabaseClient, spec: SpecT) {
   const format = spec.format ? L.formats.find((f) => f.slug === spec.format) ?? fail(`unknown genre "${spec.format}"`) : null;
   const tagIds = spec.tags.map((s) => (L.tags.find((t) => t.slug === s) ?? fail(`unknown tag "${s}" (put new ones in new_tags)`)).id as string);
   const admin = L.authors.find((a) => a.role === 'admin' && !a.is_demo);
-  const authorRows = spec.authors.length
+  const authorRows = spec.unsigned
+    ? []
+    : spec.authors.length
     ? spec.authors.map((s) => L.authors.find((a) => a.slug === s) ?? fail(`unknown author "${s}"`))
     : spec.byline_override ? [] : [admin ?? fail('no admin profile found')];
   const actingId = (admin ?? authorRows[0])?.id as string;
@@ -299,7 +303,7 @@ async function check(file: string) {
   console.log('✓ spec is valid');
   console.log(`  language ${spec.language} · status ${spec.status}${spec.scheduled_for ? ` (${spec.scheduled_for} Tunis)` : ''}`);
   console.log(`  section ${r.category.slug}${r.extra.length ? ` (+${r.extra.length})` : ''} · genre ${r.format?.slug ?? '—'} · tags ${spec.tags.length} existing, ${spec.new_tags.length} new`);
-  console.log(`  byline ${spec.byline_override ?? r.authorRows.map((a) => a!.display_name_ar).join('، ')}`);
+  console.log(`  byline ${spec.unsigned ? '(unsigned: no author name)' : spec.byline_override ?? r.authorRows.map((a) => a!.display_name_ar).join('، ')}`);
   console.log(`  blocks ${spec.body.length} · images ${bodyImages(spec).length + (spec.cover ? 1 : 0)} · words ${docToText(doc).split(/\s+/).filter(Boolean).length}`);
   console.log(`  preview (images not uploaded yet): ${out}`);
 }
@@ -347,7 +351,7 @@ async function publish(file: string) {
     language: spec.language, status: spec.status, title: spec.title, subtitle: spec.subtitle ?? null,
     kicker_override: spec.kicker_override ?? null, location: spec.location ?? null,
     body_json: doc, body_html, body_text: docToText(doc), excerpt: spec.excerpt ?? null,
-    category_id: r.category.id, format_id: r.format?.id ?? null, byline_override: spec.byline_override ?? null,
+    category_id: r.category.id, format_id: r.format?.id ?? null, byline_override: spec.unsigned ? null : spec.byline_override ?? null,
     cover_media_id: cover?.id ?? null, cover_caption: spec.cover?.caption ?? null, cover_credit: spec.cover?.credit ?? null, cover_alt: spec.cover?.alt ?? null,
     is_featured: spec.is_featured, is_breaking: spec.is_breaking,
     breaking_until: spec.is_breaking ? new Date(now.getTime() + spec.breaking_hours * 3600000).toISOString() : null,

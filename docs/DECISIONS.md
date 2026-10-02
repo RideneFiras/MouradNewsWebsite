@@ -145,6 +145,11 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 - **Production secrets are new random values**, not the local ones; `REVALIDATE_SECRET` was also written to `private.app_config` with `revalidate_url = https://www.elborj.workers.dev/api/revalidate` (APPLY.md step 8).
 - **Unknown first path segment (e.g. `/favicon.ico`) returned 500**: the public layout queried the database with it as the language before the parent layout's locale check took effect. The public layout now calls `notFound()` for unknown locales.
 
+## Bylines and names (2026-10-02)
+
+- **Unsigned articles** («بدون توقيع» / «Sans signature» in the editor, `unsigned: true` in the publish-article spec): no author rows and no byline override, so no «بقلم» line, no author box, no author page link; JSON-LD names the newspaper (`#organization`) as author. Chosen over a nameless author profile, which would have produced an empty byline, an author page and a nameless Person for Google. Saving no longer adds the writer as author when the box is ticked; `created_by` still lets them edit their draft.
+- **No personal names on the site for now** (Firas, pending legal research, see "Owner to verify"): the legal masthead names (director, editor-in-chief) were emptied in `site_settings` (the footer hides empty lines); the admin profile was renamed «هيئة التحرير» / «La rédaction», its title removed and its public author page turned off (`show_public_page = false`), so even a signed article shows no person's name. The publish-article skill defaults to unsigned. To restore: الإعدادات → البيانات القانونية, and ملفي (profile) in the admin. Note `supabase/seed.sql` and `bootstrap_admin.sql` still contain the name for a fresh project.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:

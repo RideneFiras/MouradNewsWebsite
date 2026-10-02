@@ -167,6 +167,8 @@
     "tagsHelp": "Villes, clubs, personnalités, compétitions… Tapez puis choisissez ou créez un mot-clé.",
     "newTag": "Nouveau mot-clé : {name}",
     "authors": "Auteurs",
+    "unsigned": "Sans signature",
+    "unsignedHelp": "Aucun nom d’auteur n’apparaît sur l’article (ni « Par », ni encadré auteur).",
     "bylineOverride": "Signature alternative (facultatif)",
     "bylineHelp": "Par ex. « Notre correspondant à Nabeul ». Remplace les noms.",
     "cover": "Image principale",

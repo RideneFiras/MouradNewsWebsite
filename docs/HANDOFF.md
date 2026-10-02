@@ -37,6 +37,11 @@ session continuing the work._
 - **Still to do by Firas**: Supabase → Authentication → URL Configuration: Site URL `https://www.elborj.workers.dev`, add redirect URL `https://www.elborj.workers.dev/**` (password reset / invitations). Then test login on the live site.
 - Logs: `npx wrangler tail www` (add `--format json` for scripts). Debug cache logging for one deploy: `npx wrangler deploy --var NEXT_PRIVATE_DEBUG_CACHE:1`, then deploy again normally.
 
+## Names and bylines (2026-10-02)
+
+- No personal names on the public site until the legal questions are researched: masthead names emptied, admin profile renamed «هيئة التحرير», author page off. Articles are published **unsigned** by default («بدون توقيع» in the editor). Details and how to undo: DECISIONS.md → "Bylines and names".
+- Drafts: post 1 (Avant Goût, `public_id` 33) saved as an unsigned draft via the publish-article skill.
+
 ## Working with Claude Code (2026-10-02)
 
 - `CLAUDE.md` was rewritten for maintenance (the build-session version said "the repository starts empty"). It holds the ground rules, commands, the live database and Cloudflare details, and the rules for touching the online database.

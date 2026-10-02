@@ -61,8 +61,9 @@ If there is no title, ask for one. Don't invent it.
      `interview`, رأي `opinion`, نتائج `results` for scores… pick from the list.
    - `tags`: existing place/club/event tags clearly mentioned (e.g. `nabeul`). Propose new tags
      (`new_tags`) only for clearly important names, and only with Firas's OK.
-   - `authors`: leave empty (defaults to the admin, «مراد ريدان») unless told otherwise.
-     `byline_override` only if the text is signed by someone else.
+   - Byline: **`"unsigned": true` by default for now** (Firas asked for no names on the site
+     until the legal questions are settled): no «بقلم» line, no author box. Use `authors` (profile
+     slugs) or `byline_override` (e.g. «مراسلنا بنابل») only when Firas asks for a signature.
    - `location` (dateline, printed as «قليبية — » before the first paragraph): only if the text
      *starts* with one ("X — …"); then remove it from the first paragraph and set `location`.
      Otherwise leave it empty (the site would print words that aren't in the text).
@@ -111,6 +112,7 @@ If there is no title, ask for one. Don't invent it.
   "format": "news",
   "tags": ["nabeul"],
   "new_tags": [],
+  "unsigned": true,
   "authors": [],
   "location": null,
   "cover": { "file": "posts/1/poster.jpeg", "alt": "…", "caption": "", "credit": "" },

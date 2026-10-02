@@ -39,7 +39,8 @@ export async function loadEditor(staff: Staff, locale: 'ar' | 'fr', id: string |
       id: a.id, public_id: a.public_id, status: a.status, language: a.language, kicker_override: a.kicker_override ?? '', title: a.title ?? '',
       subtitle: a.subtitle ?? '', body_json: a.body_json, location: a.location ?? '', category_id: a.category_id,
       extra_category_ids: (ec.data ?? []).map((x) => x.category_id), format_id: a.format_id ?? '', tag_ids: (tg.data ?? []).map((x) => x.tag_id),
-      author_ids: (au.data ?? []).map((x) => x.profile_id), byline_override: a.byline_override ?? '', cover_media_id: a.cover_media_id,
+      author_ids: (au.data ?? []).map((x) => x.profile_id), byline_override: a.byline_override ?? '',
+      unsigned: !(au.data ?? []).length && !a.byline_override, cover_media_id: a.cover_media_id,
       cover: cover.data ? { ...cover.data, focal_x: Number(cover.data.focal_x), focal_y: Number(cover.data.focal_y) } : null,
       cover_caption: a.cover_caption ?? '', cover_credit: a.cover_credit ?? '', cover_alt: a.cover_alt ?? '', excerpt: a.excerpt ?? '',
       is_featured: a.is_featured, is_breaking: a.is_breaking, breaking_hours: Math.min(72, hours), is_sponsored: a.is_sponsored,
@@ -51,7 +52,7 @@ export async function loadEditor(staff: Staff, locale: 'ar' | 'fr', id: string |
   } else {
     article = {
       id: null, public_id: null, status: 'draft', language: locale, kicker_override: '', title: '', subtitle: '', body_json: null, location: '',
-      category_id: firstTop?.id ?? '', extra_category_ids: [], format_id: '', tag_ids: [], author_ids: [staff.id], byline_override: '',
+      category_id: firstTop?.id ?? '', extra_category_ids: [], format_id: '', tag_ids: [], author_ids: [staff.id], byline_override: '', unsigned: false,
       cover_media_id: null, cover: null, cover_caption: '', cover_credit: '', cover_alt: '', excerpt: '', is_featured: false, is_breaking: false,
       breaking_hours: settings.breaking.default_hours, is_sponsored: false, sponsor_name: '', allow_ads: true, seo_title: '', seo_description: '',
       correction_note_ar: '', correction_note_fr: '', significant_update: false, translation_group_id: null, review_note: null, scheduled_for: null,
