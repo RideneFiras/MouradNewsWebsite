@@ -10,6 +10,21 @@ export interface ImageProps {
   objectPosition: string;
 }
 
+/**
+ * Crop point for object-fit: cover. A tall picture (portrait photo, poster) cropped to 3:2
+ * around its centre loses the face or the poster's title, which are near the top. So when
+ * nobody has set a focal point (still the 0.5/0.5 default), tall pictures are cropped from
+ * near the top. A focal point set in the editor always wins (except exactly the centre).
+ */
+export const TALL_DEFAULT_FOCAL_Y = 0.1;
+export function objectPosition(m: Pick<MediaRef, 'focal_x' | 'focal_y' | 'width' | 'height'>): string {
+  const fx = Number(m.focal_x ?? 0.5);
+  let fy = Number(m.focal_y ?? 0.5);
+  const tall = !!m.width && !!m.height && m.height > m.width;
+  if (tall && fx === 0.5 && fy === 0.5) fy = TALL_DEFAULT_FOCAL_Y;
+  return `${Math.round(fx * 100)}% ${Math.round(fy * 100)}%`;
+}
+
 export function imageProps(m: MediaRef, lang: Lang, altOverride?: string | null): ImageProps | null {
   const variants = m.variants ?? {};
   const entries = Object.entries(variants)
@@ -24,7 +39,7 @@ export function imageProps(m: MediaRef, lang: Lang, altOverride?: string | null)
     width: m.width ?? undefined,
     height: m.height ?? undefined,
     alt: altOverride?.trim() || (lang === 'fr' ? m.alt_fr || m.alt_ar : m.alt_ar || m.alt_fr) || '',
-    objectPosition: `${Math.round(Number(m.focal_x ?? 0.5) * 100)}% ${Math.round(Number(m.focal_y ?? 0.5) * 100)}%`,
+    objectPosition: objectPosition(m),
   };
 }
 

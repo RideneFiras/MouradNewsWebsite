@@ -153,6 +153,7 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 ## Tall cover images (2026-10-02)
 
 - On the **article page**, a cover taller than it is wide (posters, flyers: common for cultural news) is shown whole, centred, capped at 85 % of the screen height, instead of the 3:2 crop from docs/02. Cropping a poster to 3:2 cut its title and dates. Wide photos keep the 3:2 crop. Homepage and list units keep 3:2 (consistent front page); the focal point (click the cover in the editor) chooses the visible part. `Img` `ratio="auto"` = never cropped.
+- **Tall pictures crop from near the top by default** (`objectPosition` in `src/lib/public/media.ts`): with the default centre focal point, the homepage's 3:2 crop cut the player's head and the poster's title and president (Firas, 2026-10-02). When the focal point is still the 0.5/0.5 default and the picture is taller than wide, the crop starts at 10 % from the top. A focal point set in the editor is kept, except exactly the centre, which can't be told apart from "never set".
 
 ## Short share links (2026-10-02)
 
