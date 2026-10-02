@@ -161,6 +161,8 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 
 - **Share row moved below the body** (before the tags), departing from docs/02 §article ("meta row → share row → cover"). Firas: a reader who got a shared link took the dek for the whole post, because the share buttons right under it, followed by a tall poster cover, looked like the end of the article. The top now goes kicker → H1 → dek → meta → cover → body; sharing after reading is also the natural moment.
 
+- **Summary (dek) in the headline face, tall covers after the first paragraph** (Firas, 2026-10-02). Set in the body font at almost body size, the dek read as the article itself; it now uses Markazi 500 in `--ink-2`, so it belongs to the headline block. A tall cover (height > width) capped at 85 % of the screen pushed the text below the fold on phones, so it is placed after the first paragraph (`coverAfterFirst` in `buildBody`); wide covers stay above the text (they leave the first lines visible). Departs from docs/02's "cover → body" order for tall covers only.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:

@@ -154,10 +154,13 @@
     font-size: clamp(22px, 0.5vw + 20px, 26px);
     line-height: 1.2;
   }
+  /* Headline face, not the body face: set in the body font the dek read as the article
+     itself (DECISIONS.md, 2026-10-02). */
   .dek {
-    font-family: var(--font-body);
-    font-size: clamp(18px, 0.4vw + 16.5px, 21px);
-    line-height: 1.65;
+    font-family: var(--font-headline);
+    font-weight: 500;
+    font-size: clamp(20px, 0.6vw + 18px, 24px);
+    line-height: 1.5;
     color: var(--ink-2);
   }
   .excerpt {

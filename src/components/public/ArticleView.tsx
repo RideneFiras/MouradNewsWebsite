@@ -24,11 +24,15 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
   const url = `${siteUrl()}${articleShortHref(a)}`;
   const names = bylineNames(a);
   const adsAllowed = a.allow_ads && !a.is_sponsored && !preview;
+  // A tall cover (poster, portrait) fills a phone screen: placed above the text, readers had
+  // to scroll past it to find the article. It goes after the first paragraph instead.
+  const tallCover = !!(a.cover?.width && a.cover.height && a.cover.height > a.cover.width);
   const chunks = buildBody(a.body_html, {
     location: a.location,
     ads: adsAllowed,
     afterParagraphs: settings.in_article_ads.after_paragraphs ?? [3, 8],
     minParagraphs: settings.in_article_ads.min_paragraphs ?? 5,
+    coverAfterFirst: tallCover,
   });
   const m = a.cover;
   const caption = m ? a.cover_caption || (lang === 'fr' ? m.caption_fr || m.caption_ar : m.caption_ar || m.caption_fr) : null;
@@ -36,6 +40,18 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
   const correction = lang === 'fr' ? a.correction_note_fr || a.correction_note_ar : a.correction_note_ar || a.correction_note_fr;
   const primary = a.authors[0];
   const sectionName = (lang === 'fr' ? a.category_name_fr : null) || a.category_name_ar;
+
+  const cover = m && (
+    <figure className={tallCover ? '' : 'mt-6'}>
+      {/* Tall images (posters, flyers) are shown whole: cropping them to 3:2 cuts their text. */}
+      {m.height && m.width && m.height > m.width ? (
+        <Img media={m} lang={lang} alt={a.cover_alt} priority ratio="auto" className="max-h-[85svh] w-auto" sizes="(min-width: 1024px) 600px, 100vw" />
+      ) : (
+        <Img media={m} lang={lang} alt={a.cover_alt} priority sizes="(min-width: 1024px) 800px, 100vw" />
+      )}
+      {(caption || credit) && <figcaption className="caption mx-auto mt-2 max-w-[var(--measure)]">{caption && <bdi>{caption}</bdi>}{caption && credit && ' · '}{credit && <bdi>{credit}</bdi>}</figcaption>}
+    </figure>
+  );
 
   return (
     <div className="container-page mt-8" lang={lang !== locale ? lang : undefined}>
@@ -79,22 +95,13 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
             </div>
           </div>
 
-          {m && (
-            <figure className="mt-6">
-              {/* Tall images (posters, flyers) are shown whole: cropping them to 3:2 cuts their text. */}
-              {m.height && m.width && m.height > m.width ? (
-                <Img media={m} lang={lang} alt={a.cover_alt} priority ratio="auto" className="max-h-[85svh] w-auto" sizes="(min-width: 1024px) 600px, 100vw" />
-              ) : (
-                <Img media={m} lang={lang} alt={a.cover_alt} priority sizes="(min-width: 1024px) 800px, 100vw" />
-              )}
-              {(caption || credit) && <figcaption className="caption mx-auto mt-2 max-w-[var(--measure)]">{caption && <bdi>{caption}</bdi>}{caption && credit && ' · '}{credit && <bdi>{credit}</bdi>}</figcaption>}
-            </figure>
-          )}
+          {!chunks.some((c) => c.coverAfter) && cover}
 
           <div className="mx-auto mt-8 max-w-[var(--measure)]" data-article-body>
             {chunks.map((c, i) => (
               <div key={i}>
                 <div className="prose-article" dangerouslySetInnerHTML={{ __html: c.html }} />
+                {c.coverAfter && <div className="my-8">{cover}</div>}
                 {c.adAfter && <AdSlot slotKey={c.adAfter} locale={lang} categoryId={a.category_id} className="my-8" />}
               </div>
             ))}

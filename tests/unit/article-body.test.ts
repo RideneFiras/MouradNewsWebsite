@@ -11,6 +11,16 @@ const doc = (n: number) => ({
 });
 
 describe('buildBody', () => {
+  it('cuts after the first paragraph for a tall cover, even in a one-paragraph article', () => {
+    const three = buildBody(renderDoc(doc(3)), { ads: false, afterParagraphs: [], minParagraphs: 5, coverAfterFirst: true });
+    expect(three.map((c) => !!c.coverAfter)).toEqual([true, false]);
+    expect(three[0]!.html).toBe('<p>فقرة 1</p>');
+    const one = buildBody(renderDoc(doc(1)), { ads: false, afterParagraphs: [], minParagraphs: 5, coverAfterFirst: true });
+    expect(one).toHaveLength(1);
+    expect(one[0]!.coverAfter).toBe(true);
+    const wide = buildBody(renderDoc(doc(3)), { ads: false, afterParagraphs: [], minParagraphs: 5 });
+    expect(wide.some((c) => c.coverAfter)).toBe(false);
+  });
   it('prints the dateline in the first paragraph', () => {
     const chunks = buildBody(renderDoc(doc(2)), { location: 'قليبية', ads: false, afterParagraphs: [], minParagraphs: 5 });
     expect(chunks[0]!.html).toContain('<p><span class="dateline">قليبية — </span>فقرة 1</p>');
