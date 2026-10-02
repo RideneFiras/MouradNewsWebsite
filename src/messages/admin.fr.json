@@ -154,7 +154,7 @@
     "kickerHelp": "Laissez vide pour afficher automatiquement le format ou la rubrique.",
     "title": "Titre",
     "titlePlaceholder": "Écrivez le titre ici",
-    "subtitle": "Chapeau affiché sous le titre",
+    "subtitle": "Chapeau : affiché avec le lien partagé (WhatsApp, Facebook) et sur la une",
     "body": "Texte de l’article",
     "bodyPlaceholder": "Commencez à écrire…",
     "location": "Lieu de rédaction",

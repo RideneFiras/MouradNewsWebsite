@@ -22,6 +22,7 @@
     "bundle:size": "tsx scripts/bundle-size.ts",
     "db:demo": "tsx scripts/generate-demo-seed.ts",
     "publish:article": "tsx scripts/publish-article.ts",
+    "backfill:share": "tsx scripts/backfill-share-images.ts",
     "dev:users": "tsx scripts/dev-users.ts",
     "db:local-reset": "bash scripts/local-reset.sh",
     "dev:traffic": "bash scripts/simulate-traffic.sh"

@@ -269,6 +269,16 @@
     color: var(--ink-3);
     letter-spacing: 0.5em;
   }
+  /* Read aloud (ListenButton): sentence then word, as a marker would. */
+  ::highlight(listen-sentence) {
+    background-color: var(--highlight);
+  }
+  ::highlight(listen-word) {
+    background-color: var(--highlight-word);
+  }
+  .prose-article .is-reading {
+    background-color: var(--highlight);
+  }
   .prose-article figure img {
     width: 100%;
   }

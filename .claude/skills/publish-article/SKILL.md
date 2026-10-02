@@ -70,7 +70,7 @@ If there is no title, ask for one. Don't invent it.
    - `language`: `ar` or `fr`, by the language of most of the text.
    - `cover`: the most representative picture (main event poster, main photo). Other pictures go
      in the body next to the passage they illustrate (`image`), or together as a `gallery`.
-   - `subtitle` (dek, shown under the title): if the source has none, write one short factual
+   - `subtitle` (the summary sent with a shared link and shown on the homepage lead; not printed on the article page): if the source has none, write one short factual
      line using only facts from the text, list `"subtitle"` in `generated`, and get approval.
      Firas can also say "no subtitle".
    - `excerpt`, SEO description, slug, reading time: leave empty, the database derives them

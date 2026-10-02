@@ -10,6 +10,7 @@ import { bylineNames, kickerOf, tagName } from '@/lib/public/labels';
 import { siteUrl } from '@/lib/env';
 import { AdSlot } from './AdSlot';
 import { Img } from './Img';
+import { ListenButton } from './ListenButton';
 import { ShareRow } from './ShareRow';
 import { HeadlineItem, ListItem, SectionHeader } from './story';
 import { SideColumn } from './SideColumn';
@@ -69,8 +70,13 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
               <Link prefetch={false} href={sectionHref(lang, a.category_slug)}><bdi>{kickerOf(a)}</bdi></Link>
             </p>
             <h1 id="article-title" className="headline-1">{a.title}</h1>
-            {a.subtitle && <p className="dek mt-4">{a.subtitle}</p>}
+          </div>
 
+          {/* Title, then the picture, then the text (Firas, after Erem News): the summary is
+              not repeated on the page, it goes with the link when shared (og:description). */}
+          {!chunks.some((c) => c.coverAfter) && cover}
+
+          <div className="mx-auto max-w-[var(--measure)]">
             <div className="mt-5 border-y border-rule py-3">
               <p className="meta">
                 {!a.is_sponsored && names.length > 0 && (
@@ -93,9 +99,12 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                 {' · '}{tt('readingTime', { count: a.reading_minutes })}
               </p>
             </div>
+            {!preview && (
+              <div className="mt-4">
+                <ListenButton lang={lang} labels={{ listen: t('listen'), pause: t('pause'), resume: t('resume'), stop: t('stop') }} />
+              </div>
+            )}
           </div>
-
-          {!chunks.some((c) => c.coverAfter) && cover}
 
           <div className="mx-auto mt-8 max-w-[var(--measure)]" data-article-body>
             {chunks.map((c, i) => (

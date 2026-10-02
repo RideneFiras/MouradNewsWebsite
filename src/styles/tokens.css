@@ -17,6 +17,9 @@
   --warn: #9a6b00;
   --danger: #a3161c;
   --white: #ffffff;
+  /* Read-aloud highlight only (ListenButton): a transparent marker yellow. */
+  --highlight: rgb(255 196 0 / 0.26);
+  --highlight-word: rgb(255 196 0 / 0.55);
 
   --container: 1240px;
   --gutter: 16px;

@@ -3,7 +3,7 @@ import { siteUrl } from '@/lib/env';
 import type { SiteSettings } from '@/lib/data/settings';
 import { pick } from '@/lib/data/settings';
 import type { ArticleFull, Lang } from '@/lib/data/types';
-import { largestUrl } from '@/lib/public/media';
+import { largestUrl, shareImage } from '@/lib/public/media';
 import { mediaUrl } from '@/lib/env';
 import { articleHref } from '@/lib/public/links';
 
@@ -69,8 +69,12 @@ export function homeMetadata(locale: Lang, settings: S): Metadata {
 export function articleMetadata(a: ArticleFull, settings: S, translations: { language: Lang; url: string }[]): Metadata {
   const url = `${siteUrl()}${articleHref(a)}`;
   const title = a.seo_title || a.title;
-  const description = a.seo_description || a.excerpt || a.subtitle || pick(settings.tagline, a.language);
-  const og = largestUrl(a.og_media ?? a.cover) ?? defaultOgImage(settings);
+  // The summary (subtitle) is no longer printed on the article page: it is what goes with the link.
+  const description = a.seo_description || a.subtitle || a.excerpt || pick(settings.tagline, a.language);
+  const media = a.og_media ?? a.cover;
+  const share = shareImage(media);
+  const og = share?.url ?? largestUrl(media) ?? defaultOgImage(settings);
+  const ogImage = og ? { url: og, ...(share ? { width: share.width, height: share.height, type: share.type } : {}), alt: a.cover_alt || a.title } : null;
   const languages: Record<string, string> = {};
   for (const t of translations) languages[t.language] = t.url;
   if (Object.keys(languages).length > 1) languages['x-default'] = languages.ar ?? url;
@@ -92,7 +96,7 @@ export function articleMetadata(a: ArticleFull, settings: S, translations: { lan
       modifiedTime: a.content_updated_at ?? a.updated_at,
       section,
       tags: a.tags.map((t) => (a.language === 'fr' ? t.name_fr : null) || t.name_ar),
-      images: og ? [{ url: og }] : undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
     twitter: { card: og ? 'summary_large_image' : 'summary', title, description, images: og ? [og] : undefined },
   };

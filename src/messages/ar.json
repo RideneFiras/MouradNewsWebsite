@@ -50,7 +50,11 @@
     "aboutAuthor": "عن الكاتب",
     "allArticlesBy": "كل مقالات {name}",
     "photo": "صورة",
-    "readAlso": "اقرأ أيضا"
+    "readAlso": "اقرأ أيضا",
+    "listen": "استمع إلى المقال",
+    "pause": "إيقاف مؤقت",
+    "resume": "متابعة الاستماع",
+    "stop": "إيقاف"
   },
   "section": {
     "subsections": "الأقسام الفرعية",

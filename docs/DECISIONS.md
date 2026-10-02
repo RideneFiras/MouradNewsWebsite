@@ -163,6 +163,12 @@ needed a free-tier alternative. Newest sections are appended at the end of each 
 
 - **Summary (dek) in the headline face, tall covers after the first paragraph** (Firas, 2026-10-02). Set in the body font at almost body size, the dek read as the article itself; it now uses Markazi 500 in `--ink-2`, so it belongs to the headline block. A tall cover (height > width) capped at 85 % of the screen pushed the text below the fold on phones, so it is placed after the first paragraph (`coverAfterFirst` in `buildBody`); wide covers stay above the text (they leave the first lines visible). Departs from docs/02's "cover → body" order for tall covers only.
 
+## Article page after Erem News (Firas, 2026-10-02)
+
+- **No summary on the article page.** Title → picture (wide covers) → date → «استمع إلى المقال» → text. The subtitle is still written and is now what goes with a shared link (`og:description`, order: SEO description, subtitle, excerpt) and the homepage lead. Admin label says so. Supersedes the "dek in the headline face" entry above for the article page (the homepage lead keeps its dek).
+- **Link preview picture `share.jpg`** (1200×630 JPEG, `variants.share`): WhatsApp showed our WebP / tall originals as a small square thumbnail. Made at upload (admin canvas and publish script with sharp, same geometry `src/lib/public/share-image.ts`): wide pictures cropped around the focal point, square/tall ones shown whole on the paper colour (posters keep their title and dates). `og:image` carries width/height/type. Older media: `pnpm -s backfill:share --apply`. No image service and nothing on the Worker (Workers Free has 10 ms CPU, no sharp).
+- **Read aloud without an AI service**: the browser's own speech engine (Web Speech API, `ListenButton.tsx`), free; the voice is the reader's device voice (Arabic exists on Android, iPhone, Windows, macOS; often none on Linux, where the button hides). One utterance per sentence (Chrome cuts long utterances; Android ignores pause, so pause = cancel and resume from the current sentence). Highlight with the CSS Custom Highlight API (no DOM changes): current sentence in transparent yellow, current word stronger where the engine reports word boundaries. The yellow (`--highlight`) is a second colour on the public site, accepted by Firas for this feature only. Pre-generated audio (what Erem does) would need a paid TTS service.
+
 ## Owner to verify (not decided by the software)
 
 These are legal questions; the site provides the fields and pages, the answers must come from a professional:

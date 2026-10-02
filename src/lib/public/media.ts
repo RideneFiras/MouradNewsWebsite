@@ -1,5 +1,6 @@
 import { mediaUrl } from '@/lib/env';
 import type { MediaRef, Lang } from '@/lib/data/types';
+import { SHARE_H, SHARE_W } from './share-image';
 
 export interface ImageProps {
   src: string;
@@ -47,4 +48,11 @@ export function largestUrl(m: MediaRef | null | undefined): string | null {
   if (!m) return null;
   const widths = Object.keys(m.variants ?? {}).filter((w) => /^\d+$/.test(w)).sort((a, b) => Number(b) - Number(a));
   return mediaUrl(widths[0] ? m.variants[widths[0]] : m.path);
+}
+
+/** The 1200×630 JPEG link-preview picture, when the upload made one (share-image.ts). */
+export function shareImage(m: MediaRef | null | undefined): { url: string; width: number; height: number; type: string } | null {
+  const path = m?.variants?.share;
+  const url = path ? mediaUrl(path) : null;
+  return url ? { url, width: SHARE_W, height: SHARE_H, type: 'image/jpeg' } : null;
 }

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { processImage } from '@/lib/admin/image-process';
+import { SHARE_NAME } from '@/lib/public/share-image';
 import { createMedia, createUploadTargets, type AdminMedia } from '@/lib/admin/media';
 import { SUPABASE_ANON_KEY } from '@/lib/env';
 
@@ -31,13 +32,14 @@ export function useUpload() {
           const target = targets.data!.find((x) => x.name === f.name)!;
           const body = new FormData();
           body.append('cacheControl', '31536000');
-          body.append('', new File([f.blob], f.name, { type: p.mime }));
+          body.append('', new File([f.blob], f.name, { type: f.type }));
           const res = await fetch(target.url, { method: 'PUT', headers: { apikey: SUPABASE_ANON_KEY, 'x-upsert': 'false' }, body });
           if (!res.ok) throw new Error(`upload ${res.status}`);
           if (f.name.startsWith('original')) {
             original = target.path;
             size = f.blob.size;
-          } else variants[String(f.width)] = target.path;
+          } else if (f.name === SHARE_NAME) variants.share = target.path;
+          else variants[String(f.width)] = target.path;
         }
         if (p.mime === 'image/webp' && !variants[String(p.width)] && p.width < 1600) variants[String(p.width)] = original;
         const res = await createMedia({ storage_path: original, variants, width: p.width, height: p.height, size_bytes: size, mime_type: p.mime as 'image/webp' });

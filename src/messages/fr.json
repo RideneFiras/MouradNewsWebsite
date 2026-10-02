@@ -50,7 +50,11 @@
     "aboutAuthor": "L’auteur",
     "allArticlesBy": "Tous les articles de {name}",
     "photo": "Photo",
-    "readAlso": "À lire aussi"
+    "readAlso": "À lire aussi",
+    "listen": "Écouter l’article",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "stop": "Arrêter"
   },
   "section": {
     "subsections": "Sous-rubriques",

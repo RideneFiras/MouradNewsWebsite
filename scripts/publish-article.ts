@@ -20,6 +20,8 @@ import { z } from 'zod';
 import { renderDoc, docToText, type PMNode } from '../src/lib/content/render';
 import { sanitizeArticleHtml } from '../src/lib/content/sanitize';
 import { slugify } from '../src/lib/slug';
+import { SHARE_NAME, SHARE_W } from '../src/lib/public/share-image';
+import { shareJpeg } from './lib/share-image';
 
 // ------------------------------------------------------------------ env
 
@@ -144,11 +146,12 @@ async function prepareImage(file: string) {
   const w0 = meta.autoOrient?.width ?? meta.width ?? 0;
   if (!w0) fail(`not an image: ${file}`);
   const originalWidth = Math.min(w0, 2400);
-  const files: { name: string; width: number; buf: Buffer }[] = [];
+  const files: { name: string; width: number; buf: Buffer; type: string }[] = [];
   const encode = (w: number) => sharp(path, { failOn: 'none' }).rotate().resize({ width: w }).webp({ quality: 82 }).toBuffer({ resolveWithObject: true });
   const orig = await encode(originalWidth);
-  files.push({ name: 'original.webp', width: originalWidth, buf: orig.data });
-  for (const w of [480, 960, 1600]) if (w < w0) files.push({ name: `w${w}.webp`, width: w, buf: (await encode(w)).data });
+  files.push({ name: 'original.webp', width: originalWidth, buf: orig.data, type: 'image/webp' });
+  for (const w of [480, 960, 1600]) if (w < w0) files.push({ name: `w${w}.webp`, width: w, buf: (await encode(w)).data, type: 'image/webp' });
+  files.push({ name: SHARE_NAME, width: SHARE_W, buf: await shareJpeg(path), type: 'image/jpeg' });
   return { files, width: orig.info.width, height: orig.info.height };
 }
 
@@ -161,12 +164,13 @@ async function uploadImage(client: SupabaseClient, img: z.infer<typeof Image>, l
   let size = 0;
   for (const f of p.files) {
     const path = `${dir}/${f.name}`;
-    const { error } = await client.storage.from('media').upload(path, f.buf, { contentType: 'image/webp', cacheControl: '31536000', upsert: false });
+    const { error } = await client.storage.from('media').upload(path, f.buf, { contentType: f.type, cacheControl: '31536000', upsert: false });
     if (error) fail(`upload failed (${img.file}): ${error.message}`);
     if (f.name === 'original.webp') {
       original = path;
       size = f.buf.length;
-    } else variants[String(f.width)] = path;
+    } else if (f.name === SHARE_NAME) variants.share = path;
+    else variants[String(f.width)] = path;
   }
   // Same rule as the admin uploader: a small original doubles as its own width variant.
   if (!variants[String(p.width)] && p.width < 1600) variants[String(p.width)] = original;
