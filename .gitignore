@@ -16,3 +16,5 @@ test-results/
 # Playwright MCP screenshots and logs
 .playwright-mcp/
 posts/
+# Local content backups (pnpm backup)
+backups/

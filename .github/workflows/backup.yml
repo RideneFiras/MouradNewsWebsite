@@ -1,0 +1,53 @@
+# Weekly copy of the whole site (database tables + pictures), encrypted, kept 90 days.
+# The Supabase free plan has no backups of its own. The repository is public, so the copy is
+# encrypted (AES-256, gpg) before it is stored as a workflow artifact; only someone with the
+# BACKUP_PASSPHRASE can open it. Restoring: docs/BACKUP.md.
+#
+# Needs two repository secrets (Settings → Secrets and variables → Actions):
+#   SUPABASE_SERVICE_ROLE_KEY   the live project's service_role/secret key (read access is all it uses)
+#   BACKUP_PASSPHRASE           a long random passphrase; keep a copy outside GitHub
+name: Backup
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Sundays 03:00 UTC (04:00 in Tunis)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://knxuskjqpsimptwxqfju.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Secrets are set
+        run: |
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || { echo "Missing secret SUPABASE_SERVICE_ROLE_KEY"; exit 1; }
+          test -n "$BACKUP_PASSPHRASE" || { echo "Missing secret BACKUP_PASSPHRASE"; exit 1; }
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Copy tables and pictures
+        run: pnpm backup out
+      - name: Encrypt
+        run: |
+          name="elborj-backup-$(date -u +%Y-%m-%d)"
+          tar czf backup.tgz -C out .
+          gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 --symmetric --cipher-algo AES256 \
+            -o "$name.tgz.gpg" backup.tgz <<< "$BACKUP_PASSPHRASE"
+          rm -rf out backup.tgz
+          echo "NAME=$name" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ env.NAME }}.tgz.gpg
+          retention-days: 90
+          if-no-files-found: error
