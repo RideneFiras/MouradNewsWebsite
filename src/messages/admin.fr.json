@@ -436,6 +436,7 @@
     "hijri": "Afficher la date hégirienne",
     "hijriOffset": "Correction de la date hégirienne (jours)",
     "content": "Contenu",
+    "frPublic": "Montrer l’interface française aux lecteurs (bouton FR)",
     "mixFr": "Afficher les articles arabes dans l’interface française",
     "mixAr": "Afficher les articles français dans l’interface arabe",
     "breakingEnabled": "Activer le bandeau urgent",

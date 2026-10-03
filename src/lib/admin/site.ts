@@ -108,6 +108,7 @@ const SETTINGS: Record<string, z.ZodType> = {
   show_hijri_date: z.object({ enabled: z.boolean(), offset_days: z.coerce.number().int().min(-2).max(2) }),
   breaking: z.object({ enabled: z.boolean(), default_hours: z.coerce.number().int().min(1).max(72) }),
   content_mixing: z.object({ fr_include_arabic_content: z.boolean(), ar_include_french_content: z.boolean() }),
+  public_languages: z.object({ fr: z.boolean() }),
   ga4: z.object({ measurement_id: z.string().trim().regex(/^(G-[A-Z0-9]{4,15})?$/) }),
   adsense: z.object({ client_id: z.string().trim().regex(/^(ca-pub-\d{10,20})?$/), enabled: z.boolean() }),
   ads_txt: z.object({ content: z.string().max(5000) }),

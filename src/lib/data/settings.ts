@@ -40,6 +40,8 @@ export interface SiteSettings {
   show_hijri_date: { enabled: boolean; offset_days: number };
   breaking: { enabled: boolean; default_hours: number };
   content_mixing: { fr_include_arabic_content: boolean; ar_include_french_content: boolean };
+  /** Languages readers can switch to. French off = no FR switch and no hreflang to /fr. */
+  public_languages: { fr: boolean };
   ga4: { measurement_id: string };
   adsense: { client_id: string; enabled: boolean };
   ads_txt: { content: string };
@@ -61,6 +63,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   show_hijri_date: { enabled: true, offset_days: 0 },
   breaking: { enabled: true, default_hours: 6 },
   content_mixing: { fr_include_arabic_content: true, ar_include_french_content: true },
+  public_languages: { fr: false },
   ga4: { measurement_id: '' },
   adsense: { client_id: '', enabled: false },
   ads_txt: { content: '' },

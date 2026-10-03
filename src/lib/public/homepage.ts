@@ -21,6 +21,9 @@ const num = (v: unknown, d: number, max = 20) => {
   return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), max) : d;
 };
 const str = (v: unknown) => (typeof v === 'string' ? v : null);
+/** A section/genre/topic block with fewer articles than this is left out: one story next to a
+ *  big empty space looks unfinished. Its articles still appear in the lead and latest list. */
+const minItems = (c: Record<string, unknown>) => num(c.min_items, 3, 10);
 
 /**
  * Builds the homepage from homepage_sections. One pooled query of recent articles feeds
@@ -42,6 +45,13 @@ export async function resolveHomepage(sections: HomepageSection[], locale: Lang,
     const extra = await more();
     const seen = new Set(fromPool.map((a) => a.id));
     return take([...fromPool, ...extra.filter((a) => !seen.has(a.id))], n);
+  };
+
+  // A block left out gives its articles back, so a later block can still show them.
+  const keep = (items: ArticleCard[], c: Record<string, unknown>) => {
+    if (items.length >= minItems(c)) return true;
+    items.forEach((a) => shown.delete(a.id));
+    return false;
   };
 
   const out: ResolvedSection[] = [];
@@ -73,7 +83,7 @@ export async function resolveHomepage(sections: HomepageSection[], locale: Lang,
         const inCat = (a: ArticleCard) => ids.includes(a.category_id) || a.extra_category_ids.some((x) => ids.includes(x));
         const items = await fill(pool.filter(inCat), n, async () => (await listCards({ langs, categoryIds: ids, includeExtra: true, limit: n + shown.size })).items);
         const layout = (['one_big_four_list', 'feature_plus_list', 'three_columns', 'list_only'] as const).find((l) => l === c.layout) ?? 'one_big_four_list';
-        if (items.length) out.push({ kind: 'category', id: s.id, title: title(s) || (locale === 'fr' ? cat.name_fr || cat.name_ar : cat.name_ar), category: cat, items, layout });
+        if (keep(items, c)) out.push({ kind: 'category', id: s.id, title: title(s) || (locale === 'fr' ? cat.name_fr || cat.name_ar : cat.name_ar), category: cat, items, layout });
         break;
       }
       case 'editor_picks': {
@@ -98,7 +108,7 @@ export async function resolveHomepage(sections: HomepageSection[], locale: Lang,
         if (!f) break;
         const n = num(c.count, 4, 8);
         const items = await fill(pool.filter((a) => a.format_id === f.id), n, async () => (await listCards({ langs, formatId: f.id, limit: n + shown.size })).items);
-        if (items.length) out.push({ kind: 'format', id: s.id, title: title(s) || (locale === 'fr' ? f.name_fr || f.name_ar : f.name_ar), format: f, items });
+        if (keep(items, c)) out.push({ kind: 'format', id: s.id, title: title(s) || (locale === 'fr' ? f.name_fr || f.name_ar : f.name_ar), format: f, items });
         break;
       }
       case 'tag_block': {
@@ -108,7 +118,7 @@ export async function resolveHomepage(sections: HomepageSection[], locale: Lang,
         if (!tag) break;
         const n = num(c.count, 4, 8);
         const items = await fill(pool.filter((a) => a.tag_ids.includes(tag.id)), n, async () => (await listCards({ langs, tagId: tag.id, limit: n + shown.size })).items);
-        if (items.length) out.push({ kind: 'tag', id: s.id, title: title(s) || (locale === 'fr' ? tag.name_fr || tag.name_ar : tag.name_ar), tag, items });
+        if (keep(items, c)) out.push({ kind: 'tag', id: s.id, title: title(s) || (locale === 'fr' ? tag.name_fr || tag.name_ar : tag.name_ar), tag, items });
         break;
       }
       case 'ad_slot': {

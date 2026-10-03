@@ -11,8 +11,9 @@ export interface MenuSection {
 }
 
 /** Full-height sheet with sections, sub-sections, pages and the language switch (mobile). */
-export function MobileMenu({ locale, sections, pages, labels }: {
+export function MobileMenu({ locale, sections, pages, labels, showLang = true }: {
   locale: 'ar' | 'fr';
+  showLang?: boolean;
   sections: MenuSection[];
   pages: { href: string; label: string }[];
   labels: { menu: string; close: string; sections: string; pages: string };
@@ -44,7 +45,7 @@ export function MobileMenu({ locale, sections, pages, labels }: {
       {open && (
         <div id="mobile-menu" role="dialog" aria-modal="true" aria-label={labels.menu} className="fixed inset-0 z-50 overflow-y-auto bg-paper">
           <div className="flex items-center justify-between border-b border-rule px-4 py-2">
-            <LangSwitch locale={locale} className="meta text-[15px]" />
+            {showLang ? <LangSwitch locale={locale} className="meta text-[15px]" /> : <span />}
             <button ref={closeRef} type="button" onClick={() => setOpen(false)} className="inline-flex h-11 w-11 items-center justify-center" aria-label={labels.close}>
               <CloseIcon />
             </button>

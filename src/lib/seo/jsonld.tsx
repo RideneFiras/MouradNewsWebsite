@@ -9,11 +9,18 @@ export function JsonLd({ data }: { data: object | object[] }) {
   return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, '\\u003c') }} />;
 }
 
-type S = SiteSettings & { default_og_path?: string | null };
+type S = SiteSettings & { default_og_path?: string | null; favicon_path?: string | null };
+
+/** Google only accepts raster publisher logos: an SVG logo falls back to the (PNG) site icon. */
+function rasterLogo(settings: S): string | null {
+  const svg = (p?: string | null) => !!p && /\.svg$/i.test(p);
+  const path = settings.logo.path && !svg(settings.logo.path) ? settings.logo.path : settings.favicon_path && !svg(settings.favicon_path) ? settings.favicon_path : null;
+  return path ? mediaUrl(path) : null;
+}
 
 export function organization(locale: Lang, settings: S, policyPages: StaticPage[] = []) {
   const base = siteUrl();
-  const logo = settings.logo.path ? mediaUrl(settings.logo.path) : null;
+  const logo = rasterLogo(settings);
   const byKind = (k: string) => policyPages.find((p) => p.page_kind === k);
   const charter = byKind('charter');
   const about = byKind('about');

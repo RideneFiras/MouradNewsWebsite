@@ -41,7 +41,7 @@ export function pageMetadata(opts: {
     description,
     alternates: {
       canonical: url,
-      languages: opts.bothLanguages === false ? undefined : bothLocales(opts.path),
+      languages: opts.bothLanguages === false || !settings.public_languages?.fr ? undefined : bothLocales(opts.path),
       types: opts.rss ? { 'application/rss+xml': `${siteUrl()}${opts.rss}` } : undefined,
     },
     robots: opts.noindex ? { index: false, follow: true } : { index: true, follow: true, 'max-image-preview': 'large' },
