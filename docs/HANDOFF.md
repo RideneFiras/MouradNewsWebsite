@@ -54,7 +54,14 @@ session continuing the work._
 - Site icon: `design/icon/icon-480.png` (made by `node design/icon/render.mjs` from `borj-icon.svg`), set as «أيقونة المتصفح». PNG, not SVG, so iOS home screens and Google results use it too.
 - `/publish-article` may now fix sure typos, listed in `spec.corrections` and checked by `fidelity`; it prints the short link `/{lang}/article/{id}`.
 
-## Audit work (2026-10-03, committed, waiting for the Workers Paid upgrade to deploy)
+## Live since 2026-10-03 evening
+
+- **Workers Paid**, migration `events_calendar` applied, content script run, everything below deployed.
+- **Phone UX pass**: compact story rows, no repeated headlines in «آخر الأخبار», section-bar «←» hint, sticky share bar on articles, agenda multi-day strip, desktop agenda + most read side by side, list dates without the year.
+- **Installable app**: own icons in `public/icons`, `public/sw.js` (offline page only), install bar on phones (`InstallBanner.tsx`), `/ar/app` steps (iPhone: Safari only; Facebook's in-app browser can't install).
+- **Admin editor fix**: saving any article with a picture failed ("Cannot access src on the server"): ProseMirror attrs are null-prototype objects, which React turns into temporary references in server actions. The editor now sends plain JSON (`RichText.tsx`, `ArticleEditor.tsx`). Firas confirmed saving works.
+
+## Audit work (2026-10-03, now deployed; see above)
 
 - **Calendar (الأجندة)**: table `events` (migration `20261003100000_events_calendar.sql`, **not applied yet**), public `/ar/agenda` (month grid + day list), homepage block «المواعيد القادمة» (homepage section type `agenda`), a «الموعد» box on articles, `.ics` "add to my calendar" (`/api/events/{id}`), admin screen «الأجندة» (add/edit, "add the public holidays of a year"). Holidays: `src/lib/events/holidays.ts` (civil fixed; Islamic estimated, confirmed by the editor). The publish script adds dates found in the text (`events` in the spec; `events` command for saved articles).
 - **Towns page** `/ar/towns` (place tags), **Add to Home Screen** (manifest, iOS tags, `/ar/app`, `/favicon.ico`), **FR switch hidden** (setting `public_languages.fr`), **tall pictures shown whole**, **homepage blocks under 3 articles left out**, **raster logo** in Google's data.
