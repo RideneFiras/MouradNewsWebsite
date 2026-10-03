@@ -422,7 +422,10 @@ async function publish(file: string) {
 async function refreshSite(tags: string[] = ['articles', 'authors', 'stats', 'events']) {
   const secret = process.env.PROD_REVALIDATE_SECRET;
   if (!secret) return console.log('  (no PROD_REVALIDATE_SECRET: homepage and lists refresh within about 5 minutes)');
-  const res = await fetch(`${SITE_URL}/api/revalidate`, { method: 'POST', headers: { 'x-revalidate-secret': secret, 'content-type': 'application/json' }, body: JSON.stringify({ tags }) }).catch(() => null);
+  const post = (body: object) => fetch(`${SITE_URL}/api/revalidate`, { method: 'POST', headers: { 'x-revalidate-secret': secret, 'content-type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+  let res = await post({ tags });
+  // A site deployed before a tag existed (e.g. 'events') refuses the whole list: retry with the article tags.
+  if (res?.status === 400) res = await post({ tags: tags.filter((t) => t !== 'events') });
   console.log(res?.ok ? '  site refreshed: homepage and lists show it now' : `  (refresh failed${res ? `: HTTP ${res.status}` : ''}; homepage and lists refresh within about 5 minutes)`);
 }
 
