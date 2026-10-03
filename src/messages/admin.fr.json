@@ -417,7 +417,7 @@
     "siteName": "Nom du journal",
     "tagline": "Devise",
     "logo": "Logo (image)",
-    "textNameplate": "Utiliser le nom calligraphié plutôt qu’une image",
+    "textNameplate": "Utiliser le nom calligraphié (avec un logo, il s’affiche comme emblème à côté du nom ; sans cette option, l’image seule)",
     "favicon": "Icône du navigateur",
     "defaultShare": "Image de partage par défaut",
     "masthead": "En-tête et pied de page",
