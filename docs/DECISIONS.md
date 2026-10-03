@@ -199,3 +199,12 @@ These are legal questions; the site provides the fields and pages, the answers m
 ## Workers Paid (2026-10-03)
 
 - Upgraded after repeated error 1102 (page builds cost 70–650 ms CPU; Free allows 10 ms). Applied `docs/WORKERS-PAID.md` changes 1 and 2: data entries back in the regional R2 cache (shared by all locations) and `limits.cpu_ms = 30000`. Refresh stays at 5 min; the queue keeps 30 s timeout and 1 retry.
+
+## Email → article automation (2026-10-03)
+
+- **n8n on an Oracle Always Free server, plus a private "publisher" container** (`n8n/`). n8n does the plumbing (Gmail trigger, approval email, Facebook); the publisher does the editorial work in TypeScript by running `scripts/publish-article.ts` itself (check → fidelity → publish), so the automation stores articles exactly like the skill and the admin. It can't run on the Worker: image processing needs `sharp`.
+- **One set of rules.** The publisher sends `.claude/skills/publish-article/SKILL.md` to Claude at runtime, plus a short addendum for the unattended case (`n8n/publisher/prompts.ts`): questions become `notes` in the approval email, lines that aren't article text are listed in `skip_lines` and shown to Firas.
+- **Draft first, public only on a click.** The approval is n8n's Gmail "send and wait" with a form (Publish + Facebook / site only / keep as draft, Facebook text editable). Matches the rule that nothing goes live without Firas's word.
+- **JSON answer + validation loop instead of structured outputs.** The spec schema (unions, nested blocks) is validated by the existing zod schema in `check`; errors from `check`/`fidelity` go back to Claude (3 attempts).
+- **Sender check:** Gmail sender filter + `allowed_senders` + DKIM/DMARC pass in the headers, so a forged From address can't create drafts.
+- **Gmail trigger, not IMAP**, at Firas's request: needs a Google Cloud OAuth client; the consent screen must be "In production" or the login expires after 7 days.

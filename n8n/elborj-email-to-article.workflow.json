@@ -1,0 +1,708 @@
+{
+  "name": "El Borj: email → draft → approval → site + Facebook",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "CHANGE_ME@gmail.com",
+          "readStatus": "unread"
+        },
+        "options": {
+          "downloadAttachments": true,
+          "dataPropertyAttachmentsPrefixName": "attachment_"
+        }
+      },
+      "id": "c20ab203-b887-4e78-9d8b-b70a5047d263",
+      "name": "New email from the journalist",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ======= SETTINGS: change these once =======\nconst CONFIG = {\n  approver_email: 'firasuv@gmail.com',            // who gets the approval emails (Firas)\n  allowed_senders: ['CHANGE_ME@gmail.com'],       // the journalist's address(es); also set it in the Gmail trigger\n  facebook_page_id: 'CHANGE_ME',                  // the El Borj Facebook Page id\n  graph_version: 'v24.0',                         // Facebook Graph API version\n  require_dmarc: true,                            // refuse emails Gmail could not authenticate (anti-spoofing)\n};\n// ============================================\n\nconst items = $input.all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n  const from = String(j.from?.value?.[0]?.address || '').toLowerCase();\n  const headers = JSON.stringify(j.headers || {});\n  let rejected = '';\n  if (!CONFIG.allowed_senders.map((s) => s.toLowerCase()).includes(from)) rejected = `the sender ${from || '(unknown)'} is not in allowed_senders`;\n  else if (CONFIG.require_dmarc && !/dmarc=pass|dkim=pass/i.test(headers)) rejected = 'the email did not pass Gmail authentication (DKIM/DMARC); it may be forged. Set require_dmarc to false in «Prepare email» if this is wrong.';\n\n  const images = [];\n  for (const [key, bin] of Object.entries(items[i].binary || {})) {\n    if (!String(bin.mimeType || '').startsWith('image/')) continue;\n    const buf = await this.helpers.getBinaryDataBuffer(i, key);\n    images.push({ filename: bin.fileName || key, mime: bin.mimeType, data: buf.toString('base64') });\n  }\n  const text = j.text || String(j.html || '').replace(/<br\\s*\\/?>/gi, '\\n').replace(/<\\/p>/gi, '\\n\\n').replace(/<[^>]+>/g, '');\n  out.push({ json: { config: CONFIG, rejected, from, message_id: j.messageId || j.id, subject: j.subject || '', text, images, image_count: images.length } });\n}\nreturn out;\n"
+      },
+      "id": "57d61e0e-0798-45a5-b1c7-3439fd2b4f8e",
+      "name": "Prepare email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "30c93618-0c24-479a-8daa-b41315ba4804",
+              "leftValue": "={{ $json.rejected }}",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6e9e36d3-12d0-4862-b708-40c9e8fa7ea1",
+      "name": "Sender allowed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://publisher:8787/ingest",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message_id: $json.message_id, subject: $json.subject, text: $json.text, images: $json.images }) }}",
+        "options": {
+          "timeout": 900000,
+          "batching": {
+            "batch": {
+              "batchSize": 1
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "e0443da1-5a7d-4ac3-ae7e-2f971900a8cf",
+      "name": "Make draft (publisher)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "97c03b6f-d413-4ebc-883c-b53cbbf5a613",
+              "leftValue": "={{ $json.ok }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2f02bcd1-90ff-456d-89cf-b79640cdb9f2",
+      "name": "Draft saved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nconst cfg = $('Prepare email').item.json.config;\nconst list = (title, rows) => (rows && rows.length ? `\\n${title}\\n${rows.map((x) => ` - ${x}`).join('\\n')}\\n` : '');\nconst ev = (r.events || []).map((e) => `${e.starts_on}${e.ends_on ? ' → ' + e.ends_on : ''}${e.start_time ? ' ' + e.start_time : ''} «${e.title_ar}»${e.place ? ' · ' + e.place : ''}`);\nconst fixes = (r.corrections || []).map((c) => `«${c.from}» → «${c.to}»${c.why ? ' (' + c.why + ')' : ''}`);\nconst gen = (r.generated || []).includes('subtitle') ? ' (written by Claude)' : '';\nconst message = [\n  `New article from the email «${$('Prepare email').item.json.subject}». It is saved as a DRAFT (not public yet).`,\n  '',\n  `Title: ${r.title}`,\n  `Subtitle${gen}: ${r.subtitle || '(none)'}`,\n  `Section: ${[r.category, ...(r.extra_categories || [])].join(' + ')} · Genre: ${r.format || '-'} · Tags: ${(r.tags || []).join(', ') || '-'}`,\n  r.title_from_subject ? 'The title was taken from the email subject.' : '',\n  list('Pictures:', r.images),\n  list('Added to the calendar (الأجندة):', ev),\n  list('Typo fixes:', fixes),\n  list('Lines left out of the article:', r.skipped_lines),\n  list('Please check:', r.notes),\n  `Word-for-word check: ${r.fidelity}`,\n  '',\n  `Open the draft in the admin: ${r.admin_url}`,\n  '',\n  'Proposed Facebook post (you can edit it in the form):',\n  '-----',\n  r.facebook_post || '(none)',\n  '-----',\n  '',\n  'Press the button, choose what to do and submit.',\n].join('\\n').replace(/\\n{3,}/g, '\\n\\n');\nreturn [{ json: { ...r, approver_email: cfg.approver_email, approval_subject: `البرج: ${r.title}`, approval_message: message } }];\n"
+      },
+      "id": "9bcfb724-9acf-4b48-b176-24fd85ed3321",
+      "name": "Approval text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "={{ $json.approver_email }}",
+        "subject": "={{ $json.approval_subject }}",
+        "message": "={{ $json.approval_message }}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Decision",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Publish + Facebook"
+                  },
+                  {
+                    "option": "Publish on the site only"
+                  },
+                  {
+                    "option": "Keep as draft"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Facebook text",
+              "fieldType": "textarea",
+              "defaultValue": "={{ $json.facebook_post }}"
+            }
+          ]
+        },
+        "options": {
+          "messageButtonLabel": "Review and decide",
+          "responseFormTitle": "El Borj: publish this article?",
+          "responseFormButtonLabel": "Submit",
+          "limitWaitTime": {
+            "values": {
+              "limitType": "afterTimeInterval",
+              "resumeAmount": 7,
+              "resumeUnit": "days"
+            }
+          }
+        }
+      },
+      "id": "80beba97-8442-4dfb-8d65-04b5c13921b1",
+      "name": "Ask Firas",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        100
+      ],
+      "webhookId": "bdf2f491-1264-491c-9f3f-f5c3d34d4935"
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $json.data || {};\nconst pick = (re) => { const k = Object.keys(d).find((k) => re.test(k)); return k ? String(d[k] ?? '') : ''; };\nconst choice = pick(/decision/i);\nconst r = $('Approval text').item.json;\nconst decision = choice.startsWith('Publish + Facebook') ? 'publish_fb' : choice.startsWith('Publish') ? 'publish' : 'draft';\nreturn [{ json: { ...r, decision, facebook_text: pick(/facebook/i).trim() || r.facebook_post } }];\n"
+      },
+      "id": "1f57909a-eaa3-4e31-8e92-efda0d02d8b2",
+      "name": "Read decision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "39d5d7e5-6bd7-404e-80bc-7f2dc348de70",
+              "leftValue": "={{ $json.decision }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              },
+              "rightValue": "draft"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "bd29b316-2113-4717-99fc-e6307a5c2cf2",
+      "name": "Publish?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://publisher:8787/publish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ work_id: $json.work_id }) }}",
+        "options": {
+          "timeout": 120000,
+          "batching": {
+            "batch": {
+              "batchSize": 1
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "2689ef24-917a-44ff-b4bc-eb6e7dccf515",
+      "name": "Publish (publisher)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5701f56e-e2b9-4800-a9cf-a421c74515d2",
+              "leftValue": "={{ $json.ok && $('Read decision').item.json.decision === 'publish_fb' }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ecf33769-1d51-4173-b6b0-ba52fd7fa009",
+      "name": "Facebook too?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/' + $('Prepare email').item.json.config.graph_version + '/' + $('Prepare email').item.json.config.facebook_page_id + '/feed' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $('Read decision').item.json.facebook_text }}"
+            },
+            {
+              "name": "link",
+              "value": "={{ $json.public_url }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "fe1e5269-88b2-4eee-8c84-ba3704d23f7e",
+      "name": "Post on Facebook",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2420,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $('Read decision').item.json;\nconst pub = $('Publish (publisher)').item.json;\nlet fb = 'not posted on Facebook (you chose the site only).';\nif (r.decision === 'publish_fb') {\n  const f = $('Post on Facebook').isExecuted ? $('Post on Facebook').item.json : null;\n  fb = f && f.id ? `posted on Facebook (post id ${f.id}).` : `the Facebook post FAILED: ${JSON.stringify(f?.error || f).slice(0, 800)}. Post it by hand with this text:\\n\\n${r.facebook_text}`;\n}\nconst body = pub.ok\n  ? `Published: ${pub.public_url}\\n\\nFacebook: ${fb}`\n  : `Publishing FAILED: ${pub.error}\\nThe article is still a draft: ${r.admin_url}`;\nreturn [{ json: { to: r.approver_email, subject: `البرج: ${pub.ok ? 'published' : 'publishing failed'}: ${r.title}`, body } }];\n"
+      },
+      "id": "539ca5d3-0a4b-4fb2-a7f6-fbd3236c05c1",
+      "name": "Final report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "35ee19d8-981e-458e-a2cb-981aabf7695f",
+      "name": "Email: result",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2860,
+        0
+      ],
+      "webhookId": "50caa2c7-7741-4bf2-967f-8dc194da19da"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json;\nreturn [{ json: { to: r.approver_email, subject: `البرج: kept as draft: ${r.title}`, body: `The article stays a draft (not public). Edit or publish it in the admin when you want:\\n${r.admin_url}` } }];\n"
+      },
+      "id": "9ccc29b8-3141-4c4b-848a-e79dd5a8c080",
+      "name": "Kept as draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "291e18ca-e045-4004-ae3d-aa5f6d6707e1",
+      "name": "Email: draft kept",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2200,
+        200
+      ],
+      "webhookId": "c404c291-5ee2-479c-8187-fb1a0a524ae7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $('Prepare email').item.json;\nconst r = $json;\nconst subject = r.needs_input ? `البرج: question about «${p.subject}»` : `البرج: the email «${p.subject}» could not be turned into a draft`;\nconst body = r.needs_input\n  ? `Claude did not make a draft from this email and asks:\\n\\n${r.question}\\n\\n${(r.notes || []).map((n) => ' - ' + n).join('\\n')}\\n\\nYou can publish it by hand (/publish-article) or ask the journalist to resend it.`\n  : `The publisher returned an error:\\n\\n${r.error || JSON.stringify(r).slice(0, 2000)}\\n\\nNothing was published. Logs on the server: docker compose -f n8n/docker-compose.yml logs publisher`;\nreturn [{ json: { to: p.config.approver_email, subject, body } }];\n"
+      },
+      "id": "c737ab87-3230-4f09-8d98-f9f8b3519d67",
+      "name": "Explain problem",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "eee5c6ef-e65f-410d-a572-ae602fa57bfc",
+      "name": "Email: problem",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1320,
+        300
+      ],
+      "webhookId": "1a0bd55d-314c-4bdc-9caf-441bcc20865e"
+    },
+    {
+      "parameters": {
+        "jsCode": "const p = $json;\nreturn [{ json: { to: p.config.approver_email, subject: `البرج: ignored an email from ${p.from}`, body: `An email reached the articles inbox but was ignored: ${p.rejected}.\\n\\nSubject: ${p.subject}\\n\\nNothing was saved.` } }];\n"
+      },
+      "id": "aba0424c-ac2d-4045-a429-7a3c39790087",
+      "name": "Explain rejection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "07e93fd6-f3c2-40ce-8364-01daa39c89a3",
+      "name": "Email: ignored",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        450
+      ],
+      "webhookId": "a17b1db0-71b4-46f8-88d9-724532b667eb"
+    }
+  ],
+  "connections": {
+    "New email from the journalist": {
+      "main": [
+        [
+          {
+            "node": "Prepare email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare email": {
+      "main": [
+        [
+          {
+            "node": "Sender allowed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sender allowed?": {
+      "main": [
+        [
+          {
+            "node": "Make draft (publisher)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explain rejection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Make draft (publisher)": {
+      "main": [
+        [
+          {
+            "node": "Draft saved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft saved?": {
+      "main": [
+        [
+          {
+            "node": "Approval text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explain problem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approval text": {
+      "main": [
+        [
+          {
+            "node": "Ask Firas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Firas": {
+      "main": [
+        [
+          {
+            "node": "Read decision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read decision": {
+      "main": [
+        [
+          {
+            "node": "Publish?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish?": {
+      "main": [
+        [
+          {
+            "node": "Publish (publisher)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kept as draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publish (publisher)": {
+      "main": [
+        [
+          {
+            "node": "Facebook too?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook too?": {
+      "main": [
+        [
+          {
+            "node": "Post on Facebook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Final report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post on Facebook": {
+      "main": [
+        [
+          {
+            "node": "Final report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final report": {
+      "main": [
+        [
+          {
+            "node": "Email: result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kept as draft": {
+      "main": [
+        [
+          {
+            "node": "Email: draft kept",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain problem": {
+      "main": [
+        [
+          {
+            "node": "Email: problem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explain rejection": {
+      "main": [
+        [
+          {
+            "node": "Email: ignored",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Tunis",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "pinData": {},
+  "active": false
+}

@@ -62,6 +62,12 @@ session continuing the work._
 - **To go live, in this order:** (1) apply the migration (MCP `apply_migration`, then `get_advisors`); (2) `pnpm run deploy`; (3) `pnpm tsx scripts/content-2026-10-03.ts --apply` (sections تربية/جهات, town tags, calendar backfill, holidays, agenda block, page drafts); (4) screenshot `/ar/agenda` and an article at 390 px.
 - **Pages**: About/Contact/Charter drafts are written by the content script but stay drafts until Firas reads and publishes them; Legal waits for the question of who is named (lawyer).
 
+## Email → article automation (2026-10-03, built, not deployed yet)
+
+- `n8n/`: workflow to import in n8n, the private publisher service, Docker compose for the Oracle server. Setup: `n8n/README.md`. Why: DECISIONS.md → Email → article automation.
+- Flow: email from the journalist → draft on the site → approval email to Firas → publish + Facebook post.
+- Next: Firas creates the Oracle server, then follow `n8n/README.md` (credentials: Gmail OAuth, publisher token, Facebook Page token; then a test email).
+
 ## Next 5 concrete steps (for whoever continues)
 
 1. Firas: Supabase Auth URLs for the live address (above), then log in on https://www.elborj.workers.dev/ar/admin/login.

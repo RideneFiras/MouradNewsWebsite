@@ -1,0 +1,50 @@
+# n8n + HTTPS (Caddy) + the private publisher, on the Oracle server.
+# Run from the repository root on the server:  docker compose -f n8n/docker-compose.yml up -d --build
+# Secrets live in n8n/.env (never committed): see n8n/README.md.
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=${DOMAIN}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${DOMAIN}/
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=Africa/Tunis
+      - TZ=Africa/Tunis
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=336
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  publisher:
+    build:
+      context: ..
+      dockerfile: n8n/publisher/Dockerfile
+    restart: unless-stopped
+    # No "ports": only n8n can reach it, at http://publisher:8787
+    environment:
+      - PUBLISHER_TOKEN=${PUBLISHER_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - PROD_REVALIDATE_SECRET=${PROD_REVALIDATE_SECRET}
+      - CLAUDE_MODEL=${CLAUDE_MODEL:-claude-opus-5-5}
+    volumes:
+      - publisher_data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [n8n]
+
+volumes:
+  n8n_data:
+  publisher_data:
+  caddy_data:
