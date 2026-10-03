@@ -377,7 +377,8 @@ async function publish(file: string) {
   ]);
   for (const j of joins) if (j?.error) fail(`article saved (id ${art.id}) but a link table failed: ${j.error.message}. Fix it in the admin.`);
 
-  const path = `/${art.language}/article/${art.public_id}${art.slug ? `/${encodeURIComponent(art.slug)}` : ''}`;
+  // Short link (no slug): an Arabic slug percent-encodes into ~250 characters. Same page, see DECISIONS.md.
+  const path = `/${art.language}/article/${art.public_id}`;
   console.log(`\n✓ saved as ${art.status}`);
   console.log(`  admin:  ${SITE_URL}/${art.language}/admin/articles/${art.id}`);
   if (art.status === 'published') console.log(`  public: ${SITE_URL}${path}  (homepage and lists refresh within about a minute)`);
