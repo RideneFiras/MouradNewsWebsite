@@ -472,8 +472,9 @@ function specWords(spec: SpecT): string[] {
   // The site prints the dateline as «location — » at the start of the first paragraph.
   const gen = new Set(spec.generated);
   const parts: string[] = [
-    spec.title,
+    // Reading order on the page: kicker above the headline.
     gen.has('kicker_override') ? '' : spec.kicker_override ?? '',
+    spec.title,
     gen.has('subtitle') ? '' : spec.subtitle ?? '',
     !gen.has('location') && spec.location ? `${spec.location} —` : '',
     gen.has('captions') ? '' : spec.cover?.caption ?? '', spec.cover?.credit ?? '',
