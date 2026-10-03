@@ -16,7 +16,7 @@ import { Pagination } from '@/components/public/Pagination';
 import { SideColumn } from '@/components/public/SideColumn';
 import { AdSlot } from '@/components/public/AdSlot';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

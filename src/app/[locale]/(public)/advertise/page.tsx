@@ -9,7 +9,7 @@ import { StaticPageView } from '@/components/public/StaticPageView';
 import { MediaKit } from '@/components/public/MediaKit';
 
 // Numbers are cached for one hour (docs/07); the page itself refreshes every minute.
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

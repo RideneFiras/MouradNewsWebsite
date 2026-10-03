@@ -10,7 +10,7 @@ import { daysAgoIso } from '@/lib/format/date';
 import { articleMetadata } from '@/lib/seo/metadata';
 import { articleJsonLd, JsonLd } from '@/lib/seo/jsonld';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

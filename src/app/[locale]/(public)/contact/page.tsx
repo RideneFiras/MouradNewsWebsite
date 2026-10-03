@@ -8,7 +8,7 @@ import { pageMetadata } from '@/lib/seo/metadata';
 import { StaticPageView } from '@/components/public/StaticPageView';
 import { ContactForm } from '@/components/public/ContactForm';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

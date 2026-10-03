@@ -13,7 +13,7 @@ import { Img } from '@/components/public/Img';
 import { Kicker } from '@/components/public/story';
 import { Pagination } from '@/components/public/Pagination';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

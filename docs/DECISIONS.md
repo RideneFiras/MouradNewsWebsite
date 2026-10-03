@@ -178,3 +178,9 @@ These are legal questions; the site provides the fields and pages, the answers m
 3. **Personal data**: obligations under **Loi organique n° 2004-63** and whether a declaration to the **INPDP** is needed for the contact form and staff accounts; final wording of the privacy policy (the seeded AR/FR texts are factual drafts, marked as drafts).
 4. **Sponsored content and advertising** rules (labelling «محتوى برعاية» is built in; check any additional requirement).
 5. **Image rights**: demo photos are Wikimedia Commons (credited) and are removed with `demo-clear.sql`; real photos need their own rights.
+
+## Error 1102 on Workers Free (2026-10-03)
+
+- Visitors got **error 1102** (CPU limit). Building a page costs 50–90 ms CPU (cached hits 5–20 ms) against the Free plan's 10 ms; Cloudflare usually tolerates it, not always. Worse, the background refresh (Durable Object queue) timed out after its default 10 s on the homepage and **retried 6 times, each a full re-render**.
+- Fix on Free: `NEXT_CACHE_DO_QUEUE_REVALIDATION_TIMEOUT_MS=30000`, `NEXT_CACHE_DO_QUEUE_MAX_RETRIES=1` (wrangler vars), and time-based refresh **60 s → 300 s** (pages and data). Publishing still refreshes at once: the admin expires tags, and `scripts/publish-article.ts` now calls `/api/revalidate` (`PROD_REVALIDATE_SECRET` in `.env.local`).
+- Real fix: **Workers Paid** ($5/month, 30 s CPU). See `docs/WORKERS-PAID.md`.

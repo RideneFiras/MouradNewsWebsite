@@ -10,7 +10,7 @@ import { pageMetadata } from '@/lib/seo/metadata';
 import { Img } from '@/components/public/Img';
 import { Listing } from '@/components/public/Listing';
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 // Rendered on first request, then cached (ISR) — nothing is prerendered at build time,
 // so building doesn't need database access.

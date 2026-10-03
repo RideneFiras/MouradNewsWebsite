@@ -16,7 +16,7 @@ Everything the reader site shows comes from here. Pages never call Supabase dire
 Three layers, configured in `open-next.config.ts` (why: DECISIONS.md → Deployment):
 
 1. **Whole pages**: R2 + Cache API, served by OpenNext's cache interception before Next boots.
-   Fresh for 60 s, then rebuilt in the background on the next visit.
+   Fresh for 5 min, then rebuilt in the background on the next visit.
 2. **Data entries** (`cached()` here): kept in the Worker isolate's memory (max 300). Not R2, because
    on Workers Free each R2/Cache API call counts towards the 50-subrequest limit per request.
 3. **Tags**: D1 (`el-borj-tag-cache`). Admin actions call `expireTags([...])`

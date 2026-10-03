@@ -1,8 +1,8 @@
 import 'server-only';
 import { unstable_cache } from 'next/cache';
 
-/** Every public page is fresh within a minute; mutations revalidate these tags at once. */
-export const REVALIDATE_SECONDS = 60;
+/** Every public page is fresh within 5 minutes; mutations revalidate these tags at once. */
+export const REVALIDATE_SECONDS = 300;
 
 export const TAGS = {
   settings: 'settings',

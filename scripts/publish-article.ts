@@ -386,8 +386,19 @@ async function publish(file: string) {
   const path = `/${art.language}/article/${art.public_id}`;
   console.log(`\n✓ saved as ${art.status}`);
   console.log(`  admin:  ${SITE_URL}/${art.language}/admin/articles/${art.id}`);
-  if (art.status === 'published') console.log(`  public: ${SITE_URL}${path}  (homepage and lists refresh within about a minute)`);
+  if (art.status === 'published') console.log(`  public: ${SITE_URL}${path}`);
+  if (art.status !== 'draft') await refreshSite();
   if (art.status === 'scheduled') console.log(`  goes live at ${spec.scheduled_for} (Tunis): ${SITE_URL}${path}`);
+}
+
+/** Refreshes the live site's cached pages (homepage, lists) right away instead of waiting for
+ *  the time-based refresh. Needs PROD_REVALIDATE_SECRET in .env.local (the live site's
+ *  REVALIDATE_SECRET, also in private.app_config); without it, prints how long to wait. */
+async function refreshSite() {
+  const secret = process.env.PROD_REVALIDATE_SECRET;
+  if (!secret) return console.log('  (no PROD_REVALIDATE_SECRET: homepage and lists refresh within about 5 minutes)');
+  const res = await fetch(`${SITE_URL}/api/revalidate`, { method: 'POST', headers: { 'x-revalidate-secret': secret, 'content-type': 'application/json' }, body: JSON.stringify({ tags: ['articles', 'authors', 'stats'] }) }).catch(() => null);
+  console.log(res?.ok ? '  site refreshed: homepage and lists show it now' : `  (refresh failed${res ? `: HTTP ${res.status}` : ''}; homepage and lists refresh within about 5 minutes)`);
 }
 
 /** Remembers the article a spec was saved as, so it is never inserted twice. */
@@ -408,7 +419,8 @@ async function setStatus(file: string, status: string, when?: string) {
   const path = `/${art.language}/article/${art.public_id}`;
   console.log(`✓ now ${data.status}${when ? ` (${when} Tunis)` : ''}`);
   console.log(`  admin:  ${SITE_URL}/${art.language}/admin/articles/${art.id}`);
-  if (data.status === 'published') console.log(`  public: ${SITE_URL}${path}  (homepage and lists refresh within about a minute)`);
+  if (data.status === 'published') console.log(`  public: ${SITE_URL}${path}`);
+  await refreshSite();
 }
 
 /** Every word of the spec that readers will see, in reading order. */

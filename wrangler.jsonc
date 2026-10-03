@@ -34,6 +34,11 @@
   "vars": {
     // Public, non-secret values. Secrets: see docs/DEPLOY.md (wrangler secret put).
     "SITE_URL": "https://www.elborj.workers.dev",
+    // Background page refresh (Durable Object queue): a rebuild of the homepage can take more than
+    // the 10 s default, and every failed attempt is retried with a full re-render (6 by default),
+    // which multiplied CPU use on the Free plan (error 1102, 2026-10-03). Allow 30 s, retry once.
+    "NEXT_CACHE_DO_QUEUE_REVALIDATION_TIMEOUT_MS": "30000",
+    "NEXT_CACHE_DO_QUEUE_MAX_RETRIES": "1",
     "NEXT_PUBLIC_SUPABASE_URL": "https://knxuskjqpsimptwxqfju.supabase.co",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtueHVza2pxcHNpbXB0d3hxZmp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NzU0NzAsImV4cCI6MjEwNjQ1MTQ3MH0.poi9MIh2ykUKuuZK246cDul2xj7RCdDbO5bj6_2pras"
   }
