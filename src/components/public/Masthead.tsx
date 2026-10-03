@@ -11,6 +11,7 @@ import { BreakingBar } from './BreakingBar';
 import { LangSwitch } from './LangSwitch';
 import { MobileMenu } from './MobileMenu';
 import { Nameplate } from './Nameplate';
+import { NavScroll } from './NavScroll';
 import { SOCIAL_LABELS, socialLinks } from '@/lib/public/social';
 
 export async function Masthead({ locale, settings, categories, pages, latest, breaking }: {
@@ -122,7 +123,8 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
       <nav aria-label={t('sections')} className="masthead-nav z-30 border-b border-rule bg-paper lg:sticky lg:top-0">
         <div className="container-page flex items-center gap-4">
           <span className="masthead-mini shrink-0"><Nameplate settings={settings} locale={locale} size="small" /></span>
-          <ul className="flex flex-1 gap-5 overflow-x-auto whitespace-nowrap [scrollbar-width:none] lg:gap-6 lg:overflow-visible">
+          <NavScroll label={t('moreSections')}>
+          <ul className="flex gap-5 overflow-x-auto whitespace-nowrap pe-10 [scrollbar-width:none] lg:gap-6 lg:overflow-visible lg:pe-0">
             {top.map((c) => {
               const kids = childrenOf(c.id);
               return (
@@ -154,6 +156,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
               </Link>
             </li>
           </ul>
+          </NavScroll>
         </div>
       </nav>
 

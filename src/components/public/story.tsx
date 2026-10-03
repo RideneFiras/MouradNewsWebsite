@@ -117,22 +117,28 @@ export function LeadStory({ a, locale, layout = 'stacked', priority = true }: { 
   );
 }
 
-/** Secondary story: optional 3:2 image, kicker, headline-2, excerpt (clamped to 3 lines), meta. */
+/**
+ * Secondary story: optional 3:2 image, kicker, headline-2, excerpt (clamped to 3 lines), meta.
+ * On phones (below lg) it becomes a compact row: headline first, a small picture at the end
+ * side, no excerpt. Only the lead story keeps a full-width picture on a phone, so the page has
+ * a hierarchy and stays short.
+ */
 export function SecondaryStory({ a, locale, image = true, horizontal = false, excerpt = true }: {
   a: ArticleCard; locale: Lang; image?: boolean; horizontal?: boolean; excerpt?: boolean;
 }) {
   const showImg = image && a.cover;
+  const compact = !horizontal && showImg; // phone layout of the stacked card
   return (
-    <ItemFrame a={a} locale={locale} className={`${a.is_sponsored ? 'bg-paper-2 p-3' : ''} ${horizontal && showImg ? 'grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]' : ''}`}>
+    <ItemFrame a={a} locale={locale} className={`${a.is_sponsored ? 'bg-paper-2 p-3' : ''} ${horizontal && showImg ? 'grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]' : ''} ${compact ? 'max-lg:flex max-lg:items-start max-lg:gap-3' : ''}`}>
       {showImg && a.cover && (
-        <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true" className={horizontal ? '' : 'mb-3 block'}>
-          <Img media={a.cover} lang={a.language} alt={a.cover_alt} ratio={horizontal ? '4/3' : '3/2'} sizes="(min-width: 1024px) 400px, 100vw" />
+        <Link prefetch={false} href={articleHref(a)} tabIndex={-1} aria-hidden="true" className={horizontal ? '' : 'mb-3 block max-lg:order-2 max-lg:mb-0 max-lg:w-28 max-lg:shrink-0'}>
+          <Img media={a.cover} lang={a.language} alt={a.cover_alt} ratio={horizontal ? '4/3' : '3/2'} sizes="(min-width: 1024px) 400px, 112px" />
         </Link>
       )}
-      <div>
+      <div className={compact ? 'max-lg:min-w-0 max-lg:flex-1' : ''}>
         <Kicker a={a} locale={locale} />
-        <Title a={a} className="headline-2" />
-        {excerpt && (a.subtitle || a.excerpt) && <p className="excerpt clamp-3 mt-2">{a.subtitle || a.excerpt}</p>}
+        <Title a={a} className={`headline-2 ${compact ? 'max-lg:text-[19px] max-lg:leading-snug' : ''}`} />
+        {excerpt && (a.subtitle || a.excerpt) && <p className={`excerpt clamp-3 mt-2 ${compact ? 'max-lg:hidden' : ''}`}>{a.subtitle || a.excerpt}</p>}
         <MetaLine a={a} className="mt-2" />
       </div>
     </ItemFrame>
@@ -140,9 +146,9 @@ export function SecondaryStory({ a, locale, image = true, horizontal = false, ex
 }
 
 /** List item: fixed-width time column + headline-3 + optional kicker. */
-export function ListItem({ a, locale, kicker = true, thumb = false }: { a: ArticleCard; locale: Lang; kicker?: boolean; thumb?: boolean }) {
+export function ListItem({ a, locale, kicker = true, thumb = false, className = '' }: { a: ArticleCard; locale: Lang; kicker?: boolean; thumb?: boolean; className?: string }) {
   return (
-    <ItemFrame a={a} locale={locale} as="li" className={`flex gap-3 py-3 ${a.is_sponsored ? 'bg-paper-2 px-2' : ''}`}>
+    <ItemFrame a={a} locale={locale} as="li" className={`flex gap-3 py-3 ${a.is_sponsored ? 'bg-paper-2 px-2' : ''} ${className}`}>
       <time dateTime={a.published_at} className="meta w-[4.5rem] shrink-0 pt-1 tabular-nums">
         {formatListTime(a.published_at, a.language)}
       </time>

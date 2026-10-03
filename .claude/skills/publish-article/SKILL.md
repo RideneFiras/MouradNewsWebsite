@@ -131,7 +131,10 @@ If there is no title, ask for one. Don't invent it.
    layout choices you made (joined lines, headings, bold labels, tables), the calendar entries
    (date, time, title, place: "added to the calendar"), the typo fixes
    (`corrections`, from → to), any other probable error you noticed and left unchanged, and the
-   fidelity result. Ask: publish now, schedule, or leave it as a draft?
+   fidelity result. **Ask where the pictures come from** (a club's Facebook page, the
+   organiser, our own photo…) so a credit can be added (`credit`, e.g. «صورة: جمعية …» or
+   «المصدر: فيسبوك»): readers trust a paper that credits its pictures. Then ask: publish now,
+   schedule, or leave it as a draft?
 8. **Go live only on Firas's word**: `pnpm -s publish:article status posts/<n>/spec.json published`
    (or `scheduled 2026-10-05T08:00`, Tunis time). It prints the short public link
    `/{lang}/article/{id}`; give it to Firas. The script refreshes the site's cached pages

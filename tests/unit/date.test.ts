@@ -63,7 +63,8 @@ describe('list time', () => {
   it('HH:MM today, short date before', () => {
     const now = new Date('2026-10-01T22:00:00Z');
     expect(formatListTime(D, 'ar', now)).toBe('21:38');
-    expect(formatListTime(new Date('2026-09-29T10:00:00Z'), 'ar', now)).toBe('29 سبتمبر 2026');
+    expect(formatListTime(new Date('2026-09-29T10:00:00Z'), 'ar', now)).toBe('29 سبتمبر');
+    expect(formatListTime(new Date('2025-12-29T10:00:00Z'), 'ar', now)).toBe('29 ديسمبر 2025');
   });
 });
 

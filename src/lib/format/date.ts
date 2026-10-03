@@ -114,9 +114,13 @@ export function formatDate(
   }
 }
 
-/** "HH:MM" today (Tunis), otherwise the short date — used in headline lists. */
+/** Headline lists: "HH:MM" today (Tunis), «2 أكتوبر» this year (no year: it wrapped in the
+ *  narrow time column), the short date with the year otherwise. */
 export function formatListTime(input: Date | string | number, locale: Locale, now: Date = new Date()): string {
-  return tunisDayKey(input) === tunisDayKey(now) ? formatDate(input, locale, 'time') : formatDate(input, locale, 'short');
+  const day = tunisDayKey(input);
+  if (day === tunisDayKey(now)) return formatDate(input, locale, 'time');
+  if (day.slice(0, 4) === tunisDayKey(now).slice(0, 4)) return formatCalendarDay(day, locale);
+  return formatDate(input, locale, 'short');
 }
 
 /**

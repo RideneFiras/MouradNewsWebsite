@@ -12,6 +12,7 @@ import { AdSlot } from './AdSlot';
 import { Img } from './Img';
 import { ListenButton } from './ListenButton';
 import { ShareRow } from './ShareRow';
+import { MobileShareBar } from './MobileShareBar';
 import { ArticleEvents } from './Agenda';
 import { agendaLabels } from '@/lib/public/agenda';
 import type { CalendarEvent } from '@/lib/data/types';
@@ -127,6 +128,7 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
             <div className="no-print mt-10">
               <ShareRow url={url} title={a.title} labels={{ share: t('share'), facebook: t('shareFacebook'), whatsapp: t('shareWhatsapp'), x: t('shareX'), copy: t('copyLink'), copied: t('copied') }} />
             </div>
+            {!preview && <MobileShareBar url={url} title={a.title} labels={{ whatsapp: t('shareWhatsapp'), facebook: t('shareFacebook'), share: t('share'), copied: t('copied') }} />}
 
             {a.tags.length > 0 && (
               <p className="meta mt-6 border-t border-rule pt-4">

@@ -12,6 +12,8 @@ export async function agendaLabels(locale: Lang): Promise<AgendaLabels> {
     addToCalendar: t('addToCalendar'),
     until: t('until'),
     today: t('today'),
+    ongoing: t('ongoing'),
+    from: t('from'),
     weekdaysShort: t.raw('weekdaysShort') as string[],
   };
 }

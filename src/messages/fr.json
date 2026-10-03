@@ -26,7 +26,8 @@
     "previewBanner": "Aperçu — cette page n’est pas publiée",
     "page": "Page {n}",
     "houseAd": "Votre publicité ici",
-    "houseAdCta": "Annoncez chez nous"
+    "houseAdCta": "Annoncez chez nous",
+    "moreSections": "Plus de rubriques"
   },
   "time": {
     "today": "Aujourd’hui",
@@ -212,6 +213,8 @@
     "inArticle": "Rendez-vous",
     "all": "Tout l’agenda",
     "towns": "Les villes du Cap Bon",
-    "townsIntro": "L’actualité de chaque ville."
+    "townsIntro": "L’actualité de chaque ville.",
+    "ongoing": "Sur plusieurs jours",
+    "from": "du"
   }
 }

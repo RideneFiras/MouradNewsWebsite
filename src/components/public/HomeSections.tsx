@@ -26,22 +26,26 @@ function LeadArea({ s, locale, latest, latestTitle, allNews }: { s: Of<'lead'>; 
     </div>
   );
   if (!latest) return <section className="container-page mt-6">{lead}</section>;
+  // On a phone the latest column comes right after the stories above: it skips them, so the
+  // same headline isn't read twice in a row. Desktop shows the full column beside them.
+  const above = new Set([s.lead.id, ...s.secondary.map((a) => a.id)]);
+  const nothingNew = latest.items.every((a) => above.has(a.id));
   return (
     <section className="container-page mt-6 grid gap-8 lg:grid-cols-12 lg:gap-6">
       <div className="lg:col-span-8">{lead}</div>
-      <aside className="col-rule lg:col-span-4" aria-labelledby={`h-${latest.id}`}>
-        <LatestColumn s={latest} locale={locale} title={latestTitle} allNews={allNews} />
+      <aside className={`col-rule lg:col-span-4 ${nothingNew ? 'max-lg:hidden' : ''}`} aria-labelledby={`h-${latest.id}`}>
+        <LatestColumn s={latest} locale={locale} title={latestTitle} allNews={allNews} hideOnPhone={above} />
       </aside>
     </section>
   );
 }
 
-function LatestColumn({ s, locale, title, allNews }: { s: Of<'latest'>; locale: Lang; title: string; allNews: string }) {
+function LatestColumn({ s, locale, title, allNews, hideOnPhone }: { s: Of<'latest'>; locale: Lang; title: string; allNews: string; hideOnPhone?: Set<string> }) {
   return (
     <>
       <SectionHeader id={`h-${s.id}`} title={s.title || title} href={`/${locale}/latest`} moreLabel={allNews} />
       <ul className="hairline-list -mt-3">
-        {s.items.map((a) => <ListItem key={a.id} a={a} locale={locale} />)}
+        {s.items.map((a) => <ListItem key={a.id} a={a} locale={locale} className={hideOnPhone?.has(a.id) ? 'max-lg:hidden' : ''} />)}
       </ul>
     </>
   );
@@ -74,7 +78,9 @@ function CategoryBlock({ s, locale, more }: { s: Of<'category'>; locale: Lang; m
     case 'feature_plus_list':
       body = (
         <div>
-          <LeadStory a={first} locale={locale} layout="side_by_side" priority={false} />
+          {/* Phones: only the homepage lead keeps a big picture. */}
+          <div className="lg:hidden"><SecondaryStory a={first} locale={locale} /></div>
+          <div className="hidden lg:block"><LeadStory a={first} locale={locale} layout="side_by_side" priority={false} /></div>
           {rest.length > 0 && (
             <ul className="mt-4 grid border-t border-rule md:grid-cols-2 md:gap-x-6 [&>li]:border-b [&>li]:border-rule">
               {rest.map((a) => <HeadlineItem key={a.id} a={a} locale={locale} />)}
@@ -121,8 +127,42 @@ export async function HomeSections({ sections, locale }: { sections: ResolvedSec
   const tl = await getTranslations({ locale, namespace: 'latest' });
   const ta = await getTranslations({ locale, namespace: 'article' });
   const out = [];
+  // "Upcoming dates" and "most read" are both half-width lists: shown side by side on desktop
+  // (at the place of the first one), stacked on phones.
+  const agendaIdx = sections.findIndex((x) => x.kind === 'agenda');
+  const mostReadIdx = sections.findIndex((x) => x.kind === 'most_read');
+  const paired = agendaIdx >= 0 && mostReadIdx >= 0;
+  const tg = await getTranslations({ locale, namespace: 'agenda' });
+  const labels = await agendaLabels(locale);
+  const agendaCol = (s: Of<'agenda'>) => (
+    <div key={s.id} aria-labelledby={`h-${s.id}`} role="region">
+      <SectionHeader id={`h-${s.id}`} title={s.title || tg('upcoming')} href={`/${locale}/agenda`} moreLabel={tg('all')} />
+      <UpcomingList events={s.events} locale={locale} labels={labels} />
+    </div>
+  );
+  const mostReadCol = (s: Of<'most_read'>) => (
+    <div key={s.id} aria-labelledby={`h-${s.id}`} role="region">
+      <SectionHeader id={`h-${s.id}`} title={s.title || ta('mostRead')} />
+      <ol className="hairline-list -mt-3">
+        {s.items.map((a, n) => <NumberedItem key={a.id} a={a} locale={locale} n={n + 1} />)}
+      </ol>
+    </div>
+  );
   for (let i = 0; i < sections.length; i++) {
     const s = sections[i]!;
+    if (paired && (i === agendaIdx || i === mostReadIdx)) {
+      if (i === Math.min(agendaIdx, mostReadIdx)) {
+        const ag = sections[agendaIdx] as Of<'agenda'>;
+        const mr = sections[mostReadIdx] as Of<'most_read'>;
+        out.push(
+          <section key={`pair-${ag.id}`} className="container-page mt-12 grid gap-12 lg:grid-cols-2 lg:gap-6">
+            {agendaCol(ag)}
+            <div className="col-rule">{mostReadCol(mr)}</div>
+          </section>,
+        );
+      }
+      continue;
+    }
     const next = sections[i + 1];
     switch (s.kind) {
       case 'lead': {
@@ -159,16 +199,7 @@ export async function HomeSections({ sections, locale }: { sections: ResolvedSec
         );
         break;
       case 'most_read':
-        out.push(
-          <section key={s.id} className="container-page mt-12 grid lg:grid-cols-12" aria-labelledby={`h-${s.id}`}>
-            <div className="lg:col-span-6">
-              <SectionHeader id={`h-${s.id}`} title={s.title || ta('mostRead')} />
-              <ol className="hairline-list -mt-3">
-                {s.items.map((a, n) => <NumberedItem key={a.id} a={a} locale={locale} n={n + 1} />)}
-              </ol>
-            </div>
-          </section>,
-        );
+        out.push(<section key={s.id} className="container-page mt-12 grid lg:grid-cols-12"><div className="lg:col-span-6">{mostReadCol(s)}</div></section>);
         break;
       case 'opinion':
         out.push(
@@ -184,18 +215,9 @@ export async function HomeSections({ sections, locale }: { sections: ResolvedSec
           </section>,
         );
         break;
-      case 'agenda': {
-        const tg = await getTranslations({ locale, namespace: 'agenda' });
-        out.push(
-          <section key={s.id} className="container-page mt-12 grid lg:grid-cols-12" aria-labelledby={`h-${s.id}`}>
-            <div className="lg:col-span-6">
-              <SectionHeader id={`h-${s.id}`} title={s.title || tg('upcoming')} href={`/${locale}/agenda`} moreLabel={tg('all')} />
-              <UpcomingList events={s.events} locale={locale} labels={await agendaLabels(locale)} />
-            </div>
-          </section>,
-        );
+      case 'agenda':
+        out.push(<section key={s.id} className="container-page mt-12 grid lg:grid-cols-12"><div className="lg:col-span-6">{agendaCol(s)}</div></section>);
         break;
-      }
       case 'ad':
         out.push(<AdSlot key={s.id} slotKey={s.slotKey} locale={locale} className="container-page mt-12" />);
         break;
