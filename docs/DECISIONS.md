@@ -207,4 +207,5 @@ These are legal questions; the site provides the fields and pages, the answers m
 - **Draft first, public only on a click.** The approval is n8n's Gmail "send and wait" with a form (Publish + Facebook / site only / keep as draft, Facebook text editable). Matches the rule that nothing goes live without Firas's word.
 - **JSON answer + validation loop instead of structured outputs.** The spec schema (unions, nested blocks) is validated by the existing zod schema in `check`; errors from `check`/`fidelity` go back to Claude (3 attempts).
 - **Sender check:** Gmail sender filter + `allowed_senders` + DKIM/DMARC pass in the headers, so a forged From address can't create drafts.
+- **GPT by default** (`LLM_PROVIDER=openai`, Responses API): Firas has OpenAI credits. Claude stays available (`LLM_PROVIDER=anthropic`); both behind `n8n/publisher/llm.ts`. The model is chosen after a local dry run (`pnpm -s publisher:try posts/<n>`) on past posts.
 - **Gmail trigger, not IMAP**, at Firas's request: needs a Google Cloud OAuth client; the consent screen must be "In production" or the login expires after 7 days.

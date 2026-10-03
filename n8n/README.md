@@ -9,7 +9,7 @@ without that click.
 ```
 Gmail (new email from the journalist, polled every minute)
   → Prepare email          check the sender (+ Gmail DKIM/DMARC), collect text and pictures
-  → Make draft (publisher) Claude writes the spec with the /publish-article rules,
+  → Make draft (publisher) GPT (or Claude) writes the spec with the /publish-article rules,
                            check + fidelity ("word for word"), saves the DRAFT,
                            writes the Facebook teaser
   → Ask Firas              approval email + form (waits up to 7 days)
@@ -23,7 +23,10 @@ Files here:
 | File | What it is |
 |---|---|
 | `elborj-email-to-article.workflow.json` | The workflow, to import in n8n |
-| `publisher/server.ts` | Private service n8n calls (`/ingest`, `/publish`). Reuses `scripts/publish-article.ts` and reads `.claude/skills/publish-article/SKILL.md` at runtime, so the rules stay in one place |
+| `publisher/server.ts` | Private service n8n calls (`/ingest`, `/publish`) |
+| `publisher/core.ts` | The work: reuses `scripts/publish-article.ts` and reads `.claude/skills/publish-article/SKILL.md` at runtime, so the rules stay in one place |
+| `publisher/llm.ts` | The model: `LLM_PROVIDER=openai` (default, `OPENAI_MODEL`) or `anthropic` (`CLAUDE_MODEL`) |
+| `publisher/try.ts` | Local test on a `posts/<n>` folder, saves nothing: `pnpm -s publisher:try posts/10` |
 | `publisher/prompts.ts` | What changes when nobody is in the chat, and Firas's Facebook post rules |
 | `publisher/Dockerfile`, `docker-compose.yml`, `Caddyfile` | n8n + publisher + HTTPS on the Oracle server |
 | `.env.example` | The secrets the server needs (copy to `n8n/.env`, never commit it) |
@@ -31,6 +34,20 @@ Files here:
 The publisher has **no public port**: only n8n reaches it (`http://publisher:8787`), with a
 bearer token. The Supabase secret key and the Claude API key live only in `n8n/.env` on the
 server.
+
+## 0. Test locally first (nothing is saved)
+
+Add `OPENAI_API_KEY=…` to `.env.local`, then:
+
+```bash
+pnpm -s publisher:try --models        # which GPT models this key can use
+OPENAI_MODEL=<one of them> pnpm -s publisher:try posts/10
+```
+
+It treats the folder like an email (`post.txt` / `post` / `posts` = the email body, pictures =
+attachments), prints what the approval email would contain (spec summary, typo fixes, skipped
+lines, notes, the word-for-word result, the Facebook text) and an HTML preview path. Compare
+with the drafts made by hand for posts/8, 9, 10. Choose the model, then put it in `n8n/.env`.
 
 ## 1. Server
 
@@ -115,5 +132,5 @@ n8n → Workflows → Import from file → `elborj-email-to-article.workflow.jso
 - HEIC pictures (iPhone) can't be read: the email says so. Ask for JPEG (most phones send JPEG
   by email anyway).
 - PDF attachments are ignored (only pictures).
-- Cost: one Claude Opus 5.5 call for the spec (+ retries) and one for the Facebook text per
-  article; set `CLAUDE_MODEL=claude-sonnet-5-5` in `n8n/.env` to make it cheaper.
+- Cost: one model call for the spec (+ up to 2 retries when fidelity fails) and one for the
+  Facebook text per article, on your OpenAI credits (or Anthropic with `LLM_PROVIDER=anthropic`).
