@@ -184,3 +184,14 @@ These are legal questions; the site provides the fields and pages, the answers m
 - Visitors got **error 1102** (CPU limit). Building a page costs 50–90 ms CPU (cached hits 5–20 ms) against the Free plan's 10 ms; Cloudflare usually tolerates it, not always. Worse, the background refresh (Durable Object queue) timed out after its default 10 s on the homepage and **retried 6 times, each a full re-render**.
 - Fix on Free: `NEXT_CACHE_DO_QUEUE_REVALIDATION_TIMEOUT_MS=30000`, `NEXT_CACHE_DO_QUEUE_MAX_RETRIES=1` (wrangler vars), and time-based refresh **60 s → 300 s** (pages and data). Publishing still refreshes at once: the admin expires tags, and `scripts/publish-article.ts` now calls `/api/revalidate` (`PROD_REVALIDATE_SECRET` in `.env.local`).
 - Real fix: **Workers Paid** ($5/month, 30 s CPU). See `docs/WORKERS-PAID.md`.
+
+## Calendar, holidays, app, backups (2026-10-03)
+
+- **Holidays without an outside service.** Nager.Date (open data) lists Tunisia's 8 civil holidays but no Islamic ones; Google's public calendar guesses them. Tunisia fixes Islamic holidays by the Mufti's moon-sighting announcement, which no API knows in advance. So civil dates are a fixed list in `src/lib/events/holidays.ts`, Islamic ones are computed from the Umm al-Qura calendar (same as the masthead Hijri date and its offset) and stored with `is_estimate = true` until the editor confirms them. Eid al-Fitr and Eid al-Adha get 2 days by default (extend in the admin if the government announces more).
+- **Events follow their article.** An event linked to a draft is hidden by RLS (`is_article_public`), so the publish script can add dates while saving a draft.
+- **"Add to my calendar" is an .ics download**, not a Google Calendar link: it opens the phone's own calendar on Android and iPhone and needs no account.
+- **Add to Home Screen without a service worker.** The manifest (name/icon from Settings) and Apple tags are enough for Android's install prompt and iOS "Add to Home Screen". No offline cache: a news site must show fresh pages, and a service worker could serve stale ones.
+- **Tall pictures are shown whole** (object-fit contain on the paper background) unless a focal point was set: posters and scanned statements are common here and were cut in half.
+- **Homepage blocks need 3 articles** (`min_items`, default 3) so a new site doesn't show one story next to a large empty space.
+- **French interface hidden from readers** (`public_languages.fr = false`): no FR switch, no hreflang to /fr; /fr still answers, the admin stays bilingual.
+- **Backups are JSON + files, encrypted, as GitHub artifacts**: the repo is public, the free plan has no backups and no database password is stored anywhere; the service key reads everything through the API. Restoring is outlined in `docs/BACKUP.md`.

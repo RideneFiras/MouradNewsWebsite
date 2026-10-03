@@ -17,6 +17,7 @@ must not import those (the build fails if it does, which is the point).
 | `ads/` | Campaign pick (weighted, client side), campaign status, Tunis local time | |
 | `seo/` | Metadata, JSON-LD, sitemaps/feeds data, RSS, XML helpers | |
 | `security/` | CSP + security headers, per-isolate rate limiter, client IP | |
+| `events/` | `holidays.ts`: Tunisian public holidays (fixed civil list + Islamic ones estimated from the Umm al-Qura calendar) | |
 | `format/` | `date.ts` (Tunisian month names, Hijri, relative, Africa/Tunis), `number.ts` (U+202F grouping so digits don't swap in RTL) | |
 | `i18n/` | next-intl routing (`ar` default, `fr`), `isLocale`, `dirOf` | |
 | `slug.ts` | ASCII slugs with Arabic transliteration; articles use a numeric `public_id` instead | |

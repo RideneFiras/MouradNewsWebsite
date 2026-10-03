@@ -8,6 +8,8 @@ public JS is measured and the Worker CPU is limited.
 | Component | What | Client? |
 |---|---|---|
 | `Masthead.tsx` | Date line (Gregorian + optional Hijri), nameplate, "ears", nav, search, breaking bar | server |
+| `Agenda.tsx` | Calendar: month grid + day list (`AgendaMonth`), homepage list (`UpcomingList`), article box (`ArticleEvents`), `.ics` link | server |
+| `InstallApp.tsx` | Add-to-Home-Screen button (Android) / steps (iPhone) | client |
 | `Nameplate.tsx` | Calligraphic «البرج» (Aref Ruqaa); with a logo and the text nameplate on, the logo is a mark above (large) or beside (bars) the name; text nameplate off = the logo image alone | server |
 | `BreakingBar.tsx` | Red bar, one item at a time, crossfade every 6 s, pauses on hover/focus | client |
 | `MobileMenu.tsx`, `NavActive.tsx`, `LangSwitch.tsx` | Mobile sheet; current-section underline; «ع · FR» switch to the same page in the other language | client |

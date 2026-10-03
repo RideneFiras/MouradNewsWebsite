@@ -14,7 +14,7 @@ Look: white panels, 4 px radius, 1 px borders, no shadows. Hand-written primitiv
 | Auth | `AuthCard.tsx`, `LoginForm.tsx`, `ForgotForm.tsx`, `ResetForm.tsx` |
 | Articles | `ArticlesTable.tsx` (list, bulk actions), `editor/ArticleEditor.tsx` (the editor: autosave every 15 s, local backup, publish/schedule, revisions, preview link, share after publish), `editor/RichText.tsx` (Tiptap, word/Facebook paste cleaning), `editor/nodes.tsx` (pull quote, figure, gallery, embed, read-also) |
 | Media | `MediaLibrary.tsx`, `MediaPicker.tsx`, `FocalPicker.tsx`, `useUpload.ts` (resize to WebP in the browser, signed upload URLs, no Supabase JS in the browser) |
-| Taxonomy & site | `CategoriesManager.tsx`, `TagsManager.tsx`, `FormatsManager.tsx`, `MenusManager.tsx`, `PageEditor.tsx`, `HomepageBuilder.tsx`, `SettingsForm.tsx`, `MediaKitForm.tsx`, `TeamManager.tsx`, `ProfileForm.tsx`, `MessagesList.tsx` |
+| Taxonomy & site | `CategoriesManager.tsx`, `TagsManager.tsx`, `EventsManager.tsx` (الأجندة: events, holidays), `FormatsManager.tsx`, `MenusManager.tsx`, `PageEditor.tsx`, `HomepageBuilder.tsx`, `SettingsForm.tsx`, `MediaKitForm.tsx`, `TeamManager.tsx`, `ProfileForm.tsx`, `MessagesList.tsx` |
 | Ads | `ads/SlotsManager.tsx`, `ads/CampaignForm.tsx`, `ads/AdsenseForm.tsx` (AdSense ID + ads.txt) |
 | Statistics | `stats/ui.tsx` (tabs, tiles, range picker, metric definitions via Popover API), `stats/LineChart.tsx` (SVG, mirrored right-to-left in Arabic, keyboard crosshair, table view), `stats/TrendCharts.tsx`, `stats/Sparkline.tsx`, `stats/BarList.tsx`, `stats/ArticleStatsTable.tsx`, `stats/DashboardStats.tsx`, `stats/SocialManager.tsx` (the only manual numbers, always labelled as such) |
 

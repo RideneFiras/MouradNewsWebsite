@@ -84,6 +84,7 @@ an admin (Team screen) or `bootstrap_admin.sql`. Helpers used by RLS: `current_r
 | `analytics_salts`, `rollup_runs` | Monthly hash salt; rollup log | **cron only** |
 | `social_stats` | Facebook/Instagram numbers typed in monthly (labelled as manual) | editor+ (own, 24 h) |
 | `contact_messages` | Contact form submissions | service role (form), editor+ read |
+| `events` | Calendar (الأجندة): events and public holidays (`event_kind`), optional `article_id` (hidden until the article is public) and `town_tag_id`; `is_estimate` for Islamic holidays | editor+ (admin «الأجندة»), publish script |
 
 `private.app_config`: key/value read by `publish_scheduled()` (revalidate URL + secret). Not exposed.
 

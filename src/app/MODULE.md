@@ -17,6 +17,7 @@ app/
   [locale]/rss.xml      feeds
   api/                  see api/MODULE.md
   robots.txt, sitemap.xml, news-sitemap.xml, sitemaps/[file], ads.txt   route handlers
+  manifest.webmanifest, favicon.ico   app manifest and icon redirect (from Settings)
 ```
 
 ## Public pages (`[locale]/(public)/`)
@@ -30,6 +31,9 @@ app/
 | `search` | Search (`search_articles` RPC); the only listing that renders per request |
 | `p/[slug]` | Static pages from the CMS |
 | `advertise` | Media kit (live numbers from `media_kit_public()`) |
+| `agenda/[[...month]]` | Calendar (الأجندة): this month, or `/agenda/2026-11`; events + holidays from `events` |
+| `towns` | Every place tag (town), each linking to `/topic/{slug}` |
+| `app` | "Add to Home Screen" page (install button on Android, steps for iPhone) |
 | `contact` | Contact form → `/api/contact` |
 | `preview/article/[id]`, `preview/home` | Signed draft preview, homepage-builder preview (noindex) |
 | `[...rest]` | Anything else: redirect from `redirects` table, or 404 |

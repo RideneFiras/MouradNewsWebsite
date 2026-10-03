@@ -54,6 +54,14 @@ session continuing the work._
 - Site icon: `design/icon/icon-480.png` (made by `node design/icon/render.mjs` from `borj-icon.svg`), set as «أيقونة المتصفح». PNG, not SVG, so iOS home screens and Google results use it too.
 - `/publish-article` may now fix sure typos, listed in `spec.corrections` and checked by `fidelity`; it prints the short link `/{lang}/article/{id}`.
 
+## Audit work (2026-10-03, committed, waiting for the Workers Paid upgrade to deploy)
+
+- **Calendar (الأجندة)**: table `events` (migration `20261003100000_events_calendar.sql`, **not applied yet**), public `/ar/agenda` (month grid + day list), homepage block «المواعيد القادمة» (homepage section type `agenda`), a «الموعد» box on articles, `.ics` "add to my calendar" (`/api/events/{id}`), admin screen «الأجندة» (add/edit, "add the public holidays of a year"). Holidays: `src/lib/events/holidays.ts` (civil fixed; Islamic estimated, confirmed by the editor). The publish script adds dates found in the text (`events` in the spec; `events` command for saved articles).
+- **Towns page** `/ar/towns` (place tags), **Add to Home Screen** (manifest, iOS tags, `/ar/app`, `/favicon.ico`), **FR switch hidden** (setting `public_languages.fr`), **tall pictures shown whole**, **homepage blocks under 3 articles left out**, **raster logo** in Google's data.
+- **Weekly encrypted backup** (`.github/workflows/backup.yml`, `docs/BACKUP.md`): needs the repo secrets `SUPABASE_SERVICE_ROLE_KEY` and `BACKUP_PASSPHRASE`.
+- **To go live, in this order:** (1) apply the migration (MCP `apply_migration`, then `get_advisors`); (2) `pnpm run deploy`; (3) `pnpm tsx scripts/content-2026-10-03.ts --apply` (sections تربية/جهات, town tags, calendar backfill, holidays, agenda block, page drafts); (4) screenshot `/ar/agenda` and an article at 390 px.
+- **Pages**: About/Contact/Charter drafts are written by the content script but stay drafts until Firas reads and publishes them; Legal waits for the question of who is named (lawyer).
+
 ## Next 5 concrete steps (for whoever continues)
 
 1. Firas: Supabase Auth URLs for the live address (above), then log in on https://www.elborj.workers.dev/ar/admin/login.
