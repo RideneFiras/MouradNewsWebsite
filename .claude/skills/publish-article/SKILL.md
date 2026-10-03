@@ -48,9 +48,12 @@ Firas in the summary (step 7): he approves the fixes together with the rest.
   line a heading when the source clearly uses it as one, bold a label that is clearly a label
   (a date line in a programme), turn clearly tabular data into a table **with the same cells in
   the same order**, place pictures. Collapsing repeated spaces and trimming line ends is fine.
-- Every visible field you write yourself (subtitle/dek, kicker) goes in `generated` and must be
-  approved by Firas before publishing. Alt text is written by you (it describes the picture for
-  blind readers and isn't shown on the page); captions and photo credits only come from Firas.
+- Every visible field you write yourself (subtitle/dek, kicker, captions, calendar titles) goes
+  in `generated` (calendar titles are in `events`) and must be approved by Firas before going
+  live. Alt text is written by you (it describes the picture for blind readers and isn't shown
+  on the page). **Captions** (since 2026-10-03): you may write a short factual caption from the
+  text (who/what/where, e.g. «جود حمام يتسلّم شهادته بألمانيا») and list `"captions"` in
+  `generated`. **Photo credits** only from Firas or the source (never guess a photographer).
 - The `fidelity` command proves it: it must say **"word for word"** (after the listed typo fixes,
   if any) before you publish.
 
@@ -96,6 +99,19 @@ If there is no title, ask for one. Don't invent it.
      Firas can also say "no subtitle".
    - `excerpt`, SEO description, slug, reading time: leave empty, the database derives them
      from the text.
+   - `events` (calendar, الأجندة; since 2026-10-03): when the text **announces** something on a
+     date (a festival night, a show, a protest, a match, a deadline, a club restarting), add one
+     entry per dated item, linked to the article automatically:
+     `{ "title_ar", "starts_on": "YYYY-MM-DD", "ends_on"?, "start_time"?: "HH:MM", "end_time"?, "place"?, "town"?: place-tag slug }`.
+     Dates, times and places come **only from the text or the poster**; the short title is
+     yours (a few words: «عرض مسرحي "X" بدار الثقافة نابل»). A programme with several dates →
+     one entry per date/item. A multi-day festival → `starts_on` + `ends_on`. Use `town` only
+     with an existing place tag. No entries for things already over (a report on last week's
+     event), and none for vague dates («قريبا»). A date without a year → the next occurrence;
+     say so in the summary. If unsure, leave it out and mention it. Draft articles' entries stay
+     hidden until the article is published. For an article saved earlier: add `events` to its
+     spec and run `pnpm -s publish:article events posts/<n>/spec.json`. Firas can add/edit any
+     entry himself in the admin (الأجندة), including the public holidays.
    - `status`: **always `draft` in the spec** (Firas, 2026-10-03: "always push to draft on the
      website"). Going live is a separate step (8). `is_breaking`/`is_featured` only if asked.
 4. **Write the spec** to `posts/<n>/spec.json` (or the scratchpad for pasted text), see the
@@ -112,13 +128,15 @@ If there is no title, ask for one. Don't invent it.
    (so the same post can never be inserted twice) and prints the admin link. A draft is not
    public. Then **show Firas a summary** with the admin link: title, subtitle (marked "written by
    Claude"), section(s), genre, tags, byline, cover + where each picture goes, alt texts, the
-   layout choices you made (joined lines, headings, bold labels, tables), the typo fixes
+   layout choices you made (joined lines, headings, bold labels, tables), the calendar entries
+   (date, time, title, place: "added to the calendar"), the typo fixes
    (`corrections`, from → to), any other probable error you noticed and left unchanged, and the
    fidelity result. Ask: publish now, schedule, or leave it as a draft?
 8. **Go live only on Firas's word**: `pnpm -s publish:article status posts/<n>/spec.json published`
    (or `scheduled 2026-10-05T08:00`, Tunis time). It prints the short public link
-   `/{lang}/article/{id}`; give it to Firas. A published article shows on the homepage and lists
-   within about a minute (pages are cached). Firas can also press publish in the admin himself.
+   `/{lang}/article/{id}`; give it to Firas. The script refreshes the site's cached pages
+   (`PROD_REVALIDATE_SECRET` in `.env.local`), so it shows on the homepage at once; without the
+   secret it takes up to 5 minutes. Firas can also press publish in the admin himself.
 9. If the text or metadata must change after saving, do it in the admin (link printed), or ask
    before changing the database directly (see `supabase/MODULE.md`). Never run `publish` again for
    a saved post (it refuses when `article.json` exists).
@@ -131,7 +149,8 @@ If there is no title, ask for one. Don't invent it.
   "status": "draft",
   "title": "…exactly as written…",
   "subtitle": "…",
-  "generated": ["subtitle"],
+  "generated": ["subtitle", "captions"],
+  "events": [{ "title_ar": "افتتاح مهرجان بعيونهن", "starts_on": "2026-10-03", "start_time": "18:30", "place": "فضاء الحمامات فن وثقافة", "town": "hammamet" }],
   "corrections": [{ "from": "2023.وتولى", "to": "2023. وتولى", "why": "space after full stop" }],
   "category": "culture",
   "extra_categories": ["theatre"],

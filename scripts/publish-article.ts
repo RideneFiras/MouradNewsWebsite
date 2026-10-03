@@ -8,6 +8,7 @@
 //   pnpm publish:article check <spec.json>     # validate + render, write nothing
 //   pnpm publish:article fidelity <spec.json> <source.txt>  # word-by-word diff vs the original text
 //   pnpm publish:article publish <spec.json>   # upload images, insert the article (once; remembered in article.json)
+//   pnpm publish:article events <spec.json>    # add the spec's calendar dates to an already saved article
 //   pnpm publish:article status <spec.json> published | draft | scheduled YYYY-MM-DDTHH:MM   # change it afterwards
 //
 // Needs .env.local: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (server only).
@@ -91,10 +92,22 @@ const Spec = z.object({
   breaking_hours: z.number().int().min(1).max(72).default(6),
   is_featured: z.boolean().default(false),
   /** Reader-visible fields Claude wrote because the source had none (e.g. "subtitle"). Must be approved. */
-  generated: z.array(z.enum(['subtitle', 'kicker_override', 'location'])).default([]),
+  generated: z.array(z.enum(['subtitle', 'kicker_override', 'location', 'captions'])).default([]),
   /** Obvious typos Claude fixed (exact text in the source → fixed text). `fidelity` applies them to the source before comparing. */
   corrections: z.array(z.object({ from: z.string().min(1), to: z.string(), why: z.string().optional() })).default([]),
   body: z.array(Block).min(1),
+  /** Dates the text announces, added to the calendar (الأجندة) linked to this article. Titles
+   *  are written by Claude (approved with the rest); dates, times and places come from the text. */
+  events: z.array(z.object({
+    title_ar: z.string().trim().min(1).max(300),
+    title_fr: z.string().trim().max(300).nullish(),
+    starts_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    ends_on: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+    start_time: z.string().regex(/^\d{2}:\d{2}$/).nullish(),
+    end_time: z.string().regex(/^\d{2}:\d{2}$/).nullish(),
+    place: z.string().trim().max(200).nullish(),
+    town: z.string().nullish(), // slug of a place tag
+  }).refine((e) => !e.ends_on || e.ends_on >= e.starts_on, 'ends_on before starts_on')).default([]),
 });
 type SpecT = z.infer<typeof Spec>;
 
@@ -266,7 +279,11 @@ async function resolveSpec(client: SupabaseClient, spec: SpecT) {
   if (spec.status === 'scheduled' && !spec.scheduled_for) fail('status "scheduled" needs scheduled_for ("YYYY-MM-DDTHH:MM", Tunis time)');
   if (spec.cover && !spec.cover.alt) fail('the cover image needs alt text');
   for (const i of [spec.cover, ...bodyImages(spec)].filter(Boolean)) if (!existsSync(resolve(i!.file))) fail(`image not found: ${i!.file}`);
-  return { category, extra, format, tagIds, authorRows, actingId };
+  const events = spec.events.map((e) => {
+    const town = e.town ? L.tags.find((t) => t.slug === e.town && t.kind === 'place') ?? fail(`unknown town "${e.town}" (a place tag: pnpm publish:article options)`) : null;
+    return { title_ar: e.title_ar, title_fr: e.title_fr ?? null, starts_on: e.starts_on, ends_on: e.ends_on ?? null, start_time: e.start_time ?? null, end_time: e.end_time ?? null, place: e.place ?? null, town_tag_id: (town?.id as string) ?? null };
+  });
+  return { category, extra, format, tagIds, authorRows, actingId, events };
 }
 
 // ------------------------------------------------------------------ commands
@@ -311,6 +328,7 @@ async function check(file: string) {
   console.log(`  language ${spec.language} · status ${spec.status}${spec.scheduled_for ? ` (${spec.scheduled_for} Tunis)` : ''}`);
   console.log(`  section ${r.category.slug}${r.extra.length ? ` (+${r.extra.length})` : ''} · genre ${r.format?.slug ?? '—'} · tags ${spec.tags.length} existing, ${spec.new_tags.length} new`);
   console.log(`  byline ${spec.unsigned ? '(unsigned: no author name)' : spec.byline_override ?? r.authorRows.map((a) => a!.display_name_ar).join('، ')}`);
+  for (const e of r.events) console.log(`  calendar: ${e.starts_on}${e.ends_on ? ` → ${e.ends_on}` : ''}${e.start_time ? ` ${e.start_time}` : ''} «${e.title_ar}»${e.place ? ` · ${e.place}` : ''}`);
   console.log(`  blocks ${spec.body.length} · images ${bodyImages(spec).length + (spec.cover ? 1 : 0)} · words ${docToText(doc).split(/\s+/).filter(Boolean).length}`);
   console.log(`  preview (images not uploaded yet): ${out}`);
 }
@@ -380,6 +398,13 @@ async function publish(file: string) {
   ]);
   for (const j of joins) if (j?.error) fail(`article saved (id ${art.id}) but a link table failed: ${j.error.message}. Fix it in the admin.`);
 
+  // Calendar entries: hidden from readers until the article is public (RLS).
+  if (r.events.length) {
+    const ev = await client.from('events').insert(r.events.map((e) => ({ ...e, kind: 'event', article_id: art.id, created_by: r.actingId })));
+    if (ev.error) fail(`article saved (id ${art.id}) but the calendar entries failed: ${ev.error.message}. Add them in the admin (الأجندة).`);
+    console.log(`  + ${r.events.length} calendar entr${r.events.length > 1 ? 'ies' : 'y'} (الأجندة)`);
+  }
+
   writeFileSync(saved, JSON.stringify({ id: art.id, public_id: art.public_id, language: art.language }, null, 2) + '\n');
 
   // Short link (no slug): an Arabic slug percent-encodes into ~250 characters. Same page, see DECISIONS.md.
@@ -394,10 +419,10 @@ async function publish(file: string) {
 /** Refreshes the live site's cached pages (homepage, lists) right away instead of waiting for
  *  the time-based refresh. Needs PROD_REVALIDATE_SECRET in .env.local (the live site's
  *  REVALIDATE_SECRET, also in private.app_config); without it, prints how long to wait. */
-async function refreshSite() {
+async function refreshSite(tags: string[] = ['articles', 'authors', 'stats', 'events']) {
   const secret = process.env.PROD_REVALIDATE_SECRET;
   if (!secret) return console.log('  (no PROD_REVALIDATE_SECRET: homepage and lists refresh within about 5 minutes)');
-  const res = await fetch(`${SITE_URL}/api/revalidate`, { method: 'POST', headers: { 'x-revalidate-secret': secret, 'content-type': 'application/json' }, body: JSON.stringify({ tags: ['articles', 'authors', 'stats'] }) }).catch(() => null);
+  const res = await fetch(`${SITE_URL}/api/revalidate`, { method: 'POST', headers: { 'x-revalidate-secret': secret, 'content-type': 'application/json' }, body: JSON.stringify({ tags }) }).catch(() => null);
   console.log(res?.ok ? '  site refreshed: homepage and lists show it now' : `  (refresh failed${res ? `: HTTP ${res.status}` : ''}; homepage and lists refresh within about 5 minutes)`);
 }
 
@@ -423,6 +448,25 @@ async function setStatus(file: string, status: string, when?: string) {
   await refreshSite();
 }
 
+/** Adds the spec's `events` to the calendar for an article already saved (skips ones already there). */
+async function addEvents(file: string) {
+  const spec = readSpec(file);
+  const saved = savedFile(file);
+  if (!existsSync(saved)) fail(`not saved on the site yet (no ${saved}): run publish (it adds the events too)`);
+  const art = JSON.parse(readFileSync(saved, 'utf8')) as { id: string };
+  const client = db();
+  const r = await resolveSpec(client, spec);
+  const { data: have } = await client.from('events').select('starts_on, title_ar').eq('article_id', art.id);
+  const key = (e: { starts_on: string; title_ar: string }) => `${e.starts_on}|${e.title_ar}`;
+  const known = new Set((have ?? []).map(key));
+  const rows = r.events.filter((e) => !known.has(key(e))).map((e) => ({ ...e, kind: 'event', article_id: art.id, created_by: r.actingId }));
+  if (!rows.length) return console.log('nothing new: these dates are already on the calendar');
+  const { error } = await client.from('events').insert(rows);
+  if (error) fail(`calendar insert failed: ${error.message}`);
+  console.log(`✓ ${rows.length} calendar entr${rows.length > 1 ? 'ies' : 'y'} added (shown once the article is public)`);
+  await refreshSite(['events']);
+}
+
 /** Every word of the spec that readers will see, in reading order. */
 function specWords(spec: SpecT): string[] {
   // The site prints the dateline as «location — » at the start of the first paragraph.
@@ -432,7 +476,7 @@ function specWords(spec: SpecT): string[] {
     gen.has('kicker_override') ? '' : spec.kicker_override ?? '',
     gen.has('subtitle') ? '' : spec.subtitle ?? '',
     !gen.has('location') && spec.location ? `${spec.location} —` : '',
-    spec.cover?.caption ?? '', spec.cover?.credit ?? '',
+    gen.has('captions') ? '' : spec.cover?.caption ?? '', spec.cover?.credit ?? '',
   ];
   const flat = (v: z.infer<typeof Inline>) => (typeof v === 'string' ? v : v.map((r) => (typeof r === 'string' ? r : r.text)).join(''));
   for (const b of spec.body) {
@@ -440,8 +484,8 @@ function specWords(spec: SpecT): string[] {
     else if (b.type === 'quote') parts.push(...b.paragraphs.map(flat));
     else if (b.type === 'list') parts.push(...b.items.map(flat));
     else if (b.type === 'table') parts.push(...b.rows.flat());
-    else if (b.type === 'image') parts.push(b.caption ?? '', b.credit ?? '');
-    else if (b.type === 'gallery') parts.push(...b.images.flatMap((i) => [i.caption ?? '', i.credit ?? '']));
+    else if (b.type === 'image') parts.push(gen.has('captions') ? '' : b.caption ?? '', b.credit ?? '');
+    else if (b.type === 'gallery') parts.push(...b.images.flatMap((i) => [gen.has('captions') ? '' : i.caption ?? '', i.credit ?? '']));
     else if (b.type === 'read_also') parts.push(b.title);
   }
   return parts.join(' ').split(/\s+/).filter(Boolean);
@@ -470,7 +514,7 @@ function fidelity(file: string, sourceFile: string) {
   while (j < m) added.push(b[j++]!);
   console.log(`original: ${n} words · article: ${m} words · identical in order: ${L[0]![0]}`);
   for (const c of spec.corrections) console.log(`typo fixed by Claude (needs approval): «${c.from}» → «${c.to}»${c.why ? `  (${c.why})` : ''}`);
-  for (const f of spec.generated) console.log(`written by Claude (not part of the comparison, needs approval): ${f} = «${spec[f] ?? ''}»`);
+  for (const f of spec.generated) console.log(`written by Claude (not part of the comparison, needs approval): ${f}${f === 'captions' ? ' (picture captions)' : ` = «${spec[f] ?? ''}»`}`);
   if (!missing.length && !added.length) { console.log(`✓ the article contains the original text word for word${spec.corrections.length ? ` (after the ${spec.corrections.length} typo fixes above)` : ''}`); return; }
   if (missing.length) console.log(`\nIn the original but NOT in the article (${missing.length}):\n  ${missing.join('\n  ')}`);
   if (added.length) console.log(`\nIn the article but NOT in the original (${added.length}):\n  ${added.join('\n  ')}`);
@@ -479,5 +523,5 @@ function fidelity(file: string, sourceFile: string) {
 
 const [cmd, file, extra, extra2] = process.argv.slice(2);
 if (cmd === 'fidelity') fidelity(file!, extra!);
-const run = cmd === 'fidelity' ? Promise.resolve() : cmd === 'options' ? options() : cmd === 'check' ? check(file!) : cmd === 'publish' ? publish(file!) : cmd === 'status' ? setStatus(file!, extra ?? '', extra2) : fail('usage: publish-article.ts options | check <spec.json> | fidelity <spec.json> <source.txt> | publish <spec.json> | status <spec.json> published|draft|scheduled [YYYY-MM-DDTHH:MM]');
+const run = cmd === 'fidelity' ? Promise.resolve() : cmd === 'options' ? options() : cmd === 'check' ? check(file!) : cmd === 'publish' ? publish(file!) : cmd === 'status' ? setStatus(file!, extra ?? '', extra2) : cmd === 'events' ? addEvents(file!) : fail('usage: publish-article.ts options | check <spec.json> | fidelity <spec.json> <source.txt> | publish <spec.json> | status <spec.json> published|draft|scheduled [YYYY-MM-DDTHH:MM]');
 run.catch((e) => fail(e instanceof Error ? e.message : String(e)));
