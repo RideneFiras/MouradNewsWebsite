@@ -56,7 +56,10 @@ export default function RichText({ value, onChange, onBlur, language, placeholde
       attributes: { class: 'prose-article admin-prose min-h-[320px] max-w-none outline-none', dir: language === 'fr' ? 'ltr' : 'rtl', lang: language, 'aria-label': t('body'), 'aria-multiline': 'true' },
       transformPastedHTML: cleanPastedHTML,
     },
-    onUpdate: ({ editor: e }) => onChange(e.getJSON() as PMNode),
+    // ProseMirror keeps node attrs in null-prototype objects. React can't send those to a server
+    // action (it turns them into "temporary references" and the server fails on the first
+    // `attrs.src`), so the document is copied into plain JSON first.
+    onUpdate: ({ editor: e }) => onChange(JSON.parse(JSON.stringify(e.getJSON())) as PMNode),
     onBlur: () => onBlur?.(),
   });
 

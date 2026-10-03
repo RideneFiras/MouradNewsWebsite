@@ -96,7 +96,9 @@ export function ArticleEditor({ initial, options, role, userId, locale }: { init
   }, [a, dirty, readOnly, backupKey]);
 
   const toInput = (x: EditorArticle) => ({
-    id: x.id, language: x.language, kicker_override: x.kicker_override, title: x.title, subtitle: x.subtitle, body_json: x.body_json,
+    id: x.id, language: x.language, kicker_override: x.kicker_override, title: x.title, subtitle: x.subtitle,
+    // Plain JSON copy: see RichText (null-prototype attrs can't cross into a server action).
+    body_json: x.body_json ? JSON.parse(JSON.stringify(x.body_json)) : x.body_json,
     location: x.location, category_id: x.category_id || null, extra_category_ids: x.extra_category_ids, format_id: x.format_id || null,
     tag_ids: x.tag_ids, author_ids: x.unsigned ? [] : x.author_ids, byline_override: x.unsigned ? null : x.byline_override, unsigned: x.unsigned,
     cover_media_id: x.cover_media_id,
