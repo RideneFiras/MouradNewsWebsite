@@ -43,6 +43,10 @@ export async function Footer({ locale, settings, categories, menu, pages }: {
       }).filter(Boolean) as { href: string; label: string; external: boolean }[]
     : pages.filter((p) => p.show_in_footer).map((p) => ({ href: pageHref(locale, p.slug, p.page_kind), label: p.title, external: false }));
 
+  // Reader tools that exist whatever the menu says: the phone "app" page.
+  const ta = await getTranslations({ locale, namespace: 'app' });
+  links.push({ href: `/${locale}/app`, label: ta('footerLink', { site: pick(settings.site_name, locale) }), external: false });
+
   const legal: [string, string][] = [
     [tm('director'), v('director')],
     [tm('editorInChief'), v('editor_in_chief')],

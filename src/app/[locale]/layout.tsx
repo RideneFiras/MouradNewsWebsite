@@ -27,6 +27,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: { default: name, template: `%s | ${name}` },
     applicationName: name,
     icons: favicon ? { icon: favicon, apple: favicon } : undefined,
+    // "Add to Home Screen": Android reads the manifest, iOS these apple-* tags.
+    manifest: '/manifest.webmanifest',
+    appleWebApp: { capable: true, title: name, statusBarStyle: 'default' },
     formatDetection: { telephone: false, email: false, address: false },
   };
 }

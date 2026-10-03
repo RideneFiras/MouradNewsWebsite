@@ -166,5 +166,20 @@
     "text": "Nous utilisons les services de Google pour mesurer l’audience et afficher de la publicité.",
     "accept": "Accepter",
     "reject": "Refuser"
+  },
+  "app": {
+    "title": "{site} sur votre téléphone",
+    "intro": "Ajoutez {site} à l’écran d’accueil de votre téléphone : il s’ouvre comme une application, sans passer par un store.",
+    "install": "Installer {site}",
+    "installed": "{site} est installé sur cet appareil : ouvrez-le depuis l’écran d’accueil.",
+    "androidTitle": "Sur Android",
+    "android1": "Ouvrez le site dans Chrome, puis touchez « Installer » ci-dessus s’il apparaît.",
+    "android2": "Ou ouvrez le menu du navigateur (⋮) et choisissez « Ajouter à l’écran d’accueil » ou « Installer l’application ».",
+    "iosTitle": "Sur iPhone et iPad",
+    "ios1": "Ouvrez le site dans Safari.",
+    "ios2": "Touchez le bouton Partager (le carré avec une flèche) en bas de l’écran.",
+    "ios3": "Choisissez « Sur l’écran d’accueil », puis « Ajouter ».",
+    "privacy": "L’application ne demande aucune autorisation et ne collecte rien de plus : c’est le site lui-même, dans sa propre fenêtre.",
+    "footerLink": "{site} sur votre téléphone"
   }
 }

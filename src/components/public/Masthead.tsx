@@ -22,6 +22,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
   breaking: ArticleCard[];
 }) {
   const t = await getTranslations({ locale, namespace: 'common' });
+  const ta = await getTranslations({ locale, namespace: 'app' });
   const now = new Date();
   const top = categories.filter((c) => !c.parent_id && c.show_in_nav);
   const childrenOf = (id: string) => categories.filter((c) => c.parent_id === id);
@@ -80,7 +81,10 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
               label: categoryName(c, locale),
               children: childrenOf(c.id).map((s) => ({ href: sectionHref(locale, s.slug), label: categoryName(s, locale) })),
             }))}
-            pages={pages.filter((p) => p.show_in_footer).map((p) => ({ href: pageHref(locale, p.slug, p.page_kind), label: p.title }))}
+            pages={[
+              ...pages.filter((p) => p.show_in_footer).map((p) => ({ href: pageHref(locale, p.slug, p.page_kind), label: p.title })),
+              { href: `/${locale}/app`, label: ta('footerLink', { site: pick(settings.site_name, locale) }) },
+            ]}
           />
           <Nameplate settings={settings} locale={locale} size="compact" />
           <Link prefetch={false} href={`/${locale}/search`} className="inline-flex h-11 w-11 items-center justify-center" aria-label={t('search')}>
