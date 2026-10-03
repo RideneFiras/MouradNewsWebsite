@@ -96,9 +96,8 @@ If there is no title, ask for one. Don't invent it.
      Firas can also say "no subtitle".
    - `excerpt`, SEO description, slug, reading time: leave empty, the database derives them
      from the text.
-   - `status`: `draft` unless Firas says publish now (`published`) or gives a date
-     (`scheduled` + `scheduled_for` as `YYYY-MM-DDTHH:MM` Tunis time). `is_breaking`/`is_featured`
-     only if asked.
+   - `status`: **always `draft` in the spec** (Firas, 2026-10-03: "always push to draft on the
+     website"). Going live is a separate step (8). `is_breaking`/`is_featured` only if asked.
 4. **Write the spec** to `posts/<n>/spec.json` (or the scratchpad for pasted text), see the
    format below. Write the original text, without the section line, to `posts/<n>/source.txt`
    (byte-for-byte copy of the rest of `post.txt`, e.g. `tail -n +2 post.txt > source.txt`).
@@ -107,18 +106,22 @@ If there is no title, ask for one. Don't invent it.
 6. **Fidelity**: `pnpm -s publish:article fidelity posts/<n>/spec.json posts/<n>/source.txt`.
    It must end with "✓ … word for word". If it lists missing or added words, fix the spec (never
    the source) and run it again.
-7. **Show Firas a summary** before writing anything: title, subtitle (marked "written by Claude"),
-   section(s), genre, tags, byline, status, cover + where each picture goes, alt texts, the layout
-   choices you made (joined lines, headings, bold labels, tables), the typo fixes (`corrections`,
-   from → to), any other probable error you noticed and left unchanged,
-   (left unchanged), and the fidelity result. Ask: draft, publish now, or schedule? Wait for the answer.
-8. **Publish**: `pnpm -s publish:article publish posts/<n>/spec.json`. It uploads the pictures
-   (WebP 480/960/1600 + original ≤ 2400 px, EXIF removed), inserts the article and its links, and
-   prints the admin and public links. Give Firas both links. A published article shows on the
-   homepage and lists within about a minute (pages are cached).
-9. If something must change after publishing, do it in the admin (link printed), or ask before
-   changing the database directly (see `supabase/MODULE.md`). Don't run `publish` twice for the
-   same post: it would create a second article.
+7. **Save it on the site as a draft, without asking**: `pnpm -s publish:article publish
+   posts/<n>/spec.json` (status `draft`). It uploads the pictures (WebP 480/960/1600 + original
+   ≤ 2400 px, EXIF removed), inserts the article and its links, writes `posts/<n>/article.json`
+   (so the same post can never be inserted twice) and prints the admin link. A draft is not
+   public. Then **show Firas a summary** with the admin link: title, subtitle (marked "written by
+   Claude"), section(s), genre, tags, byline, cover + where each picture goes, alt texts, the
+   layout choices you made (joined lines, headings, bold labels, tables), the typo fixes
+   (`corrections`, from → to), any other probable error you noticed and left unchanged, and the
+   fidelity result. Ask: publish now, schedule, or leave it as a draft?
+8. **Go live only on Firas's word**: `pnpm -s publish:article status posts/<n>/spec.json published`
+   (or `scheduled 2026-10-05T08:00`, Tunis time). It prints the short public link
+   `/{lang}/article/{id}`; give it to Firas. A published article shows on the homepage and lists
+   within about a minute (pages are cached). Firas can also press publish in the admin himself.
+9. If the text or metadata must change after saving, do it in the admin (link printed), or ask
+   before changing the database directly (see `supabase/MODULE.md`). Never run `publish` again for
+   a saved post (it refuses when `article.json` exists).
 
 ## Spec format (`spec.json`)
 
@@ -164,6 +167,7 @@ Embeds: YouTube, Facebook, Instagram, X only.
 
 - Change or add words in the title or body, beyond the typo fixes listed in `corrections`
   (fidelity must pass).
-- Publish without Firas's explicit "publish" (default is `draft`).
+- Make an article public (`status … published`/`scheduled`) without Firas's explicit "publish".
+  Saving it as a draft is always fine.
 - Use demo authors (`demo-*`) or demo tags for real articles.
 - Write statistics tables, or touch other articles.

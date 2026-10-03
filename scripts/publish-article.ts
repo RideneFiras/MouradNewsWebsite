@@ -7,12 +7,13 @@
 //   pnpm publish:article options               # sections, genres, tags, authors (live)
 //   pnpm publish:article check <spec.json>     # validate + render, write nothing
 //   pnpm publish:article fidelity <spec.json> <source.txt>  # word-by-word diff vs the original text
-//   pnpm publish:article publish <spec.json>   # upload images, insert the article
+//   pnpm publish:article publish <spec.json>   # upload images, insert the article (once; remembered in article.json)
+//   pnpm publish:article status <spec.json> published | draft | scheduled YYYY-MM-DDTHH:MM   # change it afterwards
 //
 // Needs .env.local: NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (server only).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { basename, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import sharp from 'sharp';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -316,6 +317,8 @@ async function check(file: string) {
 
 async function publish(file: string) {
   const spec = readSpec(file);
+  const saved = savedFile(file);
+  if (existsSync(saved)) fail(`already saved on the site (${saved}); change it with: status ${file} published|draft|scheduled`);
   const client = db();
   const r = await resolveSpec(client, spec);
 
@@ -377,12 +380,35 @@ async function publish(file: string) {
   ]);
   for (const j of joins) if (j?.error) fail(`article saved (id ${art.id}) but a link table failed: ${j.error.message}. Fix it in the admin.`);
 
+  writeFileSync(saved, JSON.stringify({ id: art.id, public_id: art.public_id, language: art.language }, null, 2) + '\n');
+
   // Short link (no slug): an Arabic slug percent-encodes into ~250 characters. Same page, see DECISIONS.md.
   const path = `/${art.language}/article/${art.public_id}`;
   console.log(`\n✓ saved as ${art.status}`);
   console.log(`  admin:  ${SITE_URL}/${art.language}/admin/articles/${art.id}`);
   if (art.status === 'published') console.log(`  public: ${SITE_URL}${path}  (homepage and lists refresh within about a minute)`);
   if (art.status === 'scheduled') console.log(`  goes live at ${spec.scheduled_for} (Tunis): ${SITE_URL}${path}`);
+}
+
+/** Remembers the article a spec was saved as, so it is never inserted twice. */
+const savedFile = (spec: string) => join(dirname(resolve(spec)), 'article.json');
+
+/** Change the status of the article saved from this spec (draft → published, scheduled…). */
+async function setStatus(file: string, status: string, when?: string) {
+  const saved = savedFile(file);
+  if (!existsSync(saved)) fail(`not saved on the site yet (no ${saved}): run publish first`);
+  const art = JSON.parse(readFileSync(saved, 'utf8')) as { id: string; public_id: number; language: string };
+  const patch: Record<string, unknown> =
+    status === 'published' ? { status, scheduled_for: null }
+    : status === 'draft' ? { status, published_at: null, scheduled_for: null }
+    : status === 'scheduled' && when && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(when) ? { status, scheduled_for: tunisToIso(when), published_at: null }
+    : fail('usage: status <spec.json> published | draft | scheduled YYYY-MM-DDTHH:MM');
+  const { data, error } = await db().from('articles').update(patch).eq('id', art.id).select('status').single();
+  if (error || !data) fail(`status change failed: ${error?.message}`);
+  const path = `/${art.language}/article/${art.public_id}`;
+  console.log(`✓ now ${data.status}${when ? ` (${when} Tunis)` : ''}`);
+  console.log(`  admin:  ${SITE_URL}/${art.language}/admin/articles/${art.id}`);
+  if (data.status === 'published') console.log(`  public: ${SITE_URL}${path}  (homepage and lists refresh within about a minute)`);
 }
 
 /** Every word of the spec that readers will see, in reading order. */
@@ -439,7 +465,7 @@ function fidelity(file: string, sourceFile: string) {
   process.exit(2);
 }
 
-const [cmd, file, extra] = process.argv.slice(2);
+const [cmd, file, extra, extra2] = process.argv.slice(2);
 if (cmd === 'fidelity') fidelity(file!, extra!);
-const run = cmd === 'fidelity' ? Promise.resolve() : cmd === 'options' ? options() : cmd === 'check' ? check(file!) : cmd === 'publish' ? publish(file!) : fail('usage: publish-article.ts options | check <spec.json> | fidelity <spec.json> <source.txt> | publish <spec.json>');
+const run = cmd === 'fidelity' ? Promise.resolve() : cmd === 'options' ? options() : cmd === 'check' ? check(file!) : cmd === 'publish' ? publish(file!) : cmd === 'status' ? setStatus(file!, extra ?? '', extra2) : fail('usage: publish-article.ts options | check <spec.json> | fidelity <spec.json> <source.txt> | publish <spec.json> | status <spec.json> published|draft|scheduled [YYYY-MM-DDTHH:MM]');
 run.catch((e) => fail(e instanceof Error ? e.message : String(e)));
