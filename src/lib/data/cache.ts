@@ -15,6 +15,7 @@ export const TAGS = {
   ads: 'ads',
   stats: 'stats',
   redirects: 'redirects',
+  events: 'events',
 } as const;
 
 export const ALL_TAGS = Object.values(TAGS);

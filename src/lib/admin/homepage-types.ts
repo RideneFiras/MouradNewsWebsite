@@ -1,7 +1,7 @@
 // Zod-free constants and types for the homepage builder (client component).
 // Validation schemas live in homepage-config.ts (server).
 
-export const SECTION_TYPES = ['lead', 'breaking_ticker', 'latest_list', 'category_block', 'editor_picks', 'most_read', 'opinion', 'format_block', 'tag_block', 'ad_slot', 'text_block'] as const;
+export const SECTION_TYPES = ['lead', 'breaking_ticker', 'latest_list', 'category_block', 'editor_picks', 'most_read', 'opinion', 'format_block', 'tag_block', 'ad_slot', 'text_block', 'agenda'] as const;
 export type SectionType = (typeof SECTION_TYPES)[number];
 
 export interface BuilderSection {
@@ -21,6 +21,7 @@ const DEFAULTS: Partial<Record<SectionType, Record<string, unknown>>> = {
   editor_picks: { count: 4 },
   most_read: { window_days: 7, count: 5 },
   opinion: { count: 4 },
+  agenda: { count: 5 },
 };
 
 export function defaultConfig(type: SectionType, firstIds: { category?: string; format?: string; tag?: string }): Record<string, unknown> {

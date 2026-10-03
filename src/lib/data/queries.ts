@@ -3,7 +3,7 @@ import { publicClient } from '@/lib/supabase/public';
 import { cached, TAGS } from './cache';
 import { mergeSettings, type SiteSettings } from './settings';
 import type {
-  ActiveCampaign, AdSlot, ArticleCard, ArticleFull, Category, Format, HomepageSection, Lang,
+  ActiveCampaign, AdSlot, ArticleCard, ArticleFull, CalendarEvent, Category, Format, HomepageSection, Lang,
   MediaRef, MenuItem, PublicAuthor, StaticPage, Tag,
 } from './types';
 
@@ -350,4 +350,60 @@ export const getMediaKitNumbers = cached(
   'media-kit-numbers',
   [TAGS.stats, TAGS.settings],
   3600,
+);
+
+// ---------------------------------------------------------------- calendar (أجندة)
+
+const EVENT_COLUMNS = 'id, kind, title_ar, title_fr, starts_on, ends_on, start_time, end_time, place, is_estimate, '
+  + 'town:tags!events_town_tag_id_fkey(slug, name_ar, name_fr), article:articles!events_article_id_fkey(public_id, slug, language, title)';
+const eventOrder = (a: CalendarEvent, b: CalendarEvent) =>
+  a.starts_on.localeCompare(b.starts_on) || (a.kind === b.kind ? 0 : a.kind === 'holiday' ? -1 : 1) || (a.start_time ?? '').localeCompare(b.start_time ?? '');
+
+/** Events overlapping [from, to] (YYYY-MM-DD). RLS hides events whose article isn't public. */
+export const getEventsBetween = cached(
+  async (from: string, to: string): Promise<CalendarEvent[]> => {
+    const { data, error } = await publicClient().from('events').select(EVENT_COLUMNS)
+      .lte('starts_on', to)
+      .or(`ends_on.gte.${from},and(ends_on.is.null,starts_on.gte.${from})`)
+      .order('starts_on').limit(300);
+    if (error) fail('events', error);
+    return ((data ?? []) as unknown as CalendarEvent[]).sort(eventOrder);
+  },
+  'events-between',
+  [TAGS.events, TAGS.articles],
+);
+
+/** Next events from `today` on (holidays included), for the homepage block. */
+export const getUpcomingEvents = cached(
+  async (today: string, limit: number): Promise<CalendarEvent[]> => {
+    const { data, error } = await publicClient().from('events').select(EVENT_COLUMNS)
+      .or(`starts_on.gte.${today},ends_on.gte.${today}`)
+      .order('starts_on').limit(limit * 2);
+    if (error) fail('upcoming events', error);
+    return ((data ?? []) as unknown as CalendarEvent[]).sort(eventOrder).slice(0, limit);
+  },
+  'events-upcoming',
+  [TAGS.events, TAGS.articles],
+);
+
+/** Events announced by one article (shown in a box on the article page). */
+export const getEventsForArticle = cached(
+  async (articleId: string): Promise<CalendarEvent[]> => {
+    const { data, error } = await publicClient().from('events').select(EVENT_COLUMNS).eq('article_id', articleId).order('starts_on');
+    if (error) fail('article events', error);
+    return ((data ?? []) as unknown as CalendarEvent[]).sort(eventOrder);
+  },
+  'events-article',
+  [TAGS.events, TAGS.articles],
+);
+
+/** Place tags (towns), for the towns page. */
+export const getPlaceTags = cached(
+  async (): Promise<Tag[]> => {
+    const { data, error } = await publicClient().from('tags').select('*').eq('kind', 'place').order('name_ar');
+    if (error) fail('place tags', error);
+    return (data ?? []) as Tag[];
+  },
+  'place-tags',
+  [TAGS.taxonomy],
 );

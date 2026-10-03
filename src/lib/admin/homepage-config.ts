@@ -17,6 +17,7 @@ export const SECTION_CONFIG = {
   tag_block: z.object({ tag_id: id, count: count(4, 8) }),
   ad_slot: z.object({ ad_slot_key: z.string().regex(/^[a-z0-9_]+$/) }),
   text_block: z.object({ text_ar: z.string().max(2000).default(''), text_fr: z.string().max(2000).default('') }),
+  agenda: z.object({ count: count(5, 10) }),
 } as const;
 
 export { SECTION_TYPES, defaultConfig, type BuilderSection, type SectionType } from './homepage-types';

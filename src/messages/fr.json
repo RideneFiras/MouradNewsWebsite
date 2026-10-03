@@ -181,5 +181,32 @@
     "ios3": "Choisissez « Sur l’écran d’accueil », puis « Ajouter ».",
     "privacy": "L’application ne demande aucune autorisation et ne collecte rien de plus : c’est le site lui-même, dans sa propre fenêtre.",
     "footerLink": "{site} sur votre téléphone"
+  },
+  "agenda": {
+    "title": "Agenda",
+    "intro": "Les rendez-vous du Cap Bon : festivals, spectacles, manifestations, et les jours fériés.",
+    "holiday": "Jour férié",
+    "estimate": "Date approximative",
+    "readArticle": "Lire l’article",
+    "addToCalendar": "Ajouter à mon agenda",
+    "until": "jusqu’au",
+    "today": "Aujourd’hui",
+    "weekdaysShort": [
+      "lu",
+      "ma",
+      "me",
+      "je",
+      "ve",
+      "sa",
+      "di"
+    ],
+    "prev": "Mois précédent",
+    "next": "Mois suivant",
+    "empty": "Aucun rendez-vous pour ce mois pour l’instant.",
+    "upcoming": "Prochains rendez-vous",
+    "inArticle": "Rendez-vous",
+    "all": "Tout l’agenda",
+    "towns": "Les villes du Cap Bon",
+    "townsIntro": "L’actualité de chaque ville."
   }
 }

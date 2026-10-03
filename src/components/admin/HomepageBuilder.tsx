@@ -128,6 +128,7 @@ function SectionForm({ s, onSave, categories, formats, tags, adSlots }: { s: Bui
       {s.type === 'format_block' && (<>{select('c_format_id', t('format'), formats.map((x) => ({ v: x.id, l: x.name })), c.format_id)}{num('c_count', t('count'), c.count, 8)}</>)}
       {s.type === 'tag_block' && (<>{select('c_tag_id', t('tag'), tags.map((x) => ({ v: x.id, l: x.name })), c.tag_id)}{num('c_count', t('count'), c.count, 8)}</>)}
       {(s.type === 'latest_list' || s.type === 'editor_picks' || s.type === 'opinion') && num('c_count', t('count'), c.count, 30)}
+      {s.type === 'agenda' && num('c_count', t('count'), c.count, 10)}
       {s.type === 'most_read' && (<>{num('c_window_days', t('windowDays'), c.window_days, 90)}{num('c_count', t('count'), c.count, 10)}</>)}
       {s.type === 'ad_slot' && select('c_ad_slot_key', t('adSlot'), adSlots.map((a) => ({ v: a.key, l: a.name })), c.ad_slot_key)}
       {s.type === 'text_block' && (

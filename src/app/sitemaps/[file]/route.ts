@@ -40,7 +40,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ file: s
   switch (file) {
     case 'sections.xml': {
       const cats = await getCategories();
-      return xmlResponse(urlset([...twice(base, ''), ...twice(base, '/latest'), ...cats.flatMap((c) => twice(base, `/section/${c.slug}`))]));
+      return xmlResponse(urlset([...twice(base, ''), ...twice(base, '/latest'), ...twice(base, '/agenda'), ...twice(base, '/towns'), ...cats.flatMap((c) => twice(base, `/section/${c.slug}`))]));
     }
     case 'tags.xml': {
       // Only tags with at least 3 articles (docs/08: avoid thin pages).

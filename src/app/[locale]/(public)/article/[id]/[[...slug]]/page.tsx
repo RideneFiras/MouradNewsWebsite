@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { ArticleView } from '@/components/public/ArticleView';
-import { getArticle, getAuthorBySlug, getMostRead, getSettings, getTranslations as getArticleTranslations, languagesFor, listCards } from '@/lib/data/queries';
+import { getArticle, getAuthorBySlug, getMostRead, getSettings, getTranslations as getArticleTranslations, languagesFor, listCards, getEventsForArticle } from '@/lib/data/queries';
 import type { AppLocale } from '@/lib/i18n/routing';
 import { articleHref, sectionHref } from '@/lib/public/links';
 import { siteUrl } from '@/lib/env';
@@ -55,10 +55,11 @@ export default async function ArticlePage({ params }: Params) {
   const settings = await getSettings();
   const langs = languagesFor(locale, settings);
   const since = daysAgoIso(180);
-  const [byTags, bySection, mostRead] = await Promise.all([
+  const [byTags, bySection, mostRead, events] = await Promise.all([
     a.tag_ids.length ? listCards({ langs: [a.language], tagIds: a.tag_ids, excludeIds: [a.id], since, limit: 3 }) : Promise.resolve({ items: [], total: 0 }),
     listCards({ langs: [a.language], categoryIds: [a.category_id], excludeIds: [a.id], since, limit: 8 }),
     getMostRead(langs, 7, 5),
+    getEventsForArticle(a.id),
   ]);
   const primary = a.authors[0];
   const author = primary?.linkable ? await getAuthorBySlug(primary.slug) : null;
@@ -75,7 +76,7 @@ export default async function ArticlePage({ params }: Params) {
   return (
     <>
       <span hidden data-lang-switch={switchHref} />
-      <ArticleView a={a} locale={locale} settings={settings} related={related} moreFromSection={moreFromSection} mostRead={mostRead.filter((x) => x.id !== a.id)} authorBio={authorBio} />
+      <ArticleView a={a} locale={locale} settings={settings} related={related} moreFromSection={moreFromSection} mostRead={mostRead.filter((x) => x.id !== a.id)} authorBio={authorBio} events={events} />
       <JsonLd data={articleJsonLd(a, settings, [
         { name: locale === 'fr' ? 'Accueil' : 'الرئيسية', url: `${base}/${locale}` },
         { name: sectionName, url: `${base}${sectionHref(a.language, a.category_slug)}` },

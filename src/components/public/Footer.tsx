@@ -45,6 +45,8 @@ export async function Footer({ locale, settings, categories, menu, pages }: {
 
   // Reader tools that exist whatever the menu says: the phone "app" page.
   const ta = await getTranslations({ locale, namespace: 'app' });
+  const tg = await getTranslations({ locale, namespace: 'agenda' });
+  links.push({ href: `/${locale}/agenda`, label: tg('title'), external: false }, { href: `/${locale}/towns`, label: tg('towns'), external: false });
   links.push({ href: `/${locale}/app`, label: ta('footerLink', { site: pick(settings.site_name, locale) }), external: false });
 
   const legal: [string, string][] = [

@@ -24,6 +24,7 @@ export function Sidebar({ locale, role, name, reviewCount, unreadMessages }: { l
     { key: 'media', href: `${b}/media` },
     { key: 'categories', href: `${b}/categories`, roles: ED },
     { key: 'tags', href: `${b}/tags`, roles: ED },
+    { key: 'agenda', href: `${b}/agenda`, roles: ED },
     { key: 'formats', href: `${b}/formats`, roles: ED },
     { key: 'homepage', href: `${b}/homepage`, roles: ED },
     { key: 'menus', href: `${b}/menus`, roles: ED },

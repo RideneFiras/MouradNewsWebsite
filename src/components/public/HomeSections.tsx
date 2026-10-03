@@ -4,6 +4,8 @@ import type { Lang } from '@/lib/data/types';
 import type { ResolvedSection } from '@/lib/public/homepage';
 import { formatHref, sectionHref, topicHref } from '@/lib/public/links';
 import { AdSlot } from './AdSlot';
+import { UpcomingList } from './Agenda';
+import { agendaLabels } from '@/lib/public/agenda';
 import { HeadlineItem, LeadStory, ListItem, NumberedItem, OpinionItem, SecondaryStory, SectionHeader } from './story';
 
 type Of<K extends ResolvedSection['kind']> = Extract<ResolvedSection, { kind: K }>;
@@ -182,6 +184,18 @@ export async function HomeSections({ sections, locale }: { sections: ResolvedSec
           </section>,
         );
         break;
+      case 'agenda': {
+        const tg = await getTranslations({ locale, namespace: 'agenda' });
+        out.push(
+          <section key={s.id} className="container-page mt-12 grid lg:grid-cols-12" aria-labelledby={`h-${s.id}`}>
+            <div className="lg:col-span-6">
+              <SectionHeader id={`h-${s.id}`} title={s.title || tg('upcoming')} href={`/${locale}/agenda`} moreLabel={tg('all')} />
+              <UpcomingList events={s.events} locale={locale} labels={await agendaLabels(locale)} />
+            </div>
+          </section>,
+        );
+        break;
+      }
       case 'ad':
         out.push(<AdSlot key={s.id} slotKey={s.slotKey} locale={locale} className="container-page mt-12" />);
         break;

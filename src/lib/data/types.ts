@@ -178,7 +178,7 @@ export interface StaticPage {
 
 export type HomepageSectionType =
   | 'lead' | 'breaking_ticker' | 'latest_list' | 'category_block' | 'editor_picks'
-  | 'most_read' | 'opinion' | 'format_block' | 'tag_block' | 'ad_slot' | 'text_block';
+  | 'most_read' | 'opinion' | 'format_block' | 'tag_block' | 'ad_slot' | 'text_block' | 'agenda';
 
 export interface HomepageSection {
   id: string;
@@ -218,4 +218,20 @@ export interface ActiveCampaign {
   mobile_variants: Record<string, string> | null;
   mobile_width: number | null;
   mobile_height: number | null;
+}
+
+/** A calendar entry (أجندة): an event or a public holiday, optionally linked to an article. */
+export interface CalendarEvent {
+  id: string;
+  kind: 'event' | 'holiday';
+  title_ar: string;
+  title_fr: string | null;
+  starts_on: string; // YYYY-MM-DD
+  ends_on: string | null;
+  start_time: string | null; // HH:MM:SS
+  end_time: string | null;
+  place: string | null;
+  is_estimate: boolean;
+  town: { slug: string; name_ar: string; name_fr: string | null } | null;
+  article: { public_id: number; slug: string | null; language: Lang; title: string } | null;
 }

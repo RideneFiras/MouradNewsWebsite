@@ -1,6 +1,7 @@
 import 'server-only';
-import { getCategories, getFormats, getMostRead, getTagBySlug, getTagsByIds, listCards } from '@/lib/data/queries';
-import type { ArticleCard, Category, Format, HomepageSection, Lang, Tag } from '@/lib/data/types';
+import { getCategories, getFormats, getMostRead, getTagBySlug, getTagsByIds, getUpcomingEvents, listCards } from '@/lib/data/queries';
+import type { ArticleCard, CalendarEvent, Category, Format, HomepageSection, Lang, Tag } from '@/lib/data/types';
+import { currentTimeMs, tunisDayKey } from '@/lib/format/date';
 
 export type CategoryLayout = 'one_big_four_list' | 'feature_plus_list' | 'three_columns' | 'list_only';
 
@@ -14,7 +15,8 @@ export type ResolvedSection =
   | { kind: 'format'; id: string; title: string; format: Format; items: ArticleCard[] }
   | { kind: 'tag'; id: string; title: string; tag: Tag; items: ArticleCard[] }
   | { kind: 'ad'; id: string; slotKey: string }
-  | { kind: 'text'; id: string; text: string };
+  | { kind: 'text'; id: string; text: string }
+  | { kind: 'agenda'; id: string; title: string | null; events: CalendarEvent[] };
 
 const num = (v: unknown, d: number, max = 20) => {
   const n = Number(v);
@@ -129,6 +131,12 @@ export async function resolveHomepage(sections: HomepageSection[], locale: Lang,
       case 'text_block': {
         const text = (locale === 'fr' ? str(c.text_fr) || str(c.text_ar) : str(c.text_ar)) ?? '';
         if (text.trim()) out.push({ kind: 'text', id: s.id, text });
+        break;
+      }
+      case 'agenda': {
+        // Next dates on the calendar (holidays included). Left out when nothing is coming up.
+        const events = await getUpcomingEvents(tunisDayKey(currentTimeMs()), num(c.count, 5, 10));
+        if (events.length) out.push({ kind: 'agenda', id: s.id, title: title(s), events });
         break;
       }
       case 'breaking_ticker':

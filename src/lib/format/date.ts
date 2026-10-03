@@ -169,3 +169,24 @@ export function formatMonth(iso: string, locale: Locale): string {
 
 /** Current time in ms (server components: keeps Date.now out of render bodies for the purity lint). */
 export const currentTimeMs = () => Date.now();
+
+/** Weekday (0 = Sunday) of a calendar day "YYYY-MM-DD". */
+export function weekdayOfDay(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+/** «السبت 3 أكتوبر» / «samedi 3 oct.» for a calendar day; withYear adds the year. */
+export function formatDayWithWeekday(iso: string, locale: Locale, withYear = false): string {
+  const wd = (locale === 'ar' ? AR_WEEKDAYS : FR_WEEKDAYS)[weekdayOfDay(iso)];
+  return `${wd} ${formatCalendarDay(iso, locale, withYear)}`;
+}
+
+/** "HH:MM:SS" (Postgres time) as "18:30". */
+export const formatClock = (t: string | null | undefined): string => (t ? t.slice(0, 5) : '');
+
+/** "YYYY-MM-DD" plus n days (calendar arithmetic, no time zone involved). */
+export function addDays(iso: string, n: number): string {
+  const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
+}

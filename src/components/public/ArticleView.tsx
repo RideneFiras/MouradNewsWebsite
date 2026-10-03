@@ -12,16 +12,21 @@ import { AdSlot } from './AdSlot';
 import { Img } from './Img';
 import { ListenButton } from './ListenButton';
 import { ShareRow } from './ShareRow';
+import { ArticleEvents } from './Agenda';
+import { agendaLabels } from '@/lib/public/agenda';
+import type { CalendarEvent } from '@/lib/data/types';
 import { HeadlineItem, ListItem, SectionHeader } from './story';
 import { SideColumn } from './SideColumn';
 
-export async function ArticleView({ a, locale, settings, related, moreFromSection, mostRead, authorBio = null, preview = false }: {
+export async function ArticleView({ a, locale, settings, related, moreFromSection, mostRead, authorBio = null, preview = false, events = [] }: {
   a: ArticleFull; locale: Lang; settings: SiteSettings; related: ArticleCard[]; moreFromSection: ArticleCard[]; mostRead: ArticleCard[]; authorBio?: string | null; preview?: boolean;
+  events?: CalendarEvent[];
 }) {
   const lang = a.language;
   const t = await getTranslations({ locale: lang, namespace: 'article' });
   const tt = await getTranslations({ locale: lang, namespace: 'time' });
   const tc = await getTranslations({ locale: lang, namespace: 'common' });
+  const tg = await getTranslations({ locale: lang, namespace: 'agenda' });
   const url = `${siteUrl()}${articleShortHref(a)}`;
   const names = bylineNames(a);
   const adsAllowed = a.allow_ads && !a.is_sponsored && !preview;
@@ -114,6 +119,8 @@ export async function ArticleView({ a, locale, settings, related, moreFromSectio
                 {c.adAfter && <AdSlot slotKey={c.adAfter} locale={lang} categoryId={a.category_id} className="my-8" />}
               </div>
             ))}
+
+            <ArticleEvents events={events} locale={lang} labels={await agendaLabels(lang)} heading={tg('inArticle')} />
 
             {/* Share row after the body, not under the title: above a tall cover it read as the
                 end of the post, so readers took the dek for the whole article. */}

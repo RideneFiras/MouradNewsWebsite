@@ -23,6 +23,7 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
 }) {
   const t = await getTranslations({ locale, namespace: 'common' });
   const ta = await getTranslations({ locale, namespace: 'app' });
+  const tg = await getTranslations({ locale, namespace: 'agenda' });
   const now = new Date();
   const top = categories.filter((c) => !c.parent_id && c.show_in_nav);
   const childrenOf = (id: string) => categories.filter((c) => c.parent_id === id);
@@ -80,7 +81,10 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
               href: sectionHref(locale, c.slug),
               label: categoryName(c, locale),
               children: childrenOf(c.id).map((s) => ({ href: sectionHref(locale, s.slug), label: categoryName(s, locale) })),
-            }))}
+            })).concat([
+              { href: `/${locale}/agenda`, label: tg('title'), children: [] },
+              { href: `/${locale}/towns`, label: tg('towns'), children: [] },
+            ])}
             pages={[
               ...pages.filter((p) => p.show_in_footer).map((p) => ({ href: pageHref(locale, p.slug, p.page_kind), label: p.title })),
               { href: `/${locale}/app`, label: ta('footerLink', { site: pick(settings.site_name, locale) }) },
@@ -139,6 +143,11 @@ export async function Masthead({ locale, settings, categories, pages, latest, br
                 </li>
               );
             })}
+            <li>
+              <Link prefetch={false} href={`/${locale}/agenda`} data-section="agenda" className="nav-link inline-flex min-h-11 items-center border-b-2 border-transparent font-ui text-[15px] font-semibold lg:text-[16px]">
+                {tg('title')}
+              </Link>
+            </li>
             <li>
               <Link prefetch={false} href={`/${locale}/latest`} className="nav-link inline-flex min-h-11 items-center border-b-2 border-transparent font-ui text-[15px] font-semibold text-ink-2 lg:text-[16px]">
                 {t('allNews')}
