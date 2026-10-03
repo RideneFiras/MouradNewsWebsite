@@ -48,6 +48,12 @@ session continuing the work._
 - Every main folder has a `MODULE.md` (map in CLAUDE.md). **`supabase/MODULE.md` is the database definition**: tables, roles, views, RPCs, triggers, cron, and how to change it.
 - The live Supabase project has **no migration history table**: apply new migrations with the Supabase MCP `apply_migration`, never `supabase db push`.
 
+## Logo and site icon (2026-10-03)
+
+- The Borj Kelibia mark (`design/logo/borj-mark.svg`) is the site logo, uploaded to the media library (`brand/…`) and set in Settings with «الاسم بالخط المغربي» on: the mark shows above the calligraphic name on the masthead and beside it in the mobile/sticky bars and footer (`Nameplate.tsx`). Turning that option off shows the uploaded image alone.
+- Site icon: `design/icon/icon-480.png` (made by `node design/icon/render.mjs` from `borj-icon.svg`), set as «أيقونة المتصفح». PNG, not SVG, so iOS home screens and Google results use it too.
+- `/publish-article` may now fix sure typos, listed in `spec.corrections` and checked by `fidelity`; it prints the short link `/{lang}/article/{id}`.
+
 ## Next 5 concrete steps (for whoever continues)
 
 1. Firas: Supabase Auth URLs for the live address (above), then log in on https://www.elborj.workers.dev/ar/admin/login.
