@@ -180,7 +180,12 @@
     "ios2": "Touchez le bouton Partager (le carré avec une flèche) en bas de l’écran.",
     "ios3": "Choisissez « Sur l’écran d’accueil », puis « Ajouter ».",
     "privacy": "L’application ne demande aucune autorisation et ne collecte rien de plus : c’est le site lui-même, dans sa propre fenêtre.",
-    "footerLink": "{site} sur votre téléphone"
+    "footerLink": "{site} sur votre téléphone",
+    "bannerText": "Installez El Borj sur votre téléphone",
+    "bannerInstall": "Installer",
+    "bannerHow": "Comment ?",
+    "bannerClose": "Fermer",
+    "inApp": "Si vous avez ouvert le site depuis Facebook ou Instagram : touchez les trois points (⋯) et choisissez « Ouvrir dans le navigateur », puis suivez les étapes ci-dessous."
   },
   "agenda": {
     "title": "Agenda",

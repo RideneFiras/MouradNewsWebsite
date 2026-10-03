@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     metadataBase: new URL(siteUrl()),
     title: { default: name, template: `%s | ${name}` },
     applicationName: name,
-    icons: favicon ? { icon: favicon, apple: favicon } : undefined,
+    // Browser tab: the icon chosen in the admin. Home screen (iOS): a 180 px PNG on this site.
+    icons: { ...(favicon ? { icon: favicon } : {}), apple: '/icons/apple-touch-icon.png' },
     // "Add to Home Screen": Android reads the manifest, iOS these apple-* tags.
     manifest: '/manifest.webmanifest',
     appleWebApp: { capable: true, title: name, statusBarStyle: 'default' },

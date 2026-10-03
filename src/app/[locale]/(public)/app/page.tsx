@@ -33,7 +33,8 @@ export default async function AppPage({ params }: Params) {
       <article className="mx-auto max-w-[var(--measure)]">
         <h1 className="headline-1 pb-2">{t('title', { site })}</h1>
         <div className="section-rule mb-6" />
-        <p className="dek mb-8">{t('intro', { site })}</p>
+        <p className="dek mb-4">{t('intro', { site })}</p>
+        <p className="mb-8 border-s-[3px] border-accent ps-4 font-ui text-[16px] leading-relaxed">{t('inApp')}</p>
         <InstallApp labels={{
           install: t('install', { site }),
           installed: t('installed', { site }),

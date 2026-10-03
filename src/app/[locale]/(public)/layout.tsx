@@ -11,6 +11,8 @@ import { AdSlot } from '@/components/public/AdSlot';
 import { makeToken } from '@/lib/analytics/token';
 import { serverEnv } from '@/lib/env.server';
 import { isLocale } from '@/lib/i18n/routing';
+import { getTranslations } from 'next-intl/server';
+import { InstallBanner } from '@/components/public/InstallBanner';
 
 export default async function PublicLayout({ children, params }: { children: ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -20,6 +22,7 @@ export default async function PublicLayout({ children, params }: { children: Rea
   setRequestLocale(locale);
   const chrome = await getChrome(locale);
   const token = await makeToken(serverEnv.trackerSecret());
+  const ta = await getTranslations({ locale, namespace: 'app' });
   return (
     <>
       <Masthead locale={locale} settings={chrome.settings} categories={chrome.categories} pages={chrome.pages} latest={chrome.latest} breaking={chrome.breaking} />
@@ -30,6 +33,7 @@ export default async function PublicLayout({ children, params }: { children: Rea
       <NavActive />
       <Tracker token={token} locale={locale} />
       <Analytics settings={chrome.settings} />
+      <InstallBanner locale={locale} labels={{ text: ta('bannerText'), install: ta('bannerInstall'), how: ta('bannerHow'), close: ta('bannerClose') }} />
     </>
   );
 }
