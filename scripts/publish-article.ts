@@ -91,6 +91,8 @@ const Spec = z.object({
   is_featured: z.boolean().default(false),
   /** Reader-visible fields Claude wrote because the source had none (e.g. "subtitle"). Must be approved. */
   generated: z.array(z.enum(['subtitle', 'kicker_override', 'location'])).default([]),
+  /** Obvious typos Claude fixed (exact text in the source → fixed text). `fidelity` applies them to the source before comparing. */
+  corrections: z.array(z.object({ from: z.string().min(1), to: z.string(), why: z.string().optional() })).default([]),
   body: z.array(Block).min(1),
 });
 type SpecT = z.infer<typeof Spec>;
@@ -410,7 +412,12 @@ function specWords(spec: SpecT): string[] {
 function fidelity(file: string, sourceFile: string) {
   const spec = readSpec(file);
   if (!sourceFile || !existsSync(sourceFile)) fail(`source text not found: ${sourceFile}`);
-  const a = readFileSync(sourceFile, 'utf8').split(/\s+/).filter(Boolean);
+  let source = readFileSync(sourceFile, 'utf8');
+  for (const c of spec.corrections) {
+    if (!source.includes(c.from)) fail(`correction not found in the source: «${c.from}»`);
+    source = source.split(c.from).join(c.to);
+  }
+  const a = source.split(/\s+/).filter(Boolean);
   const b = specWords(spec);
   const n = a.length, m = b.length;
   const L = Array.from({ length: n + 1 }, () => new Uint32Array(m + 1));
@@ -423,8 +430,9 @@ function fidelity(file: string, sourceFile: string) {
   while (i < n) missing.push(`${a[i++]}  (word ${i})`);
   while (j < m) added.push(b[j++]!);
   console.log(`original: ${n} words · article: ${m} words · identical in order: ${L[0]![0]}`);
+  for (const c of spec.corrections) console.log(`typo fixed by Claude (needs approval): «${c.from}» → «${c.to}»${c.why ? `  (${c.why})` : ''}`);
   for (const f of spec.generated) console.log(`written by Claude (not part of the comparison, needs approval): ${f} = «${spec[f] ?? ''}»`);
-  if (!missing.length && !added.length) { console.log('✓ the article contains the original text word for word'); return; }
+  if (!missing.length && !added.length) { console.log(`✓ the article contains the original text word for word${spec.corrections.length ? ` (after the ${spec.corrections.length} typo fixes above)` : ''}`); return; }
   if (missing.length) console.log(`\nIn the original but NOT in the article (${missing.length}):\n  ${missing.join('\n  ')}`);
   if (added.length) console.log(`\nIn the article but NOT in the original (${added.length}):\n  ${added.join('\n  ')}`);
   process.exit(2);

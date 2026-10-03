@@ -6,9 +6,9 @@ description: Publish an article to the El Borj newspaper website from a text (pa
 # Publish an article on El Borj
 
 You turn a text the owner gives you into an article on the live site, **without changing a
-single word of it**. You decide the *format* (paragraphs, headings, lists, tables, where images go)
+single word of it** except obvious typing slips (see "Typo fixes" below). You decide the *format* (paragraphs, headings, lists, tables, where images go)
 and fill the *metadata* the text doesn't give (section, genre, tags, cover, alt text). The
-content itself is the journalist's and is never edited.
+content itself is the journalist's and is never rewritten.
 
 Tool: `scripts/publish-article.ts` (`pnpm -s publish:article …`). It stores the article exactly
 like the admin editor does (same editor JSON, same HTML renderer and sanitizer, same WebP image
@@ -16,12 +16,32 @@ sizes), so the result can be edited in the admin afterwards.
 
 ## The non-negotiable rule: the text stays as written
 
-- Copy every word **exactly**: same spelling, same mistakes, same punctuation, same spacing of
-  punctuation (« ، » « . »), same digits (don't convert ٣ ↔ 3), same Latin words and odd spellings
-  (e.g. `Avant _Gout` stays `Avant _Gout`), same quotes and dashes.
-- **Never** correct, rephrase, shorten, translate, summarise, reorder or add sentences inside the
-  body or the title. Not even an obvious typo. If you notice a probable error (e.g. a wrong year),
-  **point it out to Firas and ask**; change it only if he says so.
+- Copy every word **exactly**: same wording, same digits (don't convert ٣ ↔ 3), same Latin words
+  and odd spellings (e.g. `Avant _Gout` stays `Avant _Gout`), same quotes and dashes, except the
+  typo fixes allowed below.
+- **Never** rephrase, shorten, translate, summarise, reorder or add sentences inside the body or
+  the title. If you notice a probable error of *fact* (a wrong year, a wrong name, a date that
+  doesn't match its weekday), **point it out to Firas and ask**; change it only if he says so.
+
+### Typo fixes (allowed since 2026-10-03, only when you are very sure)
+
+Firas allowed fixing minor typing mistakes **when you are very sure** they are slips, not choices:
+- spacing around punctuation: `كلمة ،` → `كلمة،`, `2023.وتولى` → `2023. وتولى`, `" نادي"` → `"نادي"`;
+  missing space between a number and a word (`11أوت` → `11 أوت`);
+- a letter clearly dropped or doubled (`عل الألوان` → `على الألوان`);
+- standard hamza spelling: `الى` → `إلى`, hamzat wasl written as qat' (`الإحتفال` → `الاحتفال`,
+  `الإنضمام` → `الانضمام`), especially when the text itself spells the word correctly elsewhere;
+- a stray character from copy-paste (a lone `-` at a line start), an unclosed bracket whose end
+  is obvious.
+
+Never "fix": dialect or spoken forms (`اللي`, `ياهوى`, `راجعين`), names of people/places/events,
+style, word choice, grammar you'd merely write differently, missing final full stops, numbers or
+dates (those are *facts*: ask). If in doubt, leave it and mention it to Firas.
+
+Every fix goes in the spec's `corrections` list (`{ "from": exact text in source.txt, "to": fixed
+text, "why": "…" }`); the body then contains the fixed text. `fidelity` applies the corrections to
+the source before comparing, fails if a `from` isn't found, and lists every fix. Show the list to
+Firas in the summary (step 7): he approves the fixes together with the rest.
 - You may only change *layout*: join lines that are clearly one sentence broken by copy-paste
   (e.g. a line break around a Latin word), split paragraphs where the source has blank lines,
   keep meaningful line breaks inside a paragraph (`\n` in a string becomes a line break), make a
@@ -31,7 +51,8 @@ sizes), so the result can be edited in the admin afterwards.
 - Every visible field you write yourself (subtitle/dek, kicker) goes in `generated` and must be
   approved by Firas before publishing. Alt text is written by you (it describes the picture for
   blind readers and isn't shown on the page); captions and photo credits only come from Firas.
-- The `fidelity` command proves it: it must say **"word for word"** before you publish.
+- The `fidelity` command proves it: it must say **"word for word"** (after the listed typo fixes,
+  if any) before you publish.
 
 ## Input formats
 
@@ -88,7 +109,8 @@ If there is no title, ask for one. Don't invent it.
    the source) and run it again.
 7. **Show Firas a summary** before writing anything: title, subtitle (marked "written by Claude"),
    section(s), genre, tags, byline, status, cover + where each picture goes, alt texts, the layout
-   choices you made (joined lines, headings, bold labels, tables), any probable typo you noticed
+   choices you made (joined lines, headings, bold labels, tables), the typo fixes (`corrections`,
+   from → to), any other probable error you noticed and left unchanged,
    (left unchanged), and the fidelity result. Ask: draft, publish now, or schedule? Wait for the answer.
 8. **Publish**: `pnpm -s publish:article publish posts/<n>/spec.json`. It uploads the pictures
    (WebP 480/960/1600 + original ≤ 2400 px, EXIF removed), inserts the article and its links, and
@@ -107,6 +129,7 @@ If there is no title, ask for one. Don't invent it.
   "title": "…exactly as written…",
   "subtitle": "…",
   "generated": ["subtitle"],
+  "corrections": [{ "from": "2023.وتولى", "to": "2023. وتولى", "why": "space after full stop" }],
   "category": "culture",
   "extra_categories": ["theatre"],
   "format": "news",
@@ -139,7 +162,8 @@ Embeds: YouTube, Facebook, Instagram, X only.
 
 ## Never
 
-- Change, fix or add words in the title or body (fidelity must pass).
+- Change or add words in the title or body, beyond the typo fixes listed in `corrections`
+  (fidelity must pass).
 - Publish without Firas's explicit "publish" (default is `draft`).
 - Use demo authors (`demo-*`) or demo tags for real articles.
 - Write statistics tables, or touch other articles.
