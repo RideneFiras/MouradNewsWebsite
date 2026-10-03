@@ -50,6 +50,7 @@ const EVENTS: Ev[] = [
   { pid: 37, title_ar: 'المهرجان الدولي لفيلم المرأة «بعيونهن»', starts_on: '2026-10-03', ends_on: '2026-10-07', place: 'نابل والحمامات وبوعرقوب' },
   { pid: 37, title_ar: 'افتتاح مهرجان «بعيونهن»', starts_on: '2026-10-03', start_time: '18:30', place: 'فضاء الحمامات فن وثقافة', town: 'hammamet' },
   { pid: 38, title_ar: 'نادي عليسة للغناء يستأنف نشاطه', starts_on: '2026-10-07', place: 'دار الشباب بني خيار', town: 'beni-khiar' },
+  { pid: 41, title_ar: 'دخول مجاني إلى المتاحف والمواقع الأثرية', starts_on: '2026-10-04' },
   { pid: 40, title_ar: 'وقفة احتجاجية ضد مصنع الذباب الأسود', starts_on: '2026-10-03', start_time: '11:00', end_time: '13:00', place: 'أمام المصنع، شارع المنجي سليم', town: 'menzel-bouzelfa' },
 ];
 

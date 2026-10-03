@@ -1,5 +1,8 @@
 # Moving to Cloudflare Workers Paid ($5/month)
 
+> **Done on 2026-10-03.** The site is on Workers Paid; changes 1 and 2 below are applied
+> (R2 data cache, `limits.cpu_ms = 30000`). The refresh time stays at 5 minutes (change 3 not applied).
+
 The site runs on the **Workers Free** plan. A few choices in the code exist only because
 of Free-plan limits. This page lists them, so that the day the paper moves to **Workers
 Paid** they can be switched back to the simpler or faster setup.

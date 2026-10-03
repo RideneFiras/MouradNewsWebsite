@@ -9,6 +9,8 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Workers Paid (2026-10-03): up to 30 s of CPU per request (a page build needs well under 1 s).
+  "limits": { "cpu_ms": 30000 },
   // Minify the Worker script at deploy (keeps it well under the free-plan size limit).
   "minify": true,
   "services": [

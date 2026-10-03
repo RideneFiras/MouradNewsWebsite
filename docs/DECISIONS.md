@@ -195,3 +195,7 @@ These are legal questions; the site provides the fields and pages, the answers m
 - **Homepage blocks need 3 articles** (`min_items`, default 3) so a new site doesn't show one story next to a large empty space.
 - **French interface hidden from readers** (`public_languages.fr = false`): no FR switch, no hreflang to /fr; /fr still answers, the admin stays bilingual.
 - **Backups are JSON + files, encrypted, as GitHub artifacts**: the repo is public, the free plan has no backups and no database password is stored anywhere; the service key reads everything through the API. Restoring is outlined in `docs/BACKUP.md`.
+
+## Workers Paid (2026-10-03)
+
+- Upgraded after repeated error 1102 (page builds cost 70–650 ms CPU; Free allows 10 ms). Applied `docs/WORKERS-PAID.md` changes 1 and 2: data entries back in the regional R2 cache (shared by all locations) and `limits.cpu_ms = 30000`. Refresh stays at 5 min; the queue keeps 30 s timeout and 1 retry.
